@@ -1,0 +1,521 @@
+import express from 'express';
+import fs from 'fs';
+import http from 'http';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { WebSocketServer, WebSocket } from 'ws';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const STORE_DIR = path.join(__dirname, 'data');
+const STORE_PATH = path.join(STORE_DIR, 'studio-store.json');
+
+interface StrokePoint {
+  x: number;
+  y: number;
+}
+
+interface BoardStroke {
+  id: string;
+  color: string;
+  width: number;
+  points: StrokePoint[];
+}
+
+interface WordbankItem {
+  id: string;
+  en: string;
+  fr: string;
+  note: string;
+  addedAt: number;
+}
+
+interface RoomState {
+  roomCode: string;
+  activeTab: 'warmup' | 'vocab' | 'builder' | 'roleplay' | 'board';
+  stars: number;
+  warmup: {
+    mood: string | null;
+    weather: string | null;
+    promptIndex: number;
+    studentAnswer: string;
+  };
+  vocab: {
+    deckId: string;
+    cardIndex: number;
+    blindMode: boolean;
+    mode: 'cards' | 'match';
+    matchedIds: string[];
+  };
+  builder: {
+    challengeIndex: number;
+    customPromptFr: string;
+    customSentenceEn: string;
+    isCustomActive: boolean;
+    selectedIndices: number[];
+    checkedStatus: 'idle' | 'correct' | 'incorrect';
+  };
+  roleplay: {
+    scenarioId: string;
+    activeLineIndex: number;
+    hideStudentLines: boolean;
+    studentRole: 'A' | 'B';
+    revealedIndices: number[];
+  };
+  quiz: {
+    subTab: 'games' | 'time' | 'quiz' | 'dialogue';
+    questionIndex: number;
+    answers: Record<string, number>;
+  };
+  games: {
+    activeGame: 'wordsearch' | 'vocabmatch' | 'sentence' | 'grammarblitz';
+    themeId: string;
+  };
+  timeModule: {
+    mode: 'explore' | 'challenge';
+    hour: number;
+    minute: number;
+    isPm: boolean;
+    showZones: boolean;
+  };
+  guide: {
+    subTab: 'guide' | 'builder';
+    section: 'irregular' | 'modals' | 'tenses' | 'prepositions';
+    hideIrregularForms: boolean;
+  };
+  recap: {
+    subTab: 'board' | 'recap';
+    studentName: string;
+    oralFluency: string;
+    oralPronunciation: string;
+    oralComprehension: string;
+    oralNotes: string;
+    writtenSyntax: string;
+    writtenSpelling: string;
+    writtenGrammar: string;
+    writtenNotes: string;
+    nextGoal: string;
+  };
+  wordbank: WordbankItem[];
+  strokes: BoardStroke[];
+  boardNote: string;
+}
+
+interface ClientMeta {
+  id: string;
+  roomCode: string;
+  name: string;
+  role: 'tutor' | 'student';
+  ws: WebSocket;
+}
+
+function createInitialRoomState(roomCode: string): RoomState {
+  return {
+    roomCode,
+    activeTab: 'warmup',
+    stars: 3,
+    warmup: {
+      mood: null,
+      weather: null,
+      promptIndex: 0,
+      studentAnswer: '',
+    },
+    vocab: {
+      deckId: 'hobbies',
+      cardIndex: 0,
+      blindMode: false,
+      mode: 'cards',
+      matchedIds: [],
+    },
+    builder: {
+      challengeIndex: 0,
+      customPromptFr: '',
+      customSentenceEn: '',
+      isCustomActive: false,
+      selectedIndices: [],
+      checkedStatus: 'idle',
+    },
+    roleplay: {
+      scenarioId: 'cafe',
+      activeLineIndex: 0,
+      hideStudentLines: false,
+      studentRole: 'B',
+      revealedIndices: [],
+    },
+    quiz: {
+      subTab: 'games',
+      questionIndex: 0,
+      answers: {},
+    },
+    games: {
+      activeGame: 'wordsearch',
+      themeId: 'hobbies',
+    },
+    timeModule: {
+      mode: 'explore',
+      hour: 3,
+      minute: 15,
+      isPm: true,
+      showZones: true,
+    },
+    guide: {
+      subTab: 'guide',
+      section: 'irregular',
+      hideIrregularForms: false,
+    },
+    recap: {
+      subTab: 'board',
+      studentName: '',
+      oralFluency: 'En progrès',
+      oralPronunciation: 'Claire',
+      oralComprehension: 'Bonne',
+      oralNotes: '',
+      writtenSyntax: 'En progrès',
+      writtenSpelling: 'Correcte',
+      writtenGrammar: 'En cours',
+      writtenNotes: '',
+      nextGoal: 'Relire à voix haute les mots du carnet (5 min)',
+    },
+    wordbank: [
+      {
+        id: 'seed-1',
+        en: 'sketchbook',
+        fr: 'carnet de croquis',
+        note: 'Prononcer : skètch-bouk',
+        addedAt: Date.now() - 60000,
+      },
+      {
+        id: 'seed-2',
+        en: 'Would you like...?',
+        fr: 'Voudriez-vous... ? (poli)',
+        note: 'Très utile au café ou au magasin',
+        addedAt: Date.now() - 30000,
+      },
+    ],
+    strokes: [],
+    boardNote: '',
+  };
+}
+
+interface SavedSessionRecap {
+  id: string;
+  savedAt: number;
+  dateLabel: string;
+  studentName: string;
+  stars: number;
+  wordCount: number;
+  summaryText: string;
+  nextGoal: string;
+}
+
+const rooms = new Map<string, RoomState>();
+const roomClients = new Map<string, Map<string, ClientMeta>>();
+let savedRecaps: SavedSessionRecap[] = [];
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
+function loadStore() {
+  try {
+    if (!fs.existsSync(STORE_PATH)) return;
+    const raw = fs.readFileSync(STORE_PATH, 'utf8');
+    const parsed = JSON.parse(raw) as {
+      rooms?: Record<string, RoomState>;
+      savedRecaps?: SavedSessionRecap[];
+    };
+    if (parsed.rooms && typeof parsed.rooms === 'object') {
+      for (const [code, state] of Object.entries(parsed.rooms)) {
+        const base = createInitialRoomState(code);
+        rooms.set(code, {
+          ...base,
+          ...state,
+          games: state.games ? { ...base.games, ...state.games } : base.games,
+          timeModule: state.timeModule ? { ...base.timeModule, ...state.timeModule } : base.timeModule,
+        });
+      }
+    }
+    if (Array.isArray(parsed.savedRecaps)) {
+      savedRecaps = parsed.savedRecaps;
+    }
+  } catch {
+    // Start fresh if store file cannot be parsed
+  }
+}
+
+function scheduleSaveStore() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      fs.mkdirSync(STORE_DIR, { recursive: true });
+      const payload = {
+        rooms: Object.fromEntries(rooms.entries()),
+        savedRecaps,
+      };
+      fs.writeFileSync(STORE_PATH, JSON.stringify(payload, null, 2), 'utf8');
+    } catch {
+      // Ignore write errors in read-only environments
+    }
+  }, 300);
+}
+
+loadStore();
+
+function getOrCreateRoom(rawCode: string): RoomState {
+  const code = rawCode.trim().toUpperCase().slice(0, 12) || 'DEMO';
+  let state = rooms.get(code);
+  if (!state) {
+    state = createInitialRoomState(code);
+    rooms.set(code, state);
+    scheduleSaveStore();
+  }
+  return state;
+}
+
+function getParticipants(roomCode: string) {
+  const clients = roomClients.get(roomCode);
+  if (!clients) return [];
+  return Array.from(clients.values()).map((c) => ({
+    id: c.id,
+    name: c.name,
+    role: c.role,
+  }));
+}
+
+function broadcastToRoom(roomCode: string, payload: unknown, excludeClientId?: string) {
+  const clients = roomClients.get(roomCode);
+  if (!clients) return;
+  const serialized = JSON.stringify(payload);
+  for (const [id, client] of clients.entries()) {
+    if (excludeClientId && id === excludeClientId) continue;
+    if (client.ws.readyState === WebSocket.OPEN) {
+      client.ws.send(serialized);
+    }
+  }
+}
+
+async function startServer() {
+  const app = express();
+  app.use(express.json());
+
+  app.get('/api/health', (_req, res) => {
+    res.json({ ok: true, activeRooms: rooms.size, savedRecaps: savedRecaps.length });
+  });
+
+  app.get('/api/recaps', (_req, res) => {
+    res.json({ recaps: savedRecaps });
+  });
+
+  app.post('/api/recaps', (req, res) => {
+    const body = req.body as Partial<SavedSessionRecap>;
+    if (!body || typeof body.summaryText !== 'string' || !body.summaryText.trim()) {
+      res.status(400).json({ error: 'summaryText required' });
+      return;
+    }
+    const item: SavedSessionRecap = {
+      id:
+        typeof body.id === 'string' && body.id
+          ? body.id
+          : `recap-${Date.now().toString(36)}`,
+      savedAt: typeof body.savedAt === 'number' ? body.savedAt : Date.now(),
+      dateLabel:
+        typeof body.dateLabel === 'string' && body.dateLabel
+          ? body.dateLabel
+          : new Date().toLocaleDateString('fr-FR'),
+      studentName: typeof body.studentName === 'string' ? body.studentName : '',
+      stars: typeof body.stars === 'number' ? body.stars : 0,
+      wordCount: typeof body.wordCount === 'number' ? body.wordCount : 0,
+      summaryText: body.summaryText,
+      nextGoal: typeof body.nextGoal === 'string' ? body.nextGoal : '',
+    };
+    savedRecaps = [item, ...savedRecaps.filter((r) => r.id !== item.id)].slice(0, 50);
+    scheduleSaveStore();
+    res.json({ ok: true, recap: item, recaps: savedRecaps });
+  });
+
+  app.delete('/api/recaps/:id', (req, res) => {
+    const targetId = req.params.id;
+    savedRecaps = savedRecaps.filter((r) => r.id !== targetId);
+    scheduleSaveStore();
+    res.json({ ok: true, recaps: savedRecaps });
+  });
+
+  const server = http.createServer(app);
+  const wss = new WebSocketServer({ server, path: '/ws' });
+
+  wss.on('connection', (ws, req) => {
+    const reqUrl = new URL(req.url || '/ws', `http://${req.headers.host || 'localhost:3000'}`);
+    const roomCode = (reqUrl.searchParams.get('room') || 'DEMO').trim().toUpperCase().slice(0, 12);
+    const roleParam = reqUrl.searchParams.get('role') === 'tutor' ? 'tutor' : 'student';
+    const nameParam = (reqUrl.searchParams.get('name') || (roleParam === 'tutor' ? 'Prof' : 'Élève')).slice(0, 32);
+    const clientId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+
+    const state = getOrCreateRoom(roomCode);
+    let clients = roomClients.get(roomCode);
+    if (!clients) {
+      clients = new Map();
+      roomClients.set(roomCode, clients);
+    }
+
+    const clientMeta: ClientMeta = {
+      id: clientId,
+      roomCode,
+      name: nameParam,
+      role: roleParam,
+      ws,
+    };
+    clients.set(clientId, clientMeta);
+
+    ws.send(
+      JSON.stringify({
+        type: 'room:init',
+        clientId,
+        state,
+        participants: getParticipants(roomCode),
+      })
+    );
+
+    broadcastToRoom(
+      roomCode,
+      {
+        type: 'presence:update',
+        participants: getParticipants(roomCode),
+      },
+      clientId
+    );
+
+    ws.on('message', (raw) => {
+      let msg: Record<string, unknown>;
+      try {
+        msg = JSON.parse(raw.toString()) as Record<string, unknown>;
+      } catch {
+        return;
+      }
+
+      const currentState = getOrCreateRoom(roomCode);
+      const msgType = typeof msg.type === 'string' ? msg.type : '';
+
+      if (msgType === 'state:patch' && msg.patch && typeof msg.patch === 'object') {
+        const patch = msg.patch as Partial<RoomState>;
+        if (patch.activeTab) currentState.activeTab = patch.activeTab;
+        if (typeof patch.stars === 'number') currentState.stars = Math.max(0, Math.min(999, patch.stars));
+        if (typeof patch.boardNote === 'string') currentState.boardNote = patch.boardNote;
+        if (patch.warmup) currentState.warmup = { ...currentState.warmup, ...patch.warmup };
+        if (patch.vocab) currentState.vocab = { ...currentState.vocab, ...patch.vocab };
+        if (patch.builder) currentState.builder = { ...currentState.builder, ...patch.builder };
+        if (patch.roleplay) currentState.roleplay = { ...currentState.roleplay, ...patch.roleplay };
+        if (patch.quiz) currentState.quiz = { ...currentState.quiz, ...patch.quiz };
+        if (patch.games) currentState.games = { ...currentState.games, ...patch.games };
+        if (patch.timeModule) currentState.timeModule = { ...currentState.timeModule, ...patch.timeModule };
+        if (patch.guide) currentState.guide = { ...currentState.guide, ...patch.guide };
+        if (patch.recap) currentState.recap = { ...currentState.recap, ...patch.recap };
+        scheduleSaveStore();
+
+        broadcastToRoom(
+          roomCode,
+          {
+            type: 'state:patched',
+            patch,
+            senderId: clientId,
+          },
+          clientId
+        );
+      } else if (msgType === 'role:update' && (msg.role === 'tutor' || msg.role === 'student')) {
+        clientMeta.role = msg.role;
+        if (typeof msg.name === 'string' && msg.name.trim()) {
+          clientMeta.name = msg.name.trim().slice(0, 32);
+        }
+        broadcastToRoom(roomCode, {
+          type: 'presence:update',
+          participants: getParticipants(roomCode),
+        });
+      } else if (msgType === 'wordbank:add' && msg.item && typeof msg.item === 'object') {
+        const item = msg.item as WordbankItem;
+        if (!item.id || currentState.wordbank.some((w) => w.id === item.id)) return;
+        currentState.wordbank = [item, ...currentState.wordbank].slice(0, 100);
+        scheduleSaveStore();
+        broadcastToRoom(roomCode, { type: 'wordbank:added', item }, clientId);
+      } else if (msgType === 'wordbank:remove' && typeof msg.id === 'string') {
+        currentState.wordbank = currentState.wordbank.filter((w) => w.id !== msg.id);
+        scheduleSaveStore();
+        broadcastToRoom(roomCode, { type: 'wordbank:removed', id: msg.id }, clientId);
+      } else if (msgType === 'stroke:add' && msg.stroke && typeof msg.stroke === 'object') {
+        const stroke = msg.stroke as BoardStroke;
+        if (!stroke.id || currentState.strokes.some((s) => s.id === stroke.id)) return;
+        currentState.strokes = [...currentState.strokes, stroke].slice(-250);
+        scheduleSaveStore();
+        broadcastToRoom(roomCode, { type: 'stroke:added', stroke }, clientId);
+      } else if (msgType === 'stroke:undo' && typeof msg.id === 'string') {
+        currentState.strokes = currentState.strokes.filter((s) => s.id !== msg.id);
+        scheduleSaveStore();
+        broadcastToRoom(roomCode, { type: 'stroke:removed', id: msg.id }, clientId);
+      } else if (msgType === 'stroke:clear') {
+        currentState.strokes = [];
+        scheduleSaveStore();
+        broadcastToRoom(roomCode, { type: 'stroke:cleared' }, clientId);
+      } else if (msgType === 'celebrate:star') {
+        currentState.stars = Math.min(999, currentState.stars + 1);
+        scheduleSaveStore();
+        broadcastToRoom(roomCode, {
+          type: 'star:celebrated',
+          stars: currentState.stars,
+          by: clientMeta.name,
+        });
+      } else if (
+        msgType === 'rtc:offer' ||
+        msgType === 'rtc:answer' ||
+        msgType === 'rtc:ice' ||
+        msgType === 'rtc:camera-off' ||
+        msgType === 'rtc:request-offer'
+      ) {
+        broadcastToRoom(
+          roomCode,
+          {
+            type: msgType,
+            fromId: clientId,
+            fromRole: clientMeta.role,
+            payload: msg.payload ?? null,
+          },
+          clientId
+        );
+      }
+    });
+
+    ws.on('close', () => {
+      const activeClients = roomClients.get(roomCode);
+      if (activeClients) {
+        activeClients.delete(clientId);
+        if (activeClients.size === 0) {
+          roomClients.delete(roomCode);
+        } else {
+          broadcastToRoom(roomCode, {
+            type: 'presence:update',
+            participants: getParticipants(roomCode),
+          });
+        }
+      }
+    });
+  });
+
+  if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  } else {
+    const distDir = path.join(__dirname, 'dist');
+    app.use(express.static(distDir));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distDir, 'index.html'));
+    });
+  }
+
+  const port = Number(process.env.PORT) || 3000;
+  server.listen(port, '0.0.0.0', () => {
+    console.log(`StoryBridge Studio listening on http://localhost:${port}`);
+  });
+}
+
+startServer().catch((err) => {
+  console.error('Failed to start server:', err);
+  process.exit(1);
+});

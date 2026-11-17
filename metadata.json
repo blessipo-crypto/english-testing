@@ -1,0 +1,6 @@
+{
+  "name": "StoryBridge Studio",
+  "description": "Application interactive d'anglais pour élève de 11 ans conçue pour les cours en visioconférence : rituel d'accueil, cartes illustrées audio, atelier de phrases, jeux de rôle et tableau blanc synchronisé.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
