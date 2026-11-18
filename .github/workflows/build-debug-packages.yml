@@ -1,0 +1,68 @@
+name: Build Debug EXE and APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows-debug-exe:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Windows packaging dependencies
+        working-directory: packaging/windows
+        run: npm install
+
+      - name: Build Debug Portable EXE
+        working-directory: packaging/windows
+        run: npm run pack:debug
+
+      - name: Upload StoryBridge-Studio-Debug.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: StoryBridge-Studio-Debug-EXE
+          path: packaging/windows/dist/StoryBridge-Studio-Debug.exe
+
+  build-android-debug-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packaging dependencies
+        working-directory: packaging/android
+        run: npm install
+
+      - name: Prepare Capacitor Android project
+        working-directory: packaging/android
+        run: npm run prepare:android
+
+      - name: Build Debug APK
+        working-directory: packaging/android/android
+        run: ./gradlew assembleDebug
+
+      - name: Upload app-debug.apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: StoryBridge-Studio-Debug-APK
+          path: packaging/android/android/app/build/outputs/apk/debug/app-debug.apk

@@ -1,0 +1,36 @@
+{
+  "name": "storybridge-studio-windows",
+  "version": "1.0.0",
+  "description": "StoryBridge Studio Windows Debug Portable Wrapper",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "pack:debug": "electron-builder --win portable --x64"
+  },
+  "build": {
+    "appId": "com.storybridge.studio.debug",
+    "productName": "StoryBridge Studio",
+    "files": [
+      "main.cjs",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "StoryBridge-Studio-Debug.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}

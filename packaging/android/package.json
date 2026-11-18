@@ -1,0 +1,17 @@
+{
+  "name": "storybridge-studio-android",
+  "version": "1.0.0",
+  "description": "StoryBridge Studio Android Debug APK Wrapper",
+  "private": true,
+  "scripts": {
+    "prepare:android": "npx cap add android && node configure-manifest.cjs && npx cap sync android",
+    "build:debug-apk": "cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/core": "^7.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.2.0"
+  }
+}
