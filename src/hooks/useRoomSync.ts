@@ -383,9 +383,33 @@ export function useRoomSync() {
 
     const connect = () => {
       if (isUnmounted) return;
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const customOrigin =
+        typeof window !== 'undefined'
+          ? window.localStorage.getItem('storybridge_sync_server_url')?.trim()
+          : '';
+      let wsBase = '';
+      if (customOrigin) {
+        try {
+          const parsed = new URL(customOrigin);
+          const wsProto = parsed.protocol === 'https:' ? 'wss:' : 'ws:';
+          wsBase = `${wsProto}//${parsed.host}`;
+        } catch {
+          wsBase = '';
+        }
+      }
+      const isPackagedLocal =
+        window.location.protocol === 'file:' ||
+        window.location.protocol === 'capacitor:' ||
+        (window.location.hostname === 'localhost' && !window.location.port);
+      if (!wsBase && !isPackagedLocal && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        wsBase = `${protocol}//${window.location.host}`;
+      }
+      if (!wsBase) {
+        return;
+      }
       const participantName = role === 'tutor' ? 'Prof' : activeStudentNameRef.current;
-      const wsUrl = `${protocol}//${window.location.host}/ws?room=${encodeURIComponent(
+      const wsUrl = `${wsBase}/ws?room=${encodeURIComponent(
         roomCode
       )}&role=${role}&name=${encodeURIComponent(participantName)}`;
       const ws = new WebSocket(wsUrl);
@@ -548,18 +572,26 @@ export function useRoomSync() {
   const joinRoom = useCallback((code: string) => {
     const normalized = code.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12) || 'LNDN';
     setRoomCode(normalized);
-    const url = new URL(window.location.href);
-    url.searchParams.set('room', normalized);
-    window.history.replaceState({}, '', url.toString());
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('room', normalized);
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      // Ignore history errors in packaged file:// mode
+    }
   }, []);
 
   const leaveRoom = useCallback(() => {
     setRoomCode(null);
-    const url = new URL(window.location.href);
-    url.searchParams.delete('room');
-    url.searchParams.delete('name');
-    url.searchParams.delete('student');
-    window.history.replaceState({}, '', url.toString());
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('room');
+      url.searchParams.delete('name');
+      url.searchParams.delete('student');
+      window.history.replaceState({}, '', url.toString());
+    } catch {
+      // Ignore history errors in packaged file:// mode
+    }
     setState(loadSavedSoloState(activeStudentId, activeStudentNameRef.current));
   }, [activeStudentId]);
 

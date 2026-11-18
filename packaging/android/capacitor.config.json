@@ -3,8 +3,6 @@
   "appName": "StoryBridge Studio",
   "webDir": "www",
   "server": {
-    "url": "https://ais-pre-afm5mejj742ehjjk5blxlb-880439402821.europe-west2.run.app",
-    "cleartext": false,
     "androidScheme": "https"
   },
   "android": {

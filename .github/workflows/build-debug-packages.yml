@@ -17,6 +17,14 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install root dependencies and build web bundle
+        shell: bash
+        run: |
+          npm install
+          VITE_BASE=./ npm run build
+          rm -rf packaging/windows/dist-web
+          cp -r dist packaging/windows/dist-web
+
       - name: Install Windows packaging dependencies
         working-directory: packaging/windows
         run: npm install
@@ -57,6 +65,13 @@ jobs:
           echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
           mkdir -p "$SDK_ROOT/licenses"
           yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+
+      - name: Install root dependencies and build web bundle
+        run: |
+          npm install
+          VITE_BASE=./ npm run build
+          rm -rf packaging/android/www
+          cp -r dist packaging/android/www
 
       - name: Install Android packaging dependencies
         working-directory: packaging/android

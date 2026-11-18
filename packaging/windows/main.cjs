@@ -1,10 +1,6 @@
 const { app, BrowserWindow, session, shell } = require('electron');
-
-const APP_URL =
-  process.env.STORYBRIDGE_URL ||
-  'https://ais-pre-afm5mejj742ehjjk5blxlb-880439402821.europe-west2.run.app';
-
-const ALLOWED_ORIGIN = new URL(APP_URL).origin;
+const fs = require('fs');
+const path = require('path');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -22,12 +18,12 @@ function createWindow() {
     },
   });
 
-  // Allow camera, microphone, and fullscreen for StoryBridge Studio origin
-  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    const url = webContents.getURL();
+  // Allow camera, microphone, and fullscreen inside the bundled app
+  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
     if (
-      url.startsWith(ALLOWED_ORIGIN) &&
-      (permission === 'media' || permission === 'fullscreen' || permission === 'clipboard-sanitized-write')
+      permission === 'media' ||
+      permission === 'fullscreen' ||
+      permission === 'clipboard-sanitized-write'
     ) {
       callback(true);
       return;
@@ -37,14 +33,26 @@ function createWindow() {
 
   // Open external links (such as WhatsApp recap links) in the system browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith(ALLOWED_ORIGIN)) {
-      return { action: 'allow' };
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
     }
-    shell.openExternal(url);
-    return { action: 'deny' };
+    return { action: 'allow' };
   });
 
-  win.loadURL(APP_URL);
+  const bundledIndex = path.join(__dirname, 'dist-web', 'index.html');
+  if (fs.existsSync(bundledIndex)) {
+    win.loadFile(bundledIndex);
+  } else if (process.env.STORYBRIDGE_URL) {
+    win.loadURL(process.env.STORYBRIDGE_URL);
+  } else {
+    win.loadURL(
+      'data:text/html;charset=utf-8,' +
+        encodeURIComponent(
+          '<html><body style="font-family:sans-serif;padding:40px;text-align:center;"><h2>StoryBridge Studio</h2><p>Build web manquant (dist-web/index.html).</p></body></html>'
+        )
+    );
+  }
 }
 
 app.whenReady().then(() => {

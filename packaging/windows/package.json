@@ -16,7 +16,8 @@
     },
     "files": [
       "main.cjs",
-      "package.json"
+      "package.json",
+      "dist-web/**/*"
     ],
     "win": {
       "target": [
