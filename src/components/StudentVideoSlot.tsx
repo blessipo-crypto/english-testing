@@ -13,6 +13,8 @@ interface StudentVideoSlotProps {
   roomCode: string | null;
   connected: boolean;
   role: UserRole;
+  studentName?: string;
+  studentCount?: number;
   sendRtcSignal: (type: string, payload?: unknown) => void;
   subscribeRtcSignal: (listener: (msg: RtcSignal) => void) => () => void;
 }
@@ -25,6 +27,8 @@ export function StudentVideoSlot({
   roomCode,
   connected,
   role,
+  studentName,
+  studentCount = 1,
   sendRtcSignal,
   subscribeRtcSignal,
 }: StudentVideoSlotProps) {
@@ -40,6 +44,7 @@ export function StudentVideoSlot({
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
+  const remotePeerIdRef = useRef<string | null>(null);
 
   const attachStream = useCallback((stream: MediaStream | null) => {
     const el = videoRef.current;
@@ -56,6 +61,7 @@ export function StudentVideoSlot({
       pcRef.current = null;
     }
     remoteStreamRef.current = null;
+    remotePeerIdRef.current = null;
     setHasRemoteVideo(false);
   }, []);
 
@@ -137,6 +143,7 @@ export function StudentVideoSlot({
           }
         } else if (msg.type === 'rtc:offer' && msg.payload && role === 'tutor') {
           cleanupPeer();
+          remotePeerIdRef.current = msg.fromId || null;
           const pc = new RTCPeerConnection(RTC_CONFIG);
           pcRef.current = pc;
 
@@ -166,12 +173,24 @@ export function StudentVideoSlot({
             new RTCSessionDescription(msg.payload as RTCSessionDescriptionInit)
           );
         } else if (msg.type === 'rtc:ice' && msg.payload && pcRef.current) {
-          await pcRef.current.addIceCandidate(
-            new RTCIceCandidate(msg.payload as RTCIceCandidateInit)
-          );
+          if (
+            !remotePeerIdRef.current ||
+            !msg.fromId ||
+            remotePeerIdRef.current === msg.fromId
+          ) {
+            await pcRef.current.addIceCandidate(
+              new RTCIceCandidate(msg.payload as RTCIceCandidateInit)
+            );
+          }
         } else if (msg.type === 'rtc:camera-off') {
-          cleanupPeer();
-          attachStream(localStreamRef.current);
+          if (
+            !remotePeerIdRef.current ||
+            !msg.fromId ||
+            remotePeerIdRef.current === msg.fromId
+          ) {
+            cleanupPeer();
+            attachStream(localStreamRef.current);
+          }
         }
       } catch {
         // Ignore transient WebRTC negotiation mismatch
@@ -217,6 +236,10 @@ export function StudentVideoSlot({
 
   const showingVideo = localCameraOn || hasRemoteVideo;
 
+  const displayTitle = studentName?.trim()
+    ? `Visage de ${studentName.trim()}`
+    : 'Visage de l’élève';
+
   if (!isOpen) {
     return (
       <div className="fixed bottom-4 right-4 z-40">
@@ -226,7 +249,7 @@ export function StudentVideoSlot({
           className="manga-btn-primary inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-bold cursor-pointer"
         >
           <Video className="w-4 h-4" aria-hidden="true" />
-          Visage de l’élève
+          {displayTitle}
         </button>
       </div>
     );
@@ -244,8 +267,13 @@ export function StudentVideoSlot({
         <div className="flex items-center gap-2 min-w-0">
           <Video className="w-3.5 h-3.5 text-indigo-700 shrink-0" aria-hidden="true" />
           <span className="text-xs font-semibold text-slate-900 truncate">
-            Visage de l’élève (Visio)
+            {displayTitle} (Visio)
           </span>
+          {studentCount > 1 && (
+            <span className="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-bold tabular-nums shrink-0">
+              {studentCount} élèves
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">

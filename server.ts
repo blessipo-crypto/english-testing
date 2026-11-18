@@ -34,6 +34,8 @@ interface RoomState {
   roomCode: string;
   activeTab: 'warmup' | 'vocab' | 'builder' | 'roleplay' | 'board';
   stars: number;
+  sessionBaseStars: number;
+  completedModules: Array<'warmup' | 'vocab' | 'grammar' | 'games' | 'time' | 'quiz'>;
   warmup: {
     mood: string | null;
     weather: string | null;
@@ -84,7 +86,7 @@ interface RoomState {
     hideIrregularForms: boolean;
   };
   recap: {
-    subTab: 'board' | 'recap';
+    subTab: 'writing' | 'board' | 'recap';
     studentName: string;
     oralFluency: string;
     oralPronunciation: string;
@@ -95,6 +97,12 @@ interface RoomState {
     writtenGrammar: string;
     writtenNotes: string;
     nextGoal: string;
+  };
+  writingSpace: {
+    tutorText: string;
+    studentText: string;
+    tutorStrokes: BoardStroke[];
+    studentStrokes: BoardStroke[];
   };
   wordbank: WordbankItem[];
   strokes: BoardStroke[];
@@ -114,6 +122,8 @@ function createInitialRoomState(roomCode: string): RoomState {
     roomCode,
     activeTab: 'warmup',
     stars: 3,
+    sessionBaseStars: 3,
+    completedModules: [],
     warmup: {
       mood: null,
       weather: null,
@@ -176,6 +186,12 @@ function createInitialRoomState(roomCode: string): RoomState {
       writtenNotes: '',
       nextGoal: 'Relire à voix haute les mots du carnet (5 min)',
     },
+    writingSpace: {
+      tutorText: '',
+      studentText: '',
+      tutorStrokes: [],
+      studentStrokes: [],
+    },
     wordbank: [
       {
         id: 'seed-1',
@@ -227,8 +243,27 @@ function loadStore() {
         rooms.set(code, {
           ...base,
           ...state,
+          sessionBaseStars:
+            typeof state.sessionBaseStars === 'number'
+              ? state.sessionBaseStars
+              : base.sessionBaseStars,
+          completedModules: Array.isArray(state.completedModules)
+            ? state.completedModules
+            : base.completedModules,
           games: state.games ? { ...base.games, ...state.games } : base.games,
           timeModule: state.timeModule ? { ...base.timeModule, ...state.timeModule } : base.timeModule,
+          writingSpace: state.writingSpace
+            ? {
+                ...base.writingSpace,
+                ...state.writingSpace,
+                tutorStrokes: Array.isArray(state.writingSpace.tutorStrokes)
+                  ? state.writingSpace.tutorStrokes
+                  : base.writingSpace.tutorStrokes,
+                studentStrokes: Array.isArray(state.writingSpace.studentStrokes)
+                  ? state.writingSpace.studentStrokes
+                  : base.writingSpace.studentStrokes,
+              }
+            : base.writingSpace,
         });
       }
     }
@@ -396,6 +431,12 @@ async function startServer() {
         const patch = msg.patch as Partial<RoomState>;
         if (patch.activeTab) currentState.activeTab = patch.activeTab;
         if (typeof patch.stars === 'number') currentState.stars = Math.max(0, Math.min(999, patch.stars));
+        if (typeof patch.sessionBaseStars === 'number') {
+          currentState.sessionBaseStars = Math.max(0, Math.min(999, patch.sessionBaseStars));
+        }
+        if (Array.isArray(patch.completedModules)) {
+          currentState.completedModules = patch.completedModules;
+        }
         if (typeof patch.boardNote === 'string') currentState.boardNote = patch.boardNote;
         if (patch.warmup) currentState.warmup = { ...currentState.warmup, ...patch.warmup };
         if (patch.vocab) currentState.vocab = { ...currentState.vocab, ...patch.vocab };
@@ -406,6 +447,12 @@ async function startServer() {
         if (patch.timeModule) currentState.timeModule = { ...currentState.timeModule, ...patch.timeModule };
         if (patch.guide) currentState.guide = { ...currentState.guide, ...patch.guide };
         if (patch.recap) currentState.recap = { ...currentState.recap, ...patch.recap };
+        if (patch.writingSpace) {
+          currentState.writingSpace = {
+            ...currentState.writingSpace,
+            ...patch.writingSpace,
+          };
+        }
         scheduleSaveStore();
 
         broadcastToRoom(
@@ -450,6 +497,66 @@ async function startServer() {
         currentState.strokes = [];
         scheduleSaveStore();
         broadcastToRoom(roomCode, { type: 'stroke:cleared' }, clientId);
+      } else if (
+        msgType === 'writing:stroke:add' &&
+        (msg.owner === 'tutor' || msg.owner === 'student') &&
+        msg.stroke &&
+        typeof msg.stroke === 'object'
+      ) {
+        const stroke = msg.stroke as BoardStroke;
+        const owner = msg.owner;
+        const target =
+          owner === 'tutor'
+            ? currentState.writingSpace.tutorStrokes
+            : currentState.writingSpace.studentStrokes;
+        if (!stroke.id || target.some((s) => s.id === stroke.id)) return;
+        const updated = [...target, stroke].slice(-250);
+        if (owner === 'tutor') {
+          currentState.writingSpace.tutorStrokes = updated;
+        } else {
+          currentState.writingSpace.studentStrokes = updated;
+        }
+        scheduleSaveStore();
+        broadcastToRoom(
+          roomCode,
+          { type: 'writing:stroke:added', owner, stroke },
+          clientId
+        );
+      } else if (
+        msgType === 'writing:stroke:undo' &&
+        (msg.owner === 'tutor' || msg.owner === 'student') &&
+        typeof msg.id === 'string'
+      ) {
+        const owner = msg.owner;
+        if (owner === 'tutor') {
+          currentState.writingSpace.tutorStrokes =
+            currentState.writingSpace.tutorStrokes.filter((s) => s.id !== msg.id);
+        } else {
+          currentState.writingSpace.studentStrokes =
+            currentState.writingSpace.studentStrokes.filter((s) => s.id !== msg.id);
+        }
+        scheduleSaveStore();
+        broadcastToRoom(
+          roomCode,
+          { type: 'writing:stroke:removed', owner, id: msg.id },
+          clientId
+        );
+      } else if (
+        msgType === 'writing:stroke:clear' &&
+        (msg.owner === 'tutor' || msg.owner === 'student')
+      ) {
+        const owner = msg.owner;
+        if (owner === 'tutor') {
+          currentState.writingSpace.tutorStrokes = [];
+        } else {
+          currentState.writingSpace.studentStrokes = [];
+        }
+        scheduleSaveStore();
+        broadcastToRoom(
+          roomCode,
+          { type: 'writing:stroke:cleared', owner },
+          clientId
+        );
       } else if (msgType === 'celebrate:star') {
         currentState.stars = Math.min(999, currentState.stars + 1);
         scheduleSaveStore();

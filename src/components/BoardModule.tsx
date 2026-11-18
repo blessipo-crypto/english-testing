@@ -8,10 +8,13 @@ import {
   Check,
   X,
   MessageCircle,
+  PenTool,
+  Eraser,
 } from 'lucide-react';
 import type {
   BoardStroke,
   StrokePoint,
+  UserRole,
   VoiceAccent,
   WordbankItem,
 } from '../types/lesson';
@@ -22,6 +25,7 @@ interface BoardModuleProps {
   boardNote: string;
   wordbank: WordbankItem[];
   stars: number;
+  role: UserRole;
   accent: VoiceAccent;
   speechRate: number;
   onAddStroke: (stroke: BoardStroke) => void;
@@ -42,11 +46,14 @@ const INK_COLORS = [
   { label: 'Corail', value: '#DC2626' },
 ];
 
+type PaperStyle = 'dots' | 'lined' | 'blank';
+
 export function BoardModule({
   strokes,
   boardNote,
   wordbank,
   stars,
+  role,
   accent,
   speechRate,
   onAddStroke,
@@ -58,7 +65,11 @@ export function BoardModule({
 }: BoardModuleProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [inkColor, setInkColor] = useState('#4338CA');
+  const [isEraser, setIsEraser] = useState(false);
   const [brushWidth, setBrushWidth] = useState(3);
+  const [stylusOnly, setStylusOnly] = useState(false);
+  const [paperStyle, setPaperStyle] = useState<PaperStyle>('lined');
+  const [lastPointerKind, setLastPointerKind] = useState<'pen' | 'touch' | 'mouse' | null>(null);
   const [activePoints, setActivePoints] = useState<StrokePoint[] | null>(null);
 
   const [newEn, setNewEn] = useState('');
@@ -66,7 +77,7 @@ export function BoardModule({
   const [newNote, setNewNote] = useState('');
   const [copiedRecap, setCopiedRecap] = useState(false);
 
-  // Redraw canvas whenever synced strokes or active stroke change
+  // Redraw transparent ink layer whenever synced strokes or active stroke change
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -75,60 +86,100 @@ export function BoardModule({
 
     ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
-    // Subtle ruled dot grid on canvas
-    ctx.fillStyle = '#E2E8F0';
-    for (let x = 24; x < LOGICAL_WIDTH; x += 28) {
-      for (let y = 24; y < LOGICAL_HEIGHT; y += 28) {
-        ctx.fillRect(x, y, 1.5, 1.5);
-      }
-    }
-
     const drawStroke = (stroke: {
       color: string;
       width: number;
       points: StrokePoint[];
     }) => {
       if (stroke.points.length === 0) return;
-      ctx.strokeStyle = stroke.color;
-      ctx.lineWidth = stroke.width;
+      const erasing = stroke.color === 'ERASER';
+      ctx.save();
+      ctx.globalCompositeOperation = erasing ? 'destination-out' : 'source-over';
+      ctx.strokeStyle = erasing ? 'rgba(0,0,0,1)' : stroke.color;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
+
+      if (stroke.points.length === 1) {
+        const pt = stroke.points[0];
+        ctx.lineWidth = stroke.width;
+        ctx.beginPath();
+        ctx.moveTo(pt.x, pt.y);
+        ctx.lineTo(pt.x + 0.5, pt.y + 0.5);
+        ctx.stroke();
+        ctx.restore();
+        return;
+      }
+
+      // Smooth quadratic Bezier curve with subtle stylus pressure scaling
+      const avgPressure =
+        stroke.points.reduce((acc, pt) => acc + (typeof pt.p === 'number' && pt.p > 0 ? pt.p : 0.5), 0) /
+        stroke.points.length;
+      const pressureScale = erasing ? 1 : 0.7 + avgPressure * 0.65;
+      ctx.lineWidth = Math.max(1.5, stroke.width * pressureScale);
+
       ctx.beginPath();
       ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
-      for (let i = 1; i < stroke.points.length; i++) {
-        ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+      for (let i = 1; i < stroke.points.length - 1; i++) {
+        const midX = (stroke.points[i].x + stroke.points[i + 1].x) / 2;
+        const midY = (stroke.points[i].y + stroke.points[i + 1].y) / 2;
+        ctx.quadraticCurveTo(stroke.points[i].x, stroke.points[i].y, midX, midY);
       }
-      if (stroke.points.length === 1) {
-        ctx.lineTo(stroke.points[0].x + 0.5, stroke.points[0].y + 0.5);
-      }
+      const last = stroke.points[stroke.points.length - 1];
+      ctx.lineTo(last.x, last.y);
       ctx.stroke();
+      ctx.restore();
     };
 
     strokes.forEach(drawStroke);
     if (activePoints && activePoints.length > 0) {
-      drawStroke({ color: inkColor, width: brushWidth, points: activePoints });
+      drawStroke({
+        color: isEraser ? 'ERASER' : inkColor,
+        width: isEraser ? Math.max(16, brushWidth * 4) : brushWidth,
+        points: activePoints,
+      });
     }
-  }, [strokes, activePoints, inkColor, brushWidth]);
+  }, [strokes, activePoints, inkColor, brushWidth, isEraser]);
 
-  const toLogicalPoint = (e: React.PointerEvent<HTMLCanvasElement>): StrokePoint => {
+  const toLogicalPoint = (clientX: number, clientY: number, pressure?: number): StrokePoint => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     return {
-      x: ((e.clientX - rect.left) / rect.width) * LOGICAL_WIDTH,
-      y: ((e.clientY - rect.top) / rect.height) * LOGICAL_HEIGHT,
+      x: ((clientX - rect.left) / rect.width) * LOGICAL_WIDTH,
+      y: ((clientY - rect.top) / rect.height) * LOGICAL_HEIGHT,
+      p: typeof pressure === 'number' && pressure > 0 ? Number(pressure.toFixed(2)) : undefined,
     };
   };
 
+  const isAllowedPointer = (pointerType: string) => {
+    if (stylusOnly && pointerType === 'touch') {
+      return false;
+    }
+    return true;
+  };
+
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.button === 2) return;
+    if (!isAllowedPointer(e.pointerType)) return;
+    setLastPointerKind(
+      e.pointerType === 'pen' ? 'pen' : e.pointerType === 'touch' ? 'touch' : 'mouse'
+    );
     e.currentTarget.setPointerCapture(e.pointerId);
-    setActivePoints([toLogicalPoint(e)]);
+    setActivePoints([toLogicalPoint(e.clientX, e.clientY, e.pressure)]);
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!activePoints) return;
-    const pt = toLogicalPoint(e);
-    setActivePoints((prev) => (prev ? [...prev, pt] : [pt]));
+    if (!isAllowedPointer(e.pointerType)) return;
+    const coalesced =
+      typeof e.nativeEvent.getCoalescedEvents === 'function'
+        ? e.nativeEvent.getCoalescedEvents()
+        : null;
+    const newPts =
+      coalesced && coalesced.length > 0
+        ? coalesced.map((ce) => toLogicalPoint(ce.clientX, ce.clientY, ce.pressure))
+        : [toLogicalPoint(e.clientX, e.clientY, e.pressure)];
+    setActivePoints((prev) => (prev ? [...prev, ...newPts] : newPts));
   };
 
   const handlePointerUp = () => {
@@ -138,8 +189,8 @@ export function BoardModule({
     }
     const newStroke: BoardStroke = {
       id: `st-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
-      color: inkColor,
-      width: brushWidth,
+      color: isEraser ? 'ERASER' : inkColor,
+      width: isEraser ? Math.max(16, brushWidth * 4) : brushWidth,
       points: activePoints,
     };
     setActivePoints(null);
@@ -210,10 +261,15 @@ export function BoardModule({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-lg font-bold text-slate-900">
-                Tableau blanc partagé
+                Tableau blanc stylet & tactile
               </h1>
               <p className="text-xs text-slate-500">
-                Pour dessiner une flèche de grammaire, souligner un son ou schématiser en direct.
+                Écriture fluide au stylet Windows Ink, doigt ou souris ·{' '}
+                {lastPointerKind === 'pen'
+                  ? 'Stylet détecté'
+                  : lastPointerKind === 'touch'
+                    ? 'Tactile détecté'
+                    : 'Prêt pour écrire'}
               </p>
             </div>
 
@@ -225,24 +281,40 @@ export function BoardModule({
                     key={c.value}
                     type="button"
                     aria-label={c.label}
-                    onClick={() => setInkColor(c.value)}
+                    onClick={() => {
+                      setIsEraser(false);
+                      setInkColor(c.value);
+                    }}
                     className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
-                      inkColor === c.value
+                      !isEraser && inkColor === c.value
                         ? 'border-slate-900 scale-110'
                         : 'border-white ring-1 ring-slate-300'
                     }`}
                     style={{ backgroundColor: c.value }}
                   />
                 ))}
+                <button
+                  type="button"
+                  onClick={() => setIsEraser((v) => !v)}
+                  aria-label="Gomme"
+                  title="Gomme"
+                  className={`p-1.5 rounded-lg border text-xs font-semibold cursor-pointer ${
+                    isEraser
+                      ? 'bg-rose-50 border-rose-600 text-rose-700'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <Eraser className="w-3.5 h-3.5" />
+                </button>
               </div>
 
               {/* Thickness */}
               <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
                 <button
                   type="button"
-                  onClick={() => setBrushWidth(3)}
+                  onClick={() => setBrushWidth(2)}
                   className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
-                    brushWidth === 3
+                    brushWidth === 2
                       ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-600'
                   }`}
@@ -251,9 +323,20 @@ export function BoardModule({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setBrushWidth(6)}
+                  onClick={() => setBrushWidth(4)}
                   className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
-                    brushWidth === 6
+                    brushWidth === 4
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600'
+                  }`}
+                >
+                  Moyen
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBrushWidth(7)}
+                  className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
+                    brushWidth === 7
                       ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-600'
                   }`}
@@ -271,19 +354,78 @@ export function BoardModule({
               >
                 <Undo2 className="w-4 h-4" />
               </button>
-              <button
-                type="button"
-                onClick={onClearStrokes}
-                disabled={strokes.length === 0}
-                aria-label="Effacer le tableau"
-                className="p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40 cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {role === 'tutor' && (
+                <button
+                  type="button"
+                  onClick={onClearStrokes}
+                  disabled={strokes.length === 0}
+                  aria-label="Effacer le tableau"
+                  className="p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40 cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+          {/* Stylus Palm-Rejection & Paper Guide Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setStylusOnly((v) => !v)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                stylusOnly
+                  ? 'bg-slate-900 border-slate-900 text-white'
+                  : 'bg-slate-50 border-slate-300 text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <PenTool className="w-3.5 h-3.5" aria-hidden="true" />
+              {stylusOnly
+                ? 'Stylet seul (anti-paume actif)'
+                : 'Stylet + Doigt + Souris'}
+            </button>
+
+            <div className="flex items-center gap-1 p-0.5 bg-slate-100 border border-slate-200 rounded-lg">
+              {(
+                [
+                  { id: 'lined', label: 'Lignes cahier' },
+                  { id: 'dots', label: 'Points' },
+                  { id: 'blank', label: 'Vierge' },
+                ] as const
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setPaperStyle(opt.id)}
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-md cursor-pointer ${
+                    paperStyle === opt.id
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div
+            className="rounded-lg border-2 border-slate-900 bg-white overflow-hidden select-none"
+            style={
+              paperStyle === 'lined'
+                ? {
+                    backgroundImage:
+                      'repeating-linear-gradient(to bottom, transparent 0px, transparent 39px, #e2e8f0 39px, #e2e8f0 40px)',
+                  }
+                : paperStyle === 'dots'
+                  ? {
+                      backgroundImage:
+                        'radial-gradient(#cbd5e1 1.25px, transparent 1.25px)',
+                      backgroundSize: '24px 24px',
+                    }
+                  : undefined
+            }
+          >
             <canvas
               ref={canvasRef}
               width={LOGICAL_WIDTH}
@@ -292,7 +434,8 @@ export function BoardModule({
               onPointerMove={handlePointerMove}
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
-              className="w-full h-auto block touch-none cursor-crosshair"
+              onContextMenu={(e) => e.preventDefault()}
+              className="w-full h-auto block touch-none select-none cursor-crosshair"
             />
           </div>
         </div>
@@ -331,32 +474,36 @@ export function BoardModule({
             </div>
 
             <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={handleCopyRecap}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-              >
-                {copiedRecap ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
-                    Copié
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" aria-hidden="true" />
-                    Copier le bilan
-                  </>
-                )}
-              </button>
-              <a
-                href={whatsappRecapUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap shrink-0"
-              >
-                <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
-                WhatsApp
-              </a>
+              {role === 'tutor' && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCopyRecap}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    {copiedRecap ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                        Copié
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" aria-hidden="true" />
+                        Copier le bilan
+                      </>
+                    )}
+                  </button>
+                  <a
+                    href={whatsappRecapUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap shrink-0"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                    WhatsApp
+                  </a>
+                </>
+              )}
             </div>
           </div>
 
@@ -436,14 +583,16 @@ export function BoardModule({
                     >
                       <Volume2 className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => onRemoveWord(item.id)}
-                      aria-label={`Supprimer ${item.en}`}
-                      className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
+                    {role === 'tutor' && (
+                      <button
+                        type="button"
+                        onClick={() => onRemoveWord(item.id)}
+                        aria-label={`Supprimer ${item.en}`}
+                        className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))

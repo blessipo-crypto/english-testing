@@ -4,6 +4,13 @@ export type UserRole = 'tutor' | 'student';
 
 export type VoiceAccent = 'en-GB' | 'en-US';
 
+export interface StudentProfile {
+  id: string;
+  name: string;
+  level: 'A1' | 'A2';
+  createdAt: number;
+}
+
 export interface WordbankItem {
   id: string;
   en: string;
@@ -15,6 +22,7 @@ export interface WordbankItem {
 export interface StrokePoint {
   x: number;
   y: number;
+  p?: number;
 }
 
 export interface BoardStroke {
@@ -58,6 +66,14 @@ export interface RoleplayState {
 
 export type MiniGameId = 'wordsearch' | 'vocabmatch' | 'sentence' | 'grammarblitz';
 
+export type LessonMilestoneId =
+  | 'warmup'
+  | 'vocab'
+  | 'grammar'
+  | 'games'
+  | 'time'
+  | 'quiz';
+
 export interface QuizState {
   subTab: 'games' | 'time' | 'quiz' | 'dialogue';
   questionIndex: number;
@@ -85,8 +101,15 @@ export interface GuideState {
   hideIrregularForms: boolean;
 }
 
+export interface WritingSpaceState {
+  tutorText: string;
+  studentText: string;
+  tutorStrokes: BoardStroke[];
+  studentStrokes: BoardStroke[];
+}
+
 export interface RecapState {
-  subTab: 'board' | 'recap';
+  subTab: 'writing' | 'board' | 'recap';
   studentName: string;
   oralFluency: string;
   oralPronunciation: string;
@@ -120,6 +143,8 @@ export interface RoomState {
   roomCode: string;
   activeTab: ModuleTab;
   stars: number;
+  sessionBaseStars: number;
+  completedModules: LessonMilestoneId[];
   warmup: WarmupState;
   vocab: VocabState;
   builder: BuilderState;
@@ -129,6 +154,7 @@ export interface RoomState {
   timeModule: TimeModuleState;
   guide: GuideState;
   recap: RecapState;
+  writingSpace: WritingSpaceState;
   wordbank: WordbankItem[];
   strokes: BoardStroke[];
   boardNote: string;

@@ -58,45 +58,47 @@ export function RoleplayModule({
             <p className="text-sm text-slate-600">{scenario.settingFr}</p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() =>
-                onUpdate({
-                  studentRole: roleplay.studentRole === 'B' ? 'A' : 'B',
-                  revealedIndices: [],
-                })
-              }
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5" aria-hidden="true" />
-              Inverser les rôles
-            </button>
+          {role === 'tutor' && (
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() =>
+                  onUpdate({
+                    studentRole: roleplay.studentRole === 'B' ? 'A' : 'B',
+                    revealedIndices: [],
+                  })
+                }
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5" aria-hidden="true" />
+                Inverser les rôles
+              </button>
 
-            <button
-              type="button"
-              onClick={() =>
-                onUpdate({
-                  hideStudentLines: !roleplay.hideStudentLines,
-                  revealedIndices: [],
-                })
-              }
-              className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                roleplay.hideStudentLines
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-800'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              {roleplay.hideStudentLines ? (
-                <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />
-              ) : (
-                <Eye className="w-3.5 h-3.5" aria-hidden="true" />
-              )}
-              {roleplay.hideStudentLines
-                ? 'Répliques élève masquées'
-                : 'Masquer répliques élève'}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() =>
+                  onUpdate({
+                    hideStudentLines: !roleplay.hideStudentLines,
+                    revealedIndices: [],
+                  })
+                }
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  roleplay.hideStudentLines
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-800'
+                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {roleplay.hideStudentLines ? (
+                  <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />
+                ) : (
+                  <Eye className="w-3.5 h-3.5" aria-hidden="true" />
+                )}
+                {roleplay.hideStudentLines
+                  ? 'Répliques élève masquées'
+                  : 'Masquer répliques élève'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Role Legend Bar */}

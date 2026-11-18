@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { X, Copy, Check, Users, LogOut, MessageCircle } from 'lucide-react';
-import type { RoomParticipant } from '../types/lesson';
+import { useEffect, useState } from 'react';
+import { X, Copy, Check, Users, LogOut, MessageCircle, UserPlus } from 'lucide-react';
+import type { RoomParticipant, StudentProfile } from '../types/lesson';
 
 interface SessionModalProps {
   isOpen: boolean;
@@ -8,6 +8,9 @@ interface SessionModalProps {
   roomCode: string | null;
   connected: boolean;
   participants: RoomParticipant[];
+  studentProfiles: StudentProfile[];
+  activeStudent: StudentProfile;
+  onAddStudentProfile: (name: string, level?: 'A1' | 'A2') => StudentProfile;
   onJoinRoom: (code: string) => void;
   onLeaveRoom: () => void;
 }
@@ -18,23 +21,39 @@ export function SessionModal({
   roomCode,
   connected,
   participants,
+  studentProfiles,
+  activeStudent,
+  onAddStudentProfile,
   onJoinRoom,
   onLeaveRoom,
 }: SessionModalProps) {
   const [inputCode, setInputCode] = useState(roomCode || 'LNDN26');
+  const [inviteStudentName, setInviteStudentName] = useState(activeStudent.name);
   const [whatsappPhone, setWhatsappPhone] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      setInviteStudentName(activeStudent.name);
+    }
+  }, [isOpen, activeStudent.name]);
+
   if (!isOpen) return null;
+
+  const cleanInviteName = inviteStudentName.trim().slice(0, 32);
 
   const studentInviteUrl = roomCode
     ? `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(
         roomCode
-      )}&role=student`
+      )}&role=student${
+        cleanInviteName ? `&name=${encodeURIComponent(cleanInviteName)}` : ''
+      }`
     : '';
 
   const inviteMessage = roomCode
-    ? `Bonjour ! Voici le lien pour rejoindre notre cours d'anglais interactif sur StoryBridge Studio : ${studentInviteUrl} (Salle : ${roomCode})`
+    ? `Bonjour${
+        cleanInviteName ? ` ${cleanInviteName}` : ''
+      } ! Voici le lien pour rejoindre notre cours d'anglais interactif sur StoryBridge Studio : ${studentInviteUrl} (Salle : ${roomCode})`
     : '';
 
   const sanitizedPhone = whatsappPhone.replace(/[^\d]/g, '');
@@ -53,6 +72,20 @@ export function SessionModal({
     }
   };
 
+  const handlePrepareSecondStudent = () => {
+    const nextNumber = studentProfiles.length + 1;
+    const defaultSecondName = `Élève ${nextNumber}`;
+    if (studentProfiles.length < 2) {
+      const created = onAddStudentProfile(defaultSecondName, 'A1');
+      setInviteStudentName(created.name);
+    } else {
+      const other = studentProfiles.find((p) => p.id !== activeStudent.id);
+      setInviteStudentName(other ? other.name : defaultSecondName);
+    }
+  };
+
+  const connectedStudents = participants.filter((p) => p.role === 'student');
+
   return (
     <div
       className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-[2px] flex items-center justify-center p-4"
@@ -60,15 +93,15 @@ export function SessionModal({
       aria-modal="true"
       aria-labelledby="visio-modal-title"
     >
-      <div className="manga-panel w-full max-w-lg p-6 space-y-5">
+      <div className="manga-panel w-full max-w-lg p-6 space-y-5 max-h-[90vh] overflow-y-auto">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 id="visio-modal-title" className="text-lg font-bold text-slate-900">
               Invitation & Synchronisation Visio
             </h2>
             <p className="text-xs text-slate-500 mt-1">
-              Envoyez ce lien par WhatsApp ou copiez-le pour que l’élève manipule les
-              cartes, les phrases et le tableau en direct avec vous.
+              Envoyez ce lien par WhatsApp ou copiez-le pour qu’un ou deux élèves manipulent
+              les cartes, les phrases et le tableau en direct avec vous.
             </p>
           </div>
           <button
@@ -124,6 +157,57 @@ export function SessionModal({
                 </button>
               </div>
 
+              {/* Invite Student Selector (supports 1st or 2nd student link) */}
+              <div className="pt-3 border-t border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <label
+                    htmlFor="invite-student-name-input"
+                    className="text-xs font-semibold text-slate-700"
+                  >
+                    Élève invité (lien personnalisé)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handlePrepareSecondStudent}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-slate-300 bg-white text-[11px] font-semibold text-slate-800 hover:bg-slate-100 whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    <UserPlus className="w-3 h-3 text-rose-600" aria-hidden="true" />
+                    + Autre élève (binôme)
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {studentProfiles.map((profile) => {
+                    const selected =
+                      inviteStudentName.trim().toLowerCase() === profile.name.toLowerCase();
+                    return (
+                      <button
+                        key={profile.id}
+                        type="button"
+                        onClick={() => setInviteStudentName(profile.name)}
+                        className={`px-2 py-1 rounded-md text-[11px] font-semibold border transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                          selected
+                            ? 'bg-slate-900 border-slate-900 text-white'
+                            : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100'
+                        }`}
+                      >
+                        {profile.name}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <input
+                  id="invite-student-name-input"
+                  type="text"
+                  value={inviteStudentName}
+                  onChange={(e) => setInviteStudentName(e.target.value)}
+                  maxLength={32}
+                  placeholder="Prénom de l'élève à inviter (ex : Lucas)"
+                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                />
+              </div>
+
               {/* Optional WhatsApp Phone + 1-click WhatsApp Invite Button */}
               <div className="pt-3 border-t border-slate-200/80 space-y-2.5">
                 <label
@@ -155,11 +239,18 @@ export function SessionModal({
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                <Users className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>
-                  Participants connectés ({participants.length})
-                </span>
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-700">
+                <div className="flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>
+                    Participants connectés ({participants.length})
+                  </span>
+                </div>
+                {connectedStudents.length > 1 && (
+                  <span className="text-[11px] font-semibold text-rose-700 tabular-nums">
+                    {connectedStudents.length} élèves en salle
+                  </span>
+                )}
               </div>
               <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg px-3">
                 {participants.length === 0 ? (

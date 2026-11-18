@@ -381,6 +381,17 @@ export function WordSearchGame({
           className="select-none touch-none mx-auto max-w-[460px]"
           role="grid"
           aria-label="Grille de mots mêlés"
+          onPointerMove={(e) => {
+            if (!isDragging || !dragStart) return;
+            const target = document.elementFromPoint(e.clientX, e.clientY);
+            const cellEl = target?.closest<HTMLElement>('[data-ws-r]');
+            if (!cellEl) return;
+            const r = Number(cellEl.dataset.wsR);
+            const c = Number(cellEl.dataset.wsC);
+            if (Number.isFinite(r) && Number.isFinite(c)) {
+              setDragEnd({ r, c });
+            }
+          }}
         >
           <div className="grid grid-cols-9 gap-1.5">
             {grid.map((row, r) =>
@@ -413,7 +424,14 @@ export function WordSearchGame({
                   <button
                     key={`ws-${r}-${c}`}
                     type="button"
-                    onPointerDown={() => handleCellPointerDown({ r, c })}
+                    data-ws-r={r}
+                    data-ws-c={c}
+                    onPointerDown={(e) => {
+                      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+                        e.currentTarget.releasePointerCapture(e.pointerId);
+                      }
+                      handleCellPointerDown({ r, c });
+                    }}
                     onPointerEnter={() => handleCellPointerEnter({ r, c })}
                     className={`aspect-square min-h-[38px] sm:min-h-[44px] rounded-lg border-2 font-display text-base sm:text-lg font-extrabold flex items-center justify-center transition-transform cursor-pointer ${cellStyle}`}
                   >
