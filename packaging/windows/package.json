@@ -2,6 +2,7 @@
   "name": "storybridge-studio-windows",
   "version": "1.0.0",
   "description": "StoryBridge Studio Windows Debug Portable Wrapper",
+  "author": "StoryBridge Studio",
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",
@@ -10,6 +11,9 @@
   "build": {
     "appId": "com.storybridge.studio.debug",
     "productName": "StoryBridge Studio",
+    "directories": {
+      "output": "dist"
+    },
     "files": [
       "main.cjs",
       "package.json"
