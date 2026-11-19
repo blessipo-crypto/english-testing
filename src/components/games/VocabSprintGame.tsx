@@ -143,32 +143,32 @@ export function VocabSprintGame({
   return (
     <div className="manga-panel p-5 sm:p-7 space-y-6">
       {/* Header & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b sb-divider">
         <div>
-          <div className="text-xs text-slate-500">
+          <div className="text-xs font-semibold sb-text-accent">
             Duo Flash · Associe rapidement chaque mot anglais à son sens
           </div>
-          <h2 className="text-xl font-bold text-slate-900">
+          <h2 className="text-xl font-bold tracking-wide sb-text-primary">
             Sprint d’association ({matchedIds.length}/{pairs.length} paires)
           </h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 tabular-nums">
-            <Flame className="w-4 h-4 text-rose-600" aria-hidden="true" />
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold sb-text-reward tabular-nums tracking-wide">
+            <Flame className="w-4 h-4 text-[var(--sb-danger)]" aria-hidden="true" />
             <span>Série : {streak}</span>
             {bestStreak >= 2 && (
-              <span className="text-slate-400">· Record {bestStreak}</span>
+              <span className="sb-text-muted">· Record {bestStreak}</span>
             )}
           </div>
 
           <button
             type="button"
             onClick={() => resetGame(!chronoEnabled)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
               chronoEnabled
-                ? 'bg-rose-600 text-white border-slate-900'
-                : 'bg-white text-slate-800 border-slate-900 hover:bg-slate-50'
+                ? 'sb-chip-danger-solid border-b-[var(--sb-danger-3d)]'
+                : 'sb-chip-idle border-b-[var(--sb-border-3d)] hover:border-[var(--sb-reward)] hover:sb-text-reward'
             }`}
           >
             <Timer className="w-3.5 h-3.5" aria-hidden="true" />
@@ -182,7 +182,7 @@ export function VocabSprintGame({
           <button
             type="button"
             onClick={() => resetGame(chronoEnabled)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-slate-900 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 sb-chip-idle border-b-[var(--sb-border-3d)] text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
             Mélanger
@@ -192,16 +192,14 @@ export function VocabSprintGame({
 
       {/* Theme Selector Bar */}
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold text-slate-500 mr-1">Thème :</span>
+        <span className="text-xs font-semibold sb-text-muted mr-1">Thème :</span>
         {VOCAB_DECKS.map((d) => (
           <button
             key={d.id}
             type="button"
             onClick={() => onChangeTheme(d.id)}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
-              themeId === d.id
-                ? 'bg-slate-900 text-white border-slate-900'
-                : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+              themeId === d.id ? 'sb-chip-solid' : 'sb-chip-idle'
             }`}
           >
             {d.titleFr}
@@ -210,10 +208,8 @@ export function VocabSprintGame({
         <button
           type="button"
           onClick={() => onChangeTheme('time')}
-          className={`px-3 py-1.5 rounded-lg border text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
-            themeId === 'time'
-              ? 'bg-slate-900 text-white border-slate-900'
-              : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
+          className={`px-3 py-1.5 rounded-xl border text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+            themeId === 'time' ? 'sb-chip-solid' : 'sb-chip-idle'
           }`}
         >
           L’heure anglaise
@@ -222,10 +218,10 @@ export function VocabSprintGame({
           <button
             type="button"
             onClick={() => onChangeTheme('wordbank')}
-            className={`px-3 py-1.5 rounded-lg border text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
               themeId === 'wordbank'
-                ? 'bg-slate-900 text-white border-slate-900'
-                : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+                ? 'sb-chip-solid'
+                : 'sb-reward-pill hover:bg-[var(--sb-reward)] hover:text-[var(--sb-reward-contrast)]'
             }`}
           >
             Mon Carnet
@@ -237,10 +233,10 @@ export function VocabSprintGame({
       {allMatched && (
         <div
           role="status"
-          className="p-4 rounded-xl bg-emerald-50 border-2 border-slate-900 flex flex-wrap items-center justify-between gap-3"
+          className="p-4 rounded-2xl sb-status-success border flex flex-wrap items-center justify-between gap-3"
         >
-          <div className="flex items-center gap-2 text-sm font-bold text-emerald-950">
-            <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" aria-hidden="true" />
+          <div className="flex items-center gap-2 text-sm font-bold sb-text-success">
+            <Sparkles className="w-5 h-5 sb-text-reward shrink-0" aria-hidden="true" />
             <span>
               Bravo ! Les {pairs.length} paires sont trouvées (+1 étoile) · Meilleure série : {bestStreak}.
             </span>
@@ -248,7 +244,7 @@ export function VocabSprintGame({
           <button
             type="button"
             onClick={() => resetGame(chronoEnabled)}
-            className="manga-btn-primary px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+            className="manga-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
           >
             Rejouer
           </button>
@@ -258,15 +254,15 @@ export function VocabSprintGame({
       {timedOut && (
         <div
           role="status"
-          className="p-4 rounded-xl bg-amber-50 border-2 border-slate-900 flex flex-wrap items-center justify-between gap-3"
+          className="p-4 rounded-2xl sb-status-warn border flex flex-wrap items-center justify-between gap-3"
         >
-          <span className="text-sm font-bold text-amber-950">
+          <span className="text-sm font-bold sb-text-primary">
             Temps écoulé ! Tu as trouvé {matchedIds.length}/{pairs.length} paires.
           </span>
           <button
             type="button"
             onClick={() => resetGame(true)}
-            className="manga-btn-primary px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+            className="manga-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
           >
             Retenter en 60s
           </button>
@@ -274,13 +270,13 @@ export function VocabSprintGame({
       )}
 
       {feedback && !allMatched && !timedOut && (
-        <div className="text-xs font-semibold text-slate-700">{feedback}</div>
+        <div className="text-xs font-bold sb-text-reward">{feedback}</div>
       )}
 
       {/* Two-Column Match Arena */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2.5">
-          <div className="text-xs font-bold text-slate-500">1. Mot en anglais</div>
+          <div className="text-xs font-bold tracking-wide sb-text-accent">1. Mot en anglais</div>
           {leftItems.map((item) => {
             const matched = matchedIds.includes(item.id);
             const selected = selectedEn === item.id;
@@ -295,22 +291,34 @@ export function VocabSprintGame({
                     setFeedback(null);
                     speakEnglish(item.en, { accent, rate: speechRate });
                   }}
-                  className={`flex-1 min-h-[48px] px-4 py-3 rounded-xl border-2 text-left text-sm font-bold flex items-center justify-between transition-colors ${
+                  className={`group flex-1 min-h-[50px] px-4 py-3 rounded-2xl border border-b-4 text-left text-sm font-bold flex items-center justify-between transition-all ${
                     matched
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-900 cursor-default'
+                      ? 'sb-status-success border-b-[var(--sb-success-3d)] cursor-default'
                       : selected
-                        ? 'bg-rose-50 border-rose-600 text-rose-950 cursor-pointer'
-                        : 'bg-white border-slate-900 text-slate-900 hover:bg-slate-50 cursor-pointer'
+                        ? 'sb-status-danger border-b-[var(--sb-danger-3d)] cursor-pointer'
+                        : 'sb-card-option cursor-pointer'
                   }`}
                 >
-                  <span>{item.en}</span>
-                  {matched && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                  <span className="flex items-center gap-3 min-w-0">
+                    <span
+                      aria-hidden="true"
+                      className={`w-2.5 h-2.5 rotate-45 shrink-0 transition-colors ${
+                        matched
+                          ? 'bg-[var(--sb-success)]'
+                          : selected
+                            ? 'bg-[var(--sb-danger)]'
+                            : 'bg-[var(--sb-accent)] group-hover:bg-[var(--sb-hover-accent)]'
+                      }`}
+                    />
+                    <span>{item.en}</span>
+                  </span>
+                  {matched && <Check className="w-4 h-4 sb-text-success shrink-0" />}
                 </button>
                 <button
                   type="button"
                   onClick={() => speakEnglish(item.en, { accent, rate: speechRate })}
                   aria-label={`Écouter ${item.en}`}
-                  className="px-3 rounded-xl border-2 border-slate-900 bg-white text-slate-800 hover:bg-slate-100 shrink-0 cursor-pointer"
+                  className="px-3 rounded-2xl border border-b-4 sb-audio-btn border-b-[var(--sb-border-3d)] shrink-0 cursor-pointer"
                 >
                   <Volume2 className="w-4 h-4" />
                 </button>
@@ -320,7 +328,7 @@ export function VocabSprintGame({
         </div>
 
         <div className="space-y-2.5">
-          <div className="text-xs font-bold text-slate-500">2. Sens en français</div>
+          <div className="text-xs font-bold tracking-wide sb-text-reward">2. Sens en français</div>
           {rightItems.map((item) => {
             const matched = matchedIds.includes(item.id);
             return (
@@ -329,14 +337,24 @@ export function VocabSprintGame({
                 type="button"
                 disabled={matched || timedOut}
                 onClick={() => handleSelectFr(item.id)}
-                className={`w-full min-h-[48px] px-4 py-3 rounded-xl border-2 text-left text-sm font-semibold flex items-center justify-between transition-colors ${
+                className={`group w-full min-h-[50px] px-4 py-3 rounded-2xl border border-b-4 text-left text-sm font-bold flex items-center justify-between transition-all ${
                   matched
-                    ? 'bg-emerald-50 border-emerald-500 text-emerald-900 cursor-default'
-                    : 'bg-white border-slate-300 text-slate-800 hover:border-slate-900 hover:bg-slate-50 cursor-pointer'
+                    ? 'sb-status-success border-b-[var(--sb-success-3d)] cursor-default'
+                    : 'sb-card-option cursor-pointer'
                 }`}
               >
-                <span>{item.fr}</span>
-                {matched && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                <span className="flex items-center gap-3 min-w-0">
+                  <span
+                    aria-hidden="true"
+                    className={`w-2.5 h-2.5 rounded-full border-2 shrink-0 transition-colors ${
+                      matched
+                        ? 'border-[var(--sb-success)] bg-[var(--sb-success)]'
+                        : 'border-[var(--sb-reward)] group-hover:border-[var(--sb-accent)] group-hover:bg-[var(--sb-accent)]'
+                    }`}
+                  />
+                  <span>{item.fr}</span>
+                </span>
+                {matched && <Check className="w-4 h-4 sb-text-success shrink-0" />}
               </button>
             );
           })}

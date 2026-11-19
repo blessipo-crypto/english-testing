@@ -175,9 +175,9 @@ function InteractiveClockSvg({
       onPointerUp={() => setDragging(false)}
       onPointerLeave={() => setDragging(false)}
     >
-      {/* Outer Manga Ink Rim */}
-      <circle cx="160" cy="160" r="152" fill="#0f172a" />
-      <circle cx="160" cy="160" r="144" fill="#ffffff" stroke="#0f172a" strokeWidth="3" />
+      {/* Outer Tech Bezel Rim */}
+      <circle cx="160" cy="160" r="154" fill="var(--sb-bg-panel)" stroke="var(--sb-accent)" strokeWidth="3" />
+      <circle cx="160" cy="160" r="144" fill="#F8FAFC" stroke="#0F172A" strokeWidth="2.5" />
 
       {/* Optional Educational PAST / TO Hemispheres */}
       {showZones && (
@@ -185,14 +185,14 @@ function InteractiveClockSvg({
           {/* Right half: PAST (01-29 min) */}
           <path
             d="M 160 16 A 144 144 0 0 1 160 304 Z"
-            fill="#e0f2fe"
+            fill="#bae6fd"
             opacity="0.72"
           />
           {/* Left half: TO (31-59 min) */}
           <path
             d="M 160 16 A 144 144 0 0 0 160 304 Z"
-            fill="#ffe4e6"
-            opacity="0.72"
+            fill="#fecaca"
+            opacity="0.68"
           />
           <text
             x="212"
@@ -200,8 +200,8 @@ function InteractiveClockSvg({
             textAnchor="middle"
             className="font-display font-extrabold"
             fontSize="16"
-            fill="#0369a1"
-            opacity="0.6"
+            fill="#0284c7"
+            opacity="0.7"
           >
             PAST
           </text>
@@ -211,8 +211,8 @@ function InteractiveClockSvg({
             textAnchor="middle"
             className="font-display font-extrabold"
             fontSize="16"
-            fill="#be123c"
-            opacity="0.6"
+            fill="#dc2626"
+            opacity="0.7"
           >
             TO
           </text>
@@ -231,7 +231,7 @@ function InteractiveClockSvg({
             y1={160 + Math.sin(rad) * inner}
             x2={160 + Math.cos(rad) * outer}
             y2={160 + Math.sin(rad) * outer}
-            stroke="#0f172a"
+            stroke="#0F172A"
             strokeWidth={m % 5 === 0 ? '2.5' : '1'}
             opacity={m % 5 === 0 ? 0.85 : 0.35}
           />
@@ -249,8 +249,8 @@ function InteractiveClockSvg({
                 cx={minDotX}
                 cy={minDotY}
                 r={isCurrentMin ? 8 : 6}
-                fill={isCurrentMin ? '#e11d48' : '#ffffff'}
-                stroke="#0f172a"
+                fill={isCurrentMin ? '#EF4444' : '#ffffff'}
+                stroke="#0F172A"
                 strokeWidth="2"
                 className="cursor-pointer"
                 onPointerDown={(e) => {
@@ -274,9 +274,9 @@ function InteractiveClockSvg({
                   cx={labelX}
                   cy={labelY}
                   r="14"
-                  fill="#fef08a"
-                  stroke="#0f172a"
-                  strokeWidth="1.5"
+                  fill="#FACC15"
+                  stroke="#0F172A"
+                  strokeWidth="2"
                 />
               )}
               <text
@@ -285,7 +285,7 @@ function InteractiveClockSvg({
                 textAnchor="middle"
                 fontSize="16"
                 fontWeight="800"
-                fill="#0f172a"
+                fill="#0F172A"
                 className="font-display"
               >
                 {num}
@@ -302,28 +302,28 @@ function InteractiveClockSvg({
           y1="168"
           x2="160"
           y2="88"
-          stroke="#0f172a"
+          stroke="#0F172A"
           strokeWidth="8"
           strokeLinecap="round"
         />
       </g>
 
-      {/* Minute Hand (long, rose crimson) */}
+      {/* Minute Hand (long, vivid red) */}
       <g transform={`rotate(${minuteAngle} 160 160)`}>
         <line
           x1="160"
           y1="174"
           x2="160"
           y2="46"
-          stroke="#e11d48"
+          stroke="#EF4444"
           strokeWidth="5"
           strokeLinecap="round"
         />
       </g>
 
       {/* Center Pin */}
-      <circle cx="160" cy="160" r="8" fill="#0f172a" />
-      <circle cx="160" cy="160" r="3" fill="#ffffff" />
+      <circle cx="160" cy="160" r="8" fill="#0F172A" />
+      <circle cx="160" cy="160" r="3" fill="var(--sb-accent)" />
     </svg>
   );
 }
@@ -437,11 +437,11 @@ export function TimeModule({
       {/* Top Mode Switcher Card */}
       <div className="manga-panel p-5 flex flex-wrap items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="text-xs text-slate-500 flex items-center gap-2">
-            <Clock className="w-3.5 h-3.5 text-rose-600" aria-hidden="true" />
+          <div className="text-xs font-bold tracking-wide sb-text-accent flex items-center gap-2">
+            <Clock className="w-3.5 h-3.5 text-[var(--sb-danger)]" aria-hidden="true" />
             <span>Telling the Time · Horloge interactive & Défi audio</span>
           </div>
-          <h1 className="text-xl font-bold text-slate-900">
+          <h1 className="text-xl font-bold tracking-wide sb-text-primary">
             Apprendre à dire l’heure en anglais
           </h1>
         </div>
@@ -450,10 +450,8 @@ export function TimeModule({
           <button
             type="button"
             onClick={() => onUpdate({ showZones: !timeModule.showZones })}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
-              timeModule.showZones
-                ? 'bg-sky-50 border-sky-400 text-sky-900'
-                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold tracking-wide whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+              timeModule.showZones ? 'sb-chip-active sb-text-accent' : 'sb-chip-idle'
             }`}
           >
             {timeModule.showZones ? (
@@ -464,14 +462,12 @@ export function TimeModule({
             Zones PAST / TO
           </button>
 
-          <div className="flex items-center gap-1 p-1 bg-slate-100 border border-slate-300 rounded-lg">
+          <div className="flex items-center gap-1 p-1 sb-seg-track border rounded-xl">
             <button
               type="button"
               onClick={() => onUpdate({ mode: 'explore' })}
-              className={`px-3 py-1.5 text-xs font-bold rounded-md whitespace-nowrap shrink-0 cursor-pointer ${
-                timeModule.mode === 'explore'
-                  ? 'bg-slate-900 text-white'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1.5 text-xs font-bold tracking-wide rounded-lg whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                timeModule.mode === 'explore' ? 'sb-seg-active' : 'sb-seg-idle'
               }`}
             >
               Explorer l’horloge
@@ -482,10 +478,8 @@ export function TimeModule({
                 resetChallenge();
                 onUpdate({ mode: 'challenge' });
               }}
-              className={`px-3 py-1.5 text-xs font-bold rounded-md whitespace-nowrap shrink-0 cursor-pointer ${
-                timeModule.mode === 'challenge'
-                  ? 'bg-rose-600 text-white'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1.5 text-xs font-bold tracking-wide rounded-lg whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                timeModule.mode === 'challenge' ? 'sb-seg-active-danger' : 'sb-seg-idle'
               }`}
             >
               Défi de l’heure (6)
@@ -500,10 +494,10 @@ export function TimeModule({
           {/* Left 6 cols: Interactive Clock Stage */}
           <div className="lg:col-span-6 manga-panel p-6 space-y-5">
             <div className="flex items-center justify-between gap-3">
-              <div className="text-xs font-semibold text-slate-500">
+              <div className="text-xs font-semibold sb-text-muted">
                 Glisse l’aiguille ou clique un chiffre / point rouge
               </div>
-              <div className="font-mono text-lg font-extrabold text-slate-900 tabular-nums">
+              <div className="font-mono text-lg font-extrabold sb-text-reward tabular-nums tracking-wide">
                 {readout.numeric24} · {readout.numeric12}
               </div>
             </div>
@@ -522,42 +516,42 @@ export function TimeModule({
               <button
                 type="button"
                 onClick={() => stepHour(-1)}
-                className="py-2 px-2 rounded-lg border-2 border-slate-900 bg-white text-xs font-bold hover:bg-slate-50 cursor-pointer tabular-nums"
+                className="py-2 px-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent transition-colors cursor-pointer tabular-nums"
               >
                 -1 h
               </button>
               <button
                 type="button"
                 onClick={() => stepHour(1)}
-                className="py-2 px-2 rounded-lg border-2 border-slate-900 bg-white text-xs font-bold hover:bg-slate-50 cursor-pointer tabular-nums"
+                className="py-2 px-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent transition-colors cursor-pointer tabular-nums"
               >
                 +1 h
               </button>
               <button
                 type="button"
                 onClick={() => stepMinute(-5)}
-                className="py-2 px-2 rounded-lg border-2 border-slate-900 bg-white text-xs font-bold hover:bg-slate-50 cursor-pointer tabular-nums"
+                className="py-2 px-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent transition-colors cursor-pointer tabular-nums"
               >
                 -5 min
               </button>
               <button
                 type="button"
                 onClick={() => stepMinute(5)}
-                className="py-2 px-2 rounded-lg border-2 border-slate-900 bg-white text-xs font-bold hover:bg-slate-50 cursor-pointer tabular-nums"
+                className="py-2 px-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent transition-colors cursor-pointer tabular-nums"
               >
                 +5 min
               </button>
               <button
                 type="button"
                 onClick={() => stepMinute(-1)}
-                className="py-2 px-2 rounded-lg border border-slate-300 bg-slate-50 text-xs font-bold hover:bg-slate-100 cursor-pointer tabular-nums"
+                className="py-2 px-2 rounded-xl border border-b-4 sb-card-option sb-text-secondary text-xs font-bold hover:sb-text-reward transition-colors cursor-pointer tabular-nums"
               >
                 -1 min
               </button>
               <button
                 type="button"
                 onClick={() => stepMinute(1)}
-                className="py-2 px-2 rounded-lg border border-slate-300 bg-slate-50 text-xs font-bold hover:bg-slate-100 cursor-pointer tabular-nums"
+                className="py-2 px-2 rounded-xl border border-b-4 sb-card-option sb-text-secondary text-xs font-bold hover:sb-text-reward transition-colors cursor-pointer tabular-nums"
               >
                 +1 min
               </button>
@@ -568,18 +562,16 @@ export function TimeModule({
           <div className="lg:col-span-6 space-y-4">
             <div className="manga-panel p-6 space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="text-xs font-semibold text-slate-500">
+                <div className="text-xs font-semibold sb-text-secondary">
                   Moment : {readout.periodEn} ({readout.periodFr})
                 </div>
 
-                <div className="flex items-center gap-1 p-0.5 bg-slate-100 border border-slate-300 rounded-lg">
+                <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
                   <button
                     type="button"
                     onClick={() => onUpdate({ isPm: false })}
-                    className={`px-2.5 py-1 text-xs font-bold rounded-md cursor-pointer ${
-                      !timeModule.isPm
-                        ? 'bg-amber-300 text-slate-950'
-                        : 'text-slate-600'
+                    className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+                      !timeModule.isPm ? 'sb-seg-active-reward' : 'sb-seg-idle'
                     }`}
                   >
                     a.m. (matin)
@@ -587,10 +579,8 @@ export function TimeModule({
                   <button
                     type="button"
                     onClick={() => onUpdate({ isPm: true })}
-                    className={`px-2.5 py-1 text-xs font-bold rounded-md cursor-pointer ${
-                      timeModule.isPm
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-600'
+                    className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+                      timeModule.isPm ? 'sb-seg-active' : 'sb-seg-idle'
                     }`}
                   >
                     p.m. (après-midi)
@@ -599,16 +589,16 @@ export function TimeModule({
               </div>
 
               {/* Primary Analog English Expression */}
-              <div className="p-5 rounded-xl bg-slate-50 border-2 border-slate-900 space-y-3">
-                <div className="text-xs font-bold text-rose-600">
+              <div className="p-5 rounded-2xl border sb-surface-soft space-y-3">
+                <div className="text-xs font-bold tracking-wide sb-text-accent">
                   Expression britannique classique :
                 </div>
-                <div className="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
+                <div className="font-display text-2xl sm:text-3xl font-extrabold sb-text-primary leading-tight">
                   “{readout.analogEn}”
                 </div>
-                <div className="text-xs text-slate-600">
+                <div className="text-xs sb-text-muted">
                   Forme numérique (orale / US) :{' '}
-                  <span className="font-semibold text-slate-900">
+                  <span className="font-bold sb-text-reward">
                     {readout.digitalEn}
                   </span>
                 </div>
@@ -619,7 +609,7 @@ export function TimeModule({
                     onClick={() =>
                       speakEnglish(readout.analogEn, { accent, rate: speechRate })
                     }
-                    className="manga-btn-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer"
+                    className="manga-btn-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
                   >
                     <Volume2 className="w-4 h-4" aria-hidden="true" />
                     Prononcer
@@ -629,7 +619,7 @@ export function TimeModule({
                     onClick={() =>
                       speakEnglish(readout.analogEn, { accent, rate: 0.7 })
                     }
-                    className="px-3.5 py-2 rounded-lg border-2 border-slate-900 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent transition-colors cursor-pointer"
                   >
                     Lent (0.7x)
                   </button>
@@ -637,15 +627,15 @@ export function TimeModule({
               </div>
 
               {/* Contextual Rule Callout */}
-              <div className="p-4 rounded-xl bg-amber-50 border border-amber-300 text-sm text-amber-950 leading-relaxed">
-                <span className="font-bold">Règle : </span>
+              <div className="p-4 rounded-2xl border sb-status-warn text-sm leading-relaxed">
+                <span className="font-bold sb-text-reward">Règle : </span>
                 {readout.ruleFr}
               </div>
             </div>
 
             {/* 4 Key Landmarks Quick Jump */}
             <div className="manga-panel p-5 space-y-3">
-              <h2 className="text-sm font-bold text-slate-900">
+              <h2 className="text-sm font-bold tracking-wide sb-text-primary">
                 Les 4 repères essentiels à tester d’un clic
               </h2>
               <div className="grid grid-cols-2 gap-2.5">
@@ -662,16 +652,24 @@ export function TimeModule({
                       playPop();
                       onUpdate({ minute: preset.minute });
                     }}
-                    className={`p-3 rounded-xl border-2 text-left transition-colors cursor-pointer ${
+                    className={`p-3 rounded-2xl border border-b-4 text-left transition-all cursor-pointer ${
                       timeModule.minute === preset.minute
-                        ? 'bg-rose-50 border-rose-600 text-rose-950'
-                        : 'bg-white border-slate-300 hover:border-slate-900'
+                        ? 'sb-status-danger border-b-red-800'
+                        : 'sb-card-option'
                     }`}
                   >
-                    <div className="text-xs font-bold text-slate-900">
-                      {preset.label}
+                    <div className="text-xs font-bold sb-text-primary flex items-center gap-2">
+                      <span
+                        aria-hidden="true"
+                        className={`w-2 h-2 rotate-45 shrink-0 ${
+                          timeModule.minute === preset.minute
+                            ? 'bg-[var(--sb-danger)]'
+                            : 'bg-[var(--sb-accent)]'
+                        }`}
+                      />
+                      <span>{preset.label}</span>
                     </div>
-                    <div className="text-xs text-slate-500 mt-0.5">{preset.fr}</div>
+                    <div className="text-xs sb-text-muted mt-0.5 pl-4">{preset.fr}</div>
                   </button>
                 ))}
               </div>
@@ -681,17 +679,17 @@ export function TimeModule({
       ) : (
         /* Challenge Mode (6 Rounds) */
         <div className="manga-panel p-6 sm:p-8 space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b sb-divider">
             <div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs font-semibold sb-text-accent">
                 Défi de l’heure · Alterne réglage d’aiguilles et lecture rapide
               </div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold tracking-wide sb-text-primary">
                 Manche{' '}
-                <span className="tabular-nums">
+                <span className="tabular-nums sb-text-accent">
                   {challengeIdx + 1}/{TIME_CHALLENGES.length}
                 </span>{' '}
-                · Score : <span className="tabular-nums">{score}</span>
+                · Score : <span className="tabular-nums sb-text-reward">{score}</span>
               </h2>
             </div>
 
@@ -699,10 +697,8 @@ export function TimeModule({
               <button
                 type="button"
                 onClick={() => setAudioDictationMode((v) => !v)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
-                  audioDictationMode
-                    ? 'bg-slate-900 text-white border-slate-900'
-                    : 'bg-white text-slate-800 border-slate-300 hover:border-slate-900'
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                  audioDictationMode ? 'sb-chip-solid' : 'sb-chip-idle'
                 }`}
               >
                 <Ear className="w-3.5 h-3.5" aria-hidden="true" />
@@ -712,7 +708,7 @@ export function TimeModule({
               <button
                 type="button"
                 onClick={resetChallenge}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-slate-900 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 sb-card-option text-xs font-bold hover:sb-text-reward transition-colors cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                 Recommencer
@@ -721,20 +717,20 @@ export function TimeModule({
           </div>
 
           {completed ? (
-            <div className="p-6 rounded-xl bg-emerald-50 border-2 border-slate-900 space-y-4">
-              <div className="flex items-center gap-2 text-lg font-bold text-emerald-950">
-                <Sparkles className="w-6 h-6 text-emerald-600 shrink-0" aria-hidden="true" />
+            <div className="p-6 rounded-2xl border sb-status-success space-y-4">
+              <div className="flex items-center gap-2 text-lg font-bold tracking-wide">
+                <Sparkles className="w-6 h-6 sb-text-reward shrink-0" aria-hidden="true" />
                 <span>
                   Défi terminé ! Score : {score} / {TIME_CHALLENGES.length} (+1 étoile)
                 </span>
               </div>
-              <p className="text-sm text-emerald-900">
+              <p className="text-sm opacity-90">
                 Bravo ! Tu sais maintenant placer les aiguilles et lire « past » et « to » en anglais.
               </p>
               <button
                 type="button"
                 onClick={resetChallenge}
-                className="manga-btn-primary px-4 py-2 rounded-lg text-xs font-bold cursor-pointer"
+                className="manga-btn-primary px-4 py-2 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
               >
                 Rejouer le défi
               </button>
@@ -765,7 +761,7 @@ export function TimeModule({
                       setUserHour((h) => (h % 12) + 1);
                       setSetCheckStatus('idle');
                     }}
-                    className="px-3 py-1.5 rounded-lg border-2 border-slate-900 bg-white text-xs font-bold cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent disabled:opacity-40 cursor-pointer"
                   >
                     +1 heure
                   </button>
@@ -777,7 +773,7 @@ export function TimeModule({
                       setUserMinute((m) => (m + 5) % 60);
                       setSetCheckStatus('idle');
                     }}
-                    className="px-3 py-1.5 rounded-lg border-2 border-slate-900 bg-white text-xs font-bold cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent disabled:opacity-40 cursor-pointer"
                   >
                     +5 minutes
                   </button>
@@ -785,16 +781,16 @@ export function TimeModule({
               </div>
 
               <div className="lg:col-span-6 space-y-4">
-                <div className="p-5 rounded-xl bg-slate-50 border-2 border-slate-900 space-y-3">
-                  <div className="text-xs font-bold text-rose-600">
+                <div className="p-5 rounded-2xl border sb-surface-soft space-y-3">
+                  <div className="text-xs font-bold tracking-wide sb-text-danger">
                     Mission : règle l’horloge sur cette heure !
                   </div>
                   {audioDictationMode && setCheckStatus !== 'correct' ? (
-                    <p className="text-sm font-semibold text-slate-700">
+                    <p className="text-sm font-semibold sb-text-secondary">
                       Texte masqué (Dictée Audio active) : clique sur « Écouter l’heure » puis règle les aiguilles.
                     </p>
                   ) : (
-                    <div className="font-display text-2xl font-extrabold text-slate-900">
+                    <div className="font-display text-2xl font-extrabold sb-text-primary">
                       “{targetReadout.analogEn}”
                     </div>
                   )}
@@ -808,12 +804,12 @@ export function TimeModule({
                           rate: speechRate,
                         })
                       }
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border-2 border-slate-900 bg-white text-slate-900 text-xs font-bold hover:bg-slate-100 cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-b-4 sb-card-option text-xs font-bold hover:sb-text-accent cursor-pointer"
                     >
                       <Volume2 className="w-4 h-4" aria-hidden="true" />
                       Écouter l’heure
                     </button>
-                    <span className="text-xs font-mono text-slate-600 tabular-nums">
+                    <span className="text-xs font-mono font-bold sb-text-reward tabular-nums">
                       Ton réglage : {userHour}:{String(userMinute).padStart(2, '0')}
                     </span>
                   </div>
@@ -822,20 +818,20 @@ export function TimeModule({
                 {setCheckStatus === 'correct' && (
                   <div
                     role="status"
-                    className="p-4 rounded-xl bg-emerald-50 border-2 border-slate-900 space-y-1"
+                    className="p-4 rounded-2xl border sb-status-success space-y-1"
                   >
-                    <div className="flex items-center gap-2 text-sm font-bold text-emerald-950">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                    <div className="flex items-center gap-2 text-sm font-bold">
+                      <CheckCircle2 className="w-5 h-5 sb-text-success shrink-0" />
                       <span>Parfait ! C’est exactement {targetReadout.analogEn}</span>
                     </div>
-                    <p className="text-xs text-emerald-900">{activeChallenge.tipFr}</p>
+                    <p className="text-xs opacity-90">{activeChallenge.tipFr}</p>
                   </div>
                 )}
 
                 {setCheckStatus === 'incorrect' && (
                   <div
                     role="status"
-                    className="p-4 rounded-xl bg-amber-50 border-2 border-slate-900 text-xs font-bold text-amber-950"
+                    className="p-4 rounded-2xl border sb-status-warn text-xs font-bold"
                   >
                     Pas tout à fait ! Clique sur un chiffre pour changer l’heure (aiguille noire) et sur un point rouge pour les minutes (aiguille rouge).
                   </div>
@@ -846,7 +842,7 @@ export function TimeModule({
                     <button
                       type="button"
                       onClick={handleCheckClockSet}
-                      className="manga-btn-primary px-5 py-2.5 rounded-lg text-xs font-bold cursor-pointer"
+                      className="manga-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
                     >
                       Valider mon horloge
                     </button>
@@ -854,7 +850,7 @@ export function TimeModule({
                     <button
                       type="button"
                       onClick={handleNextChallenge}
-                      className="manga-btn-primary inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-xs font-bold cursor-pointer"
+                      className="manga-btn-primary inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
                     >
                       Manche suivante
                       <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -876,7 +872,7 @@ export function TimeModule({
               </div>
 
               <div className="lg:col-span-7 space-y-4">
-                <div className="text-sm font-bold text-slate-900">
+                <div className="text-sm font-bold tracking-wide sb-text-primary">
                   What time is it? Choisis la bonne phrase en anglais :
                 </div>
 
@@ -884,18 +880,18 @@ export function TimeModule({
                   {(activeChallenge.options || []).map((opt, idx) => {
                     const isPicked = pickedOption === idx;
                     const isRight = idx === activeChallenge.correctOptionIndex;
-                    let cls =
-                      'bg-white border-slate-900 text-slate-900 hover:bg-amber-50 cursor-pointer';
+                    let cls = 'sb-card-option cursor-pointer';
+                    let markerCls = 'bg-[var(--sb-accent)] group-hover:bg-[var(--sb-reward)]';
                     if (pickedOption !== null) {
                       if (isRight) {
-                        cls =
-                          'bg-emerald-50 border-emerald-600 text-emerald-950 cursor-default';
+                        cls = 'sb-status-success border-b-emerald-700 cursor-default';
+                        markerCls = 'bg-emerald-500';
                       } else if (isPicked) {
-                        cls =
-                          'bg-rose-50 border-rose-500 text-rose-950 cursor-default';
+                        cls = 'sb-status-danger border-b-red-800 cursor-default';
+                        markerCls = 'bg-[var(--sb-danger)]';
                       } else {
-                        cls =
-                          'bg-slate-50 border-slate-200 text-slate-400 cursor-default';
+                        cls = 'sb-card-used cursor-default';
+                        markerCls = 'bg-slate-400';
                       }
                     }
 
@@ -905,14 +901,20 @@ export function TimeModule({
                         type="button"
                         disabled={pickedOption !== null}
                         onClick={() => handlePickReadOption(idx)}
-                        className={`min-h-[54px] px-4 py-3 rounded-xl border-2 text-left text-sm font-bold flex items-center justify-between gap-2 ${cls}`}
+                        className={`group min-h-[56px] px-4 py-3 rounded-2xl border border-b-4 text-left text-sm font-bold flex items-center justify-between gap-2 transition-all ${cls}`}
                       >
-                        <span>{opt}</span>
+                        <span className="flex items-center gap-3 min-w-0">
+                          <span
+                            aria-hidden="true"
+                            className={`w-2.5 h-2.5 rotate-45 shrink-0 transition-colors ${markerCls}`}
+                          />
+                          <span>{opt}</span>
+                        </span>
                         {pickedOption !== null && isRight && (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <CheckCircle2 className="w-4 h-4 sb-text-success shrink-0" />
                         )}
                         {pickedOption !== null && isPicked && !isRight && (
-                          <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                          <XCircle className="w-4 h-4 sb-text-danger shrink-0" />
                         )}
                       </button>
                     );
@@ -920,14 +922,14 @@ export function TimeModule({
                 </div>
 
                 {pickedOption !== null && (
-                  <div className="p-4 rounded-xl bg-slate-50 border-2 border-slate-900 flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-xs font-medium text-slate-800">
+                  <div className="p-4 rounded-2xl border sb-surface-soft flex flex-wrap items-center justify-between gap-3">
+                    <p className="text-xs font-medium sb-text-secondary">
                       {activeChallenge.tipFr}
                     </p>
                     <button
                       type="button"
                       onClick={handleNextChallenge}
-                      className="manga-btn-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+                      className="manga-btn-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold tracking-wide whitespace-nowrap shrink-0 cursor-pointer"
                     >
                       {challengeIdx + 1 >= TIME_CHALLENGES.length
                         ? 'Terminer le défi'

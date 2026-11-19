@@ -91,22 +91,20 @@ export function VocabModule({
         {/* Deck Header & Mode Switcher */}
         <div className="manga-panel p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="text-xs text-slate-500">
+            <div className="text-xs font-bold tracking-wide sb-text-accent">
               Thème actif · {activeDeck.cards.length} mots illustrés
             </div>
-            <h1 className="text-xl font-bold text-slate-900">
+            <h1 className="text-xl font-bold tracking-wide sb-text-primary">
               {activeDeck.titleFr}
             </h1>
           </div>
 
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg self-start sm:self-auto shrink-0">
+          <div className="flex items-center gap-1 p-1 sb-seg-track border rounded-2xl self-start sm:self-auto shrink-0">
             <button
               type="button"
               onClick={() => onUpdate({ mode: 'cards' })}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                vocab.mode === 'cards'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                vocab.mode === 'cards' ? 'sb-seg-active' : 'sb-seg-idle'
               }`}
             >
               Cartes Audio
@@ -118,10 +116,8 @@ export function VocabModule({
                 setMatchError(null);
                 onUpdate({ mode: 'match' });
               }}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                vocab.mode === 'match'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`px-3 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                vocab.mode === 'match' ? 'sb-seg-active' : 'sb-seg-idle'
               }`}
             >
               Jeu d’association
@@ -133,7 +129,7 @@ export function VocabModule({
           <div className="manga-panel overflow-hidden">
             <div className="grid grid-cols-1 md:grid-cols-12 items-stretch">
               {/* Theme Artwork */}
-              <div className="md:col-span-5 bg-slate-50 border-b md:border-b-0 md:border-r border-slate-200">
+              <div className="md:col-span-5 sb-surface border-b md:border-b-0 md:border-r sb-divider">
                 <ResilientImage
                   src={activeDeck.imageUrl}
                   alt={activeDeck.titleEn}
@@ -147,10 +143,10 @@ export function VocabModule({
                 <div className="space-y-4">
                   {/* Top metadata + Blind Test toggle */}
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-xs text-slate-500 flex items-center gap-2">
-                      <span>{activeCard.partOfSpeech}</span>
+                    <div className="text-xs sb-text-muted flex items-center gap-2 font-semibold">
+                      <span className="sb-text-accent">{activeCard.partOfSpeech}</span>
                       <span aria-hidden="true">·</span>
-                      <span>Niveau {activeCard.level}</span>
+                      <span className="sb-text-reward">Niveau {activeCard.level}</span>
                       <span aria-hidden="true">·</span>
                       <span className="tabular-nums">
                         Carte {cardIndex + 1}/{activeDeck.cards.length}
@@ -163,10 +159,8 @@ export function VocabModule({
                         setRevealInBlind(false);
                         onUpdate({ blindMode: !vocab.blindMode });
                       }}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                        vocab.blindMode
-                          ? 'bg-indigo-50 border-indigo-300 text-indigo-800'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                        vocab.blindMode ? 'sb-reward-pill' : 'sb-chip-idle'
                       }`}
                     >
                       {vocab.blindMode ? (
@@ -181,10 +175,10 @@ export function VocabModule({
                   {/* Main English Word + Audio Controls */}
                   <div className="space-y-2 pt-2">
                     <div className="flex flex-wrap items-baseline gap-3">
-                      <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
+                      <h2 className="text-3xl lg:text-4xl font-bold sb-text-primary tracking-wide">
                         {activeCard.en}
                       </h2>
-                      <span className="font-mono text-sm text-slate-500">
+                      <span className="font-mono text-sm sb-text-accent">
                         {activeCard.phonetic}
                       </span>
                     </div>
@@ -195,7 +189,7 @@ export function VocabModule({
                         onClick={() =>
                           speakEnglish(activeCard.en, { accent, rate: speechRate })
                         }
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-700 text-white text-xs font-semibold hover:bg-indigo-800 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                        className="manga-btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         <Volume2 className="w-4 h-4" aria-hidden="true" />
                         Prononcer
@@ -205,7 +199,7 @@ export function VocabModule({
                         onClick={() =>
                           speakEnglish(activeCard.en, { accent, rate: 0.7 })
                         }
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-b-2 sb-card-option text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                       >
                         Lent (0.7x)
                       </button>
@@ -213,26 +207,26 @@ export function VocabModule({
                   </div>
 
                   {/* French Meaning (or Blind Quiz toggle) */}
-                  <div className="pt-3 border-t border-slate-100">
+                  <div className="pt-3 border-t sb-divider">
                     {vocab.blindMode && !revealInBlind ? (
                       <button
                         type="button"
                         onClick={() => setRevealInBlind(true)}
-                        className="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl border sb-reward-btn text-xs font-bold transition-colors cursor-pointer"
                       >
                         Révéler la traduction française
                       </button>
                     ) : (
-                      <p className="text-lg font-semibold text-indigo-800">
+                      <p className="text-lg font-bold sb-text-reward">
                         {activeCard.fr}
                       </p>
                     )}
                   </div>
 
                   {/* Example Sentence */}
-                  <div className="p-4 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1.5">
+                  <div className="p-4 rounded-2xl border sb-surface-soft space-y-1.5">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium text-slate-900 leading-relaxed">
+                      <p className="text-sm font-semibold sb-text-primary leading-relaxed">
                         “{activeCard.exampleEn}”
                       </p>
                       <button
@@ -244,13 +238,13 @@ export function VocabModule({
                           })
                         }
                         aria-label="Écouter la phrase d'exemple"
-                        className="p-1.5 rounded-md bg-white border border-slate-200 text-indigo-700 hover:bg-indigo-50 shrink-0 cursor-pointer"
+                        className="p-1.5 rounded-lg border sb-audio-btn shrink-0 cursor-pointer"
                       >
                         <Volume2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                     {(!vocab.blindMode || revealInBlind) && (
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs sb-text-muted">
                         {activeCard.exampleFr}
                       </p>
                     )}
@@ -258,7 +252,7 @@ export function VocabModule({
                 </div>
 
                 {/* Card Footer Navigation & Wordbank */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t sb-divider">
                   <button
                     type="button"
                     disabled={isAlreadyInWordbank}
@@ -269,20 +263,20 @@ export function VocabModule({
                         note: `${activeCard.phonetic} · ${activeCard.exampleEn}`,
                       })
                     }
-                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shrink-0 ${
                       isAlreadyInWordbank
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer'
+                        ? 'sb-status-success cursor-default'
+                        : 'sb-chip-idle cursor-pointer'
                     }`}
                   >
                     {isAlreadyInWordbank ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                        <Check className="w-3.5 h-3.5 sb-text-success" aria-hidden="true" />
                         Ajouté au carnet
                       </>
                     ) : (
                       <>
-                        <BookmarkPlus className="w-3.5 h-3.5" aria-hidden="true" />
+                        <BookmarkPlus className="w-3.5 h-3.5 sb-text-accent" aria-hidden="true" />
                         Ajouter au carnet
                       </>
                     )}
@@ -297,7 +291,7 @@ export function VocabModule({
                             activeDeck.cards.length
                         )
                       }
-                      className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl border sb-chip-idle text-xs font-bold cursor-pointer"
                     >
                       <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                       Précédent
@@ -309,7 +303,7 @@ export function VocabModule({
                           (cardIndex + 1) % activeDeck.cards.length
                         )
                       }
-                      className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 cursor-pointer"
+                      className="manga-btn-primary inline-flex items-center gap-1 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
                     >
                       Suivant
                       <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -324,10 +318,10 @@ export function VocabModule({
           <div className="manga-panel p-6 space-y-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-slate-900">
+                <h2 className="text-lg font-bold tracking-wide sb-text-primary">
                   Associe chaque mot anglais à sa traduction
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5 tabular-nums">
+                <p className="text-xs sb-text-accent font-bold mt-0.5 tabular-nums">
                   {vocab.matchedIds.length} / {activeDeck.cards.length} paires trouvées
                 </p>
               </div>
@@ -338,7 +332,7 @@ export function VocabModule({
                   setMatchError(null);
                   onUpdate({ matchedIds: [] });
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border sb-chip-idle text-xs font-bold cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                 Recommencer
@@ -348,7 +342,7 @@ export function VocabModule({
             {matchError && (
               <div
                 role="status"
-                className="px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs font-medium text-amber-900"
+                className="px-4 py-2.5 rounded-xl border sb-status-warn text-xs font-bold"
               >
                 {matchError}
               </div>
@@ -357,9 +351,9 @@ export function VocabModule({
             {vocab.matchedIds.length === activeDeck.cards.length && (
               <div
                 role="status"
-                className="px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm font-semibold text-emerald-900 flex items-center gap-2"
+                className="px-4 py-3 rounded-2xl border sb-status-success text-sm font-bold flex items-center gap-2"
               >
-                <Sparkles className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+                <Sparkles className="w-4 h-4 sb-text-reward" aria-hidden="true" />
                 Bravo ! Toutes les paires du thème ont été associées (+1 étoile).
               </div>
             )}
@@ -367,7 +361,7 @@ export function VocabModule({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* English column */}
               <div className="space-y-2.5">
-                <div className="text-xs font-semibold text-slate-500">
+                <div className="text-xs font-bold tracking-wide sb-text-accent">
                   1. Mot en anglais
                 </div>
                 {activeDeck.cards.map((card) => {
@@ -383,17 +377,29 @@ export function VocabModule({
                         setSelectedEnId(card.id);
                         speakEnglish(card.en, { accent, rate: speechRate });
                       }}
-                      className={`w-full px-4 py-3 rounded-lg border text-left text-sm font-semibold flex items-center justify-between transition-colors ${
+                      className={`w-full px-4 py-3 rounded-2xl border border-b-4 text-left text-sm font-bold flex items-center justify-between gap-2 transition-all ${
                         matched
-                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800 cursor-default'
+                          ? 'sb-status-success border-b-emerald-700 cursor-default'
                           : selected
-                            ? 'bg-indigo-50 border-indigo-600 text-indigo-950 cursor-pointer'
-                            : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50 cursor-pointer'
+                            ? 'sb-card-selected cursor-pointer'
+                            : 'sb-card-option cursor-pointer'
                       }`}
                     >
-                      <span>{card.en}</span>
+                      <span className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className={`w-2.5 h-2.5 rotate-45 shrink-0 ${
+                            matched
+                              ? 'bg-emerald-500'
+                              : selected
+                                ? 'bg-[var(--sb-reward)]'
+                                : 'bg-[var(--sb-accent)]'
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">{card.en}</span>
+                      </span>
                       {matched && (
-                        <Check className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+                        <Check className="w-4 h-4 sb-text-success shrink-0" aria-hidden="true" />
                       )}
                     </button>
                   );
@@ -402,7 +408,7 @@ export function VocabModule({
 
               {/* French column */}
               <div className="space-y-2.5">
-                <div className="text-xs font-semibold text-slate-500">
+                <div className="text-xs font-bold tracking-wide sb-text-reward">
                   2. Traduction en français
                 </div>
                 {shuffledFrCards.map((card) => {
@@ -413,15 +419,25 @@ export function VocabModule({
                       type="button"
                       disabled={matched}
                       onClick={() => handleMatchFr(card.id)}
-                      className={`w-full px-4 py-3 rounded-lg border text-left text-sm font-medium flex items-center justify-between transition-colors ${
+                      className={`w-full px-4 py-3 rounded-2xl border border-b-4 text-left text-sm font-bold flex items-center justify-between gap-2 transition-all ${
                         matched
-                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800 cursor-default'
-                          : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-400 hover:bg-indigo-50/40 cursor-pointer'
+                          ? 'sb-status-success border-b-emerald-700 cursor-default'
+                          : 'sb-card-option cursor-pointer'
                       }`}
                     >
-                      <span>{card.fr}</span>
+                      <span className="flex items-center gap-2.5 min-w-0">
+                        <span
+                          className={`w-2.5 h-2.5 rounded-full border-2 shrink-0 ${
+                            matched
+                              ? 'bg-emerald-500 border-emerald-500'
+                              : 'border-[var(--sb-reward)]'
+                          }`}
+                          aria-hidden="true"
+                        />
+                        <span className="truncate">{card.fr}</span>
+                      </span>
                       {matched && (
-                        <Check className="w-4 h-4 text-emerald-600" aria-hidden="true" />
+                        <Check className="w-4 h-4 sb-text-success shrink-0" aria-hidden="true" />
                       )}
                     </button>
                   );
@@ -435,7 +451,7 @@ export function VocabModule({
       {/* Right Sidebar: Deck Switcher & Word List (4 cols) */}
       <aside className="lg:col-span-4 space-y-4">
         <div className="manga-panel p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-bold tracking-wide sb-text-primary">
             Choisir un thème
           </h2>
           <div className="space-y-2">
@@ -451,16 +467,14 @@ export function VocabModule({
                     setMatchError(null);
                     onUpdate({ deckId: deck.id, cardIndex: 0, matchedIds: [] });
                   }}
-                  className={`w-full p-3 rounded-lg border text-left transition-colors cursor-pointer ${
-                    isSelected
-                      ? 'bg-indigo-50 border-indigo-600'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-slate-100'
+                  className={`w-full p-3 rounded-2xl border border-b-4 text-left transition-all cursor-pointer ${
+                    isSelected ? 'sb-card-selected' : 'sb-card-option'
                   }`}
                 >
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div className="text-sm font-bold sb-text-primary">
                     {deck.titleFr}
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
+                  <div className="text-xs sb-text-muted mt-0.5">
                     {deck.titleEn} · {deck.cards.length} cartes
                   </div>
                 </button>
@@ -470,10 +484,10 @@ export function VocabModule({
         </div>
 
         <div className="manga-panel p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-bold tracking-wide sb-text-primary">
             Mots de ce thème
           </h2>
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y sb-divide">
             {activeDeck.cards.map((c, idx) => {
               const isCurrent = idx === cardIndex && vocab.mode === 'cards';
               return (
@@ -484,12 +498,14 @@ export function VocabModule({
                     setRevealInBlind(false);
                     onUpdate({ mode: 'cards', cardIndex: idx });
                   }}
-                  className={`w-full py-2.5 px-2 text-left flex items-center justify-between gap-2 rounded-md transition-colors cursor-pointer ${
-                    isCurrent ? 'bg-indigo-50 text-indigo-900' : 'hover:bg-slate-50'
+                  className={`w-full py-2.5 px-2.5 text-left flex items-center justify-between gap-2 rounded-xl transition-colors cursor-pointer ${
+                    isCurrent
+                      ? 'bg-[var(--sb-accent-soft)] sb-text-accent font-bold'
+                      : 'sb-text-secondary hover:bg-[var(--sb-bg-surface)]'
                   }`}
                 >
-                  <span className="text-sm font-medium">{c.en}</span>
-                  <span className="text-xs text-slate-500 truncate">
+                  <span className="text-sm font-semibold">{c.en}</span>
+                  <span className="text-xs sb-text-muted truncate">
                     {vocab.blindMode ? '•••' : c.fr}
                   </span>
                 </button>

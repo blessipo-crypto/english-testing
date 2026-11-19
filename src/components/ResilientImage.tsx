@@ -19,12 +19,12 @@ export function ResilientImage({
   if (hasError) {
     return (
       <div
-        className={`flex flex-col items-center justify-center bg-slate-100 text-slate-500 p-6 text-center ${className}`}
+        className={`flex flex-col items-center justify-center sb-surface sb-text-muted p-6 text-center ${className}`}
         role="img"
         aria-label={alt}
       >
-        <BookOpen className="w-8 h-8 text-indigo-600 mb-2" aria-hidden="true" />
-        <span className="text-sm font-medium text-slate-700">
+        <BookOpen className="w-8 h-8 sb-text-accent mb-2" aria-hidden="true" />
+        <span className="text-sm font-semibold sb-text-primary">
           {fallbackTitle || alt}
         </span>
       </div>

@@ -260,10 +260,10 @@ export function BoardModule({
         <div className="manga-panel p-5 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-lg font-bold text-slate-900">
+              <h1 className="text-lg font-bold tracking-wide sb-text-primary">
                 Tableau blanc stylet & tactile
               </h1>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs sb-text-muted">
                 Écriture fluide au stylet Windows Ink, doigt ou souris ·{' '}
                 {lastPointerKind === 'pen'
                   ? 'Stylet détecté'
@@ -275,7 +275,7 @@ export function BoardModule({
 
             <div className="flex flex-wrap items-center gap-2">
               {/* Ink Color Buttons */}
-              <div className="flex items-center gap-1.5 pr-2 border-r border-slate-200">
+              <div className="flex items-center gap-1.5 pr-2 border-r sb-divider">
                 {INK_COLORS.map((c) => (
                   <button
                     key={c.value}
@@ -287,8 +287,8 @@ export function BoardModule({
                     }}
                     className={`w-6 h-6 rounded-full border-2 transition-transform cursor-pointer ${
                       !isEraser && inkColor === c.value
-                        ? 'border-slate-900 scale-110'
-                        : 'border-white ring-1 ring-slate-300'
+                        ? 'border-[var(--sb-accent)] scale-110 ring-2 ring-[var(--sb-accent)]/40'
+                        : 'border-slate-400 ring-1 ring-slate-500/40'
                     }`}
                     style={{ backgroundColor: c.value }}
                   />
@@ -298,10 +298,8 @@ export function BoardModule({
                   onClick={() => setIsEraser((v) => !v)}
                   aria-label="Gomme"
                   title="Gomme"
-                  className={`p-1.5 rounded-lg border text-xs font-semibold cursor-pointer ${
-                    isEraser
-                      ? 'bg-rose-50 border-rose-600 text-rose-700'
-                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                  className={`p-1.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                    isEraser ? 'sb-status-danger' : 'sb-chip-idle'
                   }`}
                 >
                   <Eraser className="w-3.5 h-3.5" />
@@ -309,14 +307,12 @@ export function BoardModule({
               </div>
 
               {/* Thickness */}
-              <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg">
+              <div className="flex items-center gap-1 sb-seg-track border p-0.5 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setBrushWidth(2)}
-                  className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
-                    brushWidth === 2
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600'
+                  className={`px-2 py-1 text-xs font-bold rounded-lg cursor-pointer ${
+                    brushWidth === 2 ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Fin
@@ -324,10 +320,8 @@ export function BoardModule({
                 <button
                   type="button"
                   onClick={() => setBrushWidth(4)}
-                  className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
-                    brushWidth === 4
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600'
+                  className={`px-2 py-1 text-xs font-bold rounded-lg cursor-pointer ${
+                    brushWidth === 4 ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Moyen
@@ -335,10 +329,8 @@ export function BoardModule({
                 <button
                   type="button"
                   onClick={() => setBrushWidth(7)}
-                  className={`px-2 py-1 text-xs font-medium rounded-md cursor-pointer ${
-                    brushWidth === 7
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600'
+                  className={`px-2 py-1 text-xs font-bold rounded-lg cursor-pointer ${
+                    brushWidth === 7 ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Épais
@@ -350,7 +342,7 @@ export function BoardModule({
                 onClick={onUndoStroke}
                 disabled={strokes.length === 0}
                 aria-label="Annuler le dernier trait"
-                className="p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer"
+                className="p-2 rounded-xl border sb-chip-idle hover:sb-text-accent disabled:opacity-40 cursor-pointer"
               >
                 <Undo2 className="w-4 h-4" />
               </button>
@@ -360,7 +352,7 @@ export function BoardModule({
                   onClick={onClearStrokes}
                   disabled={strokes.length === 0}
                   aria-label="Effacer le tableau"
-                  className="p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40 cursor-pointer"
+                  className="p-2 rounded-xl border sb-chip-idle hover:border-[var(--sb-danger)] hover:sb-text-danger disabled:opacity-40 cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -373,10 +365,8 @@ export function BoardModule({
             <button
               type="button"
               onClick={() => setStylusOnly((v) => !v)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                stylusOnly
-                  ? 'bg-slate-900 border-slate-900 text-white'
-                  : 'bg-slate-50 border-slate-300 text-slate-700 hover:bg-slate-100'
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                stylusOnly ? 'sb-chip-solid' : 'sb-chip-idle'
               }`}
             >
               <PenTool className="w-3.5 h-3.5" aria-hidden="true" />
@@ -385,7 +375,7 @@ export function BoardModule({
                 : 'Stylet + Doigt + Souris'}
             </button>
 
-            <div className="flex items-center gap-1 p-0.5 bg-slate-100 border border-slate-200 rounded-lg">
+            <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
               {(
                 [
                   { id: 'lined', label: 'Lignes cahier' },
@@ -397,10 +387,8 @@ export function BoardModule({
                   key={opt.id}
                   type="button"
                   onClick={() => setPaperStyle(opt.id)}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-md cursor-pointer ${
-                    paperStyle === opt.id
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors cursor-pointer ${
+                    paperStyle === opt.id ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   {opt.label}
@@ -410,17 +398,17 @@ export function BoardModule({
           </div>
 
           <div
-            className="rounded-lg border-2 border-slate-900 bg-white overflow-hidden select-none"
+            className="rounded-2xl border-2 border-[var(--sb-accent)]/50 bg-slate-50 overflow-hidden select-none shadow-sm"
             style={
               paperStyle === 'lined'
                 ? {
                     backgroundImage:
-                      'repeating-linear-gradient(to bottom, transparent 0px, transparent 39px, #e2e8f0 39px, #e2e8f0 40px)',
+                      'repeating-linear-gradient(to bottom, transparent 0px, transparent 39px, #cbd5e1 39px, #cbd5e1 40px)',
                   }
                 : paperStyle === 'dots'
                   ? {
                       backgroundImage:
-                        'radial-gradient(#cbd5e1 1.25px, transparent 1.25px)',
+                        'radial-gradient(#94a3b8 1.25px, transparent 1.25px)',
                       backgroundSize: '24px 24px',
                     }
                   : undefined
@@ -444,7 +432,7 @@ export function BoardModule({
         <div className="manga-panel p-5 space-y-2.5">
           <label
             htmlFor="shared-board-note"
-            className="text-sm font-semibold text-slate-900 block"
+            className="text-sm font-bold tracking-wide sb-text-primary block"
           >
             Mémo grammaire & devoirs pour la prochaine fois
           </label>
@@ -454,7 +442,7 @@ export function BoardModule({
             value={boardNote}
             onChange={(e) => onUpdateNote(e.target.value)}
             placeholder="Ex : Penser au -s à la 3e personne (He plays, She likes). À revoir : les questions avec Do / Does."
-            className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            className="w-full rounded-xl border sb-input px-3.5 py-2.5 text-sm"
           />
         </div>
       </div>
@@ -464,10 +452,10 @@ export function BoardModule({
         <div className="manga-panel p-5 space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-bold text-slate-900">
+              <h2 className="text-base font-bold tracking-wide sb-text-primary">
                 Carnet de vocabulaire
               </h2>
-              <p className="text-xs text-slate-500 tabular-nums">
+              <p className="text-xs sb-text-accent tabular-nums">
                 {wordbank.length} mot{wordbank.length > 1 ? 's' : ''} retenu
                 {wordbank.length > 1 ? 's' : ''} aujourd’hui
               </p>
@@ -479,11 +467,11 @@ export function BoardModule({
                   <button
                     type="button"
                     onClick={handleCopyRecap}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border sb-chip-idle text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     {copiedRecap ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                        <Check className="w-3.5 h-3.5 sb-text-success" aria-hidden="true" />
                         Copié
                       </>
                     ) : (
@@ -497,7 +485,7 @@ export function BoardModule({
                     href={whatsappRecapUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 border-b-2 border-emerald-800 text-white text-xs font-bold hover:bg-emerald-500 transition-colors whitespace-nowrap shrink-0"
                   >
                     <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
                     WhatsApp
@@ -508,21 +496,21 @@ export function BoardModule({
           </div>
 
           {/* Add new word form */}
-          <form onSubmit={handleCreateWord} className="space-y-2 pt-2 border-t border-slate-100">
+          <form onSubmit={handleCreateWord} className="space-y-2 pt-3 border-t sb-divider">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <input
                 type="text"
                 value={newEn}
                 onChange={(e) => setNewEn(e.target.value)}
                 placeholder="Mot en anglais"
-                className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="rounded-xl border sb-input px-3 py-2 text-xs"
               />
               <input
                 type="text"
                 value={newFr}
                 onChange={(e) => setNewFr(e.target.value)}
                 placeholder="Traduction française"
-                className="rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="rounded-xl border sb-input px-3 py-2 text-xs"
               />
             </div>
             <div className="flex gap-2">
@@ -531,12 +519,12 @@ export function BoardModule({
                 value={newNote}
                 onChange={(e) => setNewNote(e.target.value)}
                 placeholder="Astuce prononciation / exemple (optionnel)"
-                className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="flex-1 rounded-xl border sb-input px-3 py-2 text-xs"
               />
               <button
                 type="submit"
                 disabled={!newEn.trim() || !newFr.trim()}
-                className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 disabled:opacity-40 whitespace-nowrap shrink-0 cursor-pointer"
+                className="manga-btn-primary inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-bold disabled:opacity-40 whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                 Ajouter
@@ -545,9 +533,9 @@ export function BoardModule({
           </form>
 
           {/* Wordbank List */}
-          <div className="divide-y divide-slate-100 max-h-[420px] overflow-y-auto">
+          <div className="divide-y sb-divide max-h-[420px] overflow-y-auto">
             {wordbank.length === 0 ? (
-              <p className="py-6 text-center text-xs text-slate-400">
+              <p className="py-6 text-center text-xs sb-text-muted">
                 Aucun mot dans le carnet pour le moment.
               </p>
             ) : (
@@ -558,15 +546,15 @@ export function BoardModule({
                 >
                   <div className="space-y-0.5 min-w-0">
                     <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-sm font-semibold text-slate-900">
+                      <span className="text-sm font-bold sb-text-primary">
                         {item.en}
                       </span>
-                      <span className="text-xs text-indigo-700 font-medium">
+                      <span className="text-xs sb-text-reward font-semibold">
                         {item.fr}
                       </span>
                     </div>
                     {item.note && (
-                      <p className="text-xs text-slate-500 break-words">
+                      <p className="text-xs sb-text-muted break-words">
                         {item.note}
                       </p>
                     )}
@@ -579,7 +567,7 @@ export function BoardModule({
                         speakEnglish(item.en, { accent, rate: speechRate })
                       }
                       aria-label={`Écouter ${item.en}`}
-                      className="p-1.5 rounded-md text-indigo-700 hover:bg-indigo-50 cursor-pointer"
+                      className="p-1.5 rounded-lg sb-text-accent hover:bg-[var(--sb-accent-soft)] cursor-pointer"
                     >
                       <Volume2 className="w-3.5 h-3.5" />
                     </button>
@@ -588,7 +576,7 @@ export function BoardModule({
                         type="button"
                         onClick={() => onRemoveWord(item.id)}
                         aria-label={`Supprimer ${item.en}`}
-                        className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                        className="p-1.5 rounded-lg sb-text-muted hover:sb-text-danger hover:bg-[var(--sb-danger-soft)] cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>

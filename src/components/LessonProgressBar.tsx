@@ -56,16 +56,19 @@ export function TopProgressStrip({
     sessionBaseStars
   );
 
-  const fillColor =
-    percent >= 85
-      ? 'bg-emerald-500'
-      : percent >= 45
-        ? 'bg-amber-400'
-        : 'bg-rose-600';
+  const fillStyle = {
+    width: `${percent}%`,
+    backgroundImage:
+      percent >= 85
+        ? 'var(--sb-progress-high)'
+        : percent >= 45
+          ? 'var(--sb-progress-mid)'
+          : 'var(--sb-progress-low)',
+  };
 
   return (
     <div
-      className="w-full h-1.5 bg-slate-100 relative overflow-hidden border-t border-slate-200"
+      className="w-full h-2 sb-surface relative overflow-hidden border-t sb-divider transition-colors duration-300"
       role="progressbar"
       aria-label="Progression de la leçon"
       aria-valuemin={0}
@@ -73,8 +76,12 @@ export function TopProgressStrip({
       aria-valuenow={percent}
     >
       <div
-        className={`h-full transition-all duration-300 ease-out ${fillColor}`}
-        style={{ width: `${percent}%` }}
+        className="h-full transition-all duration-300 ease-out"
+        style={fillStyle}
+      />
+      <div
+        className="absolute inset-0 hud-segments-dense pointer-events-none"
+        aria-hidden="true"
       />
     </div>
   );
@@ -119,12 +126,15 @@ export function LessonProgressWidget({
   const { percent, completedCount, totalModules, starsEarned } =
     computeLessonProgress(completedModules, stars, sessionBaseStars);
 
-  const barColor =
-    percent >= 85
-      ? 'bg-emerald-500'
-      : percent >= 45
-        ? 'bg-amber-400'
-        : 'bg-rose-600';
+  const barStyle = {
+    width: `${percent}%`,
+    backgroundImage:
+      percent >= 85
+        ? 'var(--sb-progress-high)'
+        : percent >= 45
+          ? 'var(--sb-progress-mid)'
+          : 'var(--sb-progress-low)',
+  };
 
   return (
     <div ref={containerRef} className="relative">
@@ -132,52 +142,60 @@ export function LessonProgressWidget({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="inline-flex items-center gap-2.5 px-2.5 py-1 rounded-lg border border-slate-300 bg-white hover:border-slate-900 transition-colors cursor-pointer"
+        className="inline-flex items-center gap-2.5 px-3 py-1 rounded-xl border sb-chip-idle cursor-pointer"
       >
         <Trophy
           className={`w-3.5 h-3.5 shrink-0 ${
-            percent >= 85 ? 'text-emerald-600' : 'text-rose-600'
+            percent >= 85 ? 'sb-text-reward' : 'sb-text-accent'
           }`}
           aria-hidden="true"
         />
-        <span className="text-xs font-bold text-slate-800 whitespace-nowrap tabular-nums">
+        <span className="text-xs font-bold tracking-wide sb-text-primary whitespace-nowrap tabular-nums">
           Leçon · {percent}%
         </span>
 
-        <span className="hidden sm:block w-20 h-2 rounded-full bg-slate-100 border border-slate-900 overflow-hidden shrink-0">
+        <span className="hidden sm:block relative w-24 h-2.5 rounded-full sb-surface border overflow-hidden shrink-0">
           <span
-            className={`block h-full transition-all duration-300 ${barColor}`}
-            style={{ width: `${percent}%` }}
+            className="block h-full transition-all duration-300"
+            style={barStyle}
+          />
+          <span
+            className="absolute inset-0 hud-segments pointer-events-none"
+            aria-hidden="true"
           />
         </span>
 
-        <span className="text-[11px] font-semibold text-slate-500 tabular-nums whitespace-nowrap">
+        <span className="text-[11px] font-bold tracking-wide sb-text-accent tabular-nums whitespace-nowrap">
           {completedCount}/{totalModules}
         </span>
-        <ChevronDown className="w-3.5 h-3.5 text-slate-500 shrink-0" aria-hidden="true" />
+        <ChevronDown className="w-3.5 h-3.5 sb-text-muted shrink-0" aria-hidden="true" />
       </button>
 
       {open && (
         <div className="absolute right-0 mt-2 w-80 manga-panel p-4 z-40 space-y-3">
-          <div className="flex items-center justify-between gap-2 pb-2 border-b border-slate-200">
+          <div className="flex items-center justify-between gap-2 pb-2 border-b sb-divider">
             <div>
-              <div className="text-xs font-bold text-slate-900">
+              <div className="text-xs font-bold tracking-wide sb-text-primary">
                 Progression de la séance
               </div>
-              <div className="text-[11px] text-slate-500 tabular-nums">
+              <div className="text-[11px] sb-text-muted tabular-nums">
                 {completedCount}/{totalModules} modules · +{starsEarned} étoile
                 {starsEarned > 1 ? 's' : ''} gagnée{starsEarned > 1 ? 's' : ''}
               </div>
             </div>
-            <span className="font-mono text-sm font-extrabold text-rose-600 tabular-nums">
+            <span className="font-mono text-sm font-extrabold sb-text-reward tabular-nums">
               {percent}%
             </span>
           </div>
 
-          <div className="w-full h-2.5 rounded-full bg-slate-100 border border-slate-900 overflow-hidden">
+          <div className="relative w-full h-3 rounded-full sb-surface border overflow-hidden">
             <div
-              className={`h-full transition-all duration-300 ${barColor}`}
-              style={{ width: `${percent}%` }}
+              className="h-full transition-all duration-300"
+              style={barStyle}
+            />
+            <div
+              className="absolute inset-0 hud-segments pointer-events-none"
+              aria-hidden="true"
             />
           </div>
 
@@ -187,10 +205,8 @@ export function LessonProgressWidget({
               return (
                 <div
                   key={m.id}
-                  className={`p-2 rounded-lg border flex items-center justify-between gap-2 ${
-                    done
-                      ? 'bg-emerald-50 border-emerald-300'
-                      : 'bg-slate-50 border-slate-200'
+                  className={`p-2 rounded-xl border flex items-center justify-between gap-2 transition-colors duration-300 ${
+                    done ? 'sb-chip-active' : 'sb-surface-soft'
                   }`}
                 >
                   <button
@@ -203,20 +219,20 @@ export function LessonProgressWidget({
                   >
                     {done ? (
                       <CheckCircle2
-                        className="w-4 h-4 text-emerald-600 shrink-0"
+                        className="w-4 h-4 sb-text-reward shrink-0"
                         aria-hidden="true"
                       />
                     ) : (
                       <Circle
-                        className="w-4 h-4 text-slate-400 shrink-0"
+                        className="w-4 h-4 sb-text-muted shrink-0"
                         aria-hidden="true"
                       />
                     )}
                     <div className="min-w-0">
-                      <div className="text-xs font-bold text-slate-900 truncate">
+                      <div className="text-xs font-bold tracking-wide sb-text-primary truncate">
                         {m.label}
                       </div>
-                      <div className="text-[11px] text-slate-500 truncate">
+                      <div className="text-[11px] sb-text-muted truncate">
                         {m.hint}
                       </div>
                     </div>
@@ -226,10 +242,8 @@ export function LessonProgressWidget({
                     <button
                       type="button"
                       onClick={() => onToggleMilestone(m.id)}
-                      className={`px-2 py-1 rounded text-[11px] font-bold shrink-0 cursor-pointer ${
-                        done
-                          ? 'bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-100'
-                          : 'bg-white border border-slate-300 text-slate-700 hover:bg-slate-100'
+                      className={`px-2 py-1 rounded-lg text-[11px] font-bold tracking-wide shrink-0 cursor-pointer border transition-colors duration-300 ${
+                        done ? 'sb-reward-pill' : 'sb-chip-idle'
                       }`}
                     >
                       {done ? 'Validé' : 'Valider'}
@@ -241,14 +255,14 @@ export function LessonProgressWidget({
           </div>
 
           {role === 'tutor' && (
-            <div className="pt-2 border-t border-slate-200 flex justify-end">
+            <div className="pt-2 border-t sb-divider flex justify-end">
               <button
                 type="button"
                 onClick={() => {
                   onResetProgress();
                   setOpen(false);
                 }}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-rose-600 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wide sb-text-muted hover:sb-text-danger cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                 Nouvelle séance (remise à 0%)

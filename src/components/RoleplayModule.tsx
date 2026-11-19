@@ -47,15 +47,15 @@ export function RoleplayModule({
       {/* Main Dialogue Stage (8 cols) */}
       <div className="lg:col-span-8 manga-panel p-6 lg:p-8 space-y-6">
         {/* Scenario Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b sb-divider">
           <div className="space-y-1">
-            <div className="text-xs text-slate-500">
+            <div className="text-xs font-bold tracking-wide sb-text-accent">
               {scenario.titleEn} · Niveau {scenario.level}
             </div>
-            <h1 className="text-xl lg:text-2xl font-bold text-slate-900">
+            <h1 className="text-xl lg:text-2xl font-bold tracking-wide sb-text-primary">
               {scenario.titleFr}
             </h1>
-            <p className="text-sm text-slate-600">{scenario.settingFr}</p>
+            <p className="text-sm sb-text-secondary">{scenario.settingFr}</p>
           </div>
 
           {role === 'tutor' && (
@@ -68,9 +68,9 @@ export function RoleplayModule({
                     revealedIndices: [],
                   })
                 }
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border sb-chip-idle text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <ArrowLeftRight className="w-3.5 h-3.5" aria-hidden="true" />
+                <ArrowLeftRight className="w-3.5 h-3.5 sb-text-accent" aria-hidden="true" />
                 Inverser les rôles
               </button>
 
@@ -82,10 +82,8 @@ export function RoleplayModule({
                     revealedIndices: [],
                   })
                 }
-                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                  roleplay.hideStudentLines
-                    ? 'bg-indigo-50 border-indigo-300 text-indigo-800'
-                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  roleplay.hideStudentLines ? 'sb-reward-pill' : 'sb-chip-idle'
                 }`}
               >
                 {roleplay.hideStudentLines ? (
@@ -103,19 +101,19 @@ export function RoleplayModule({
 
         {/* Role Legend Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80 flex items-center justify-between">
-            <span className="font-semibold text-slate-900">
+          <div className="p-3 rounded-xl border sb-surface-soft flex items-center justify-between">
+            <span className="font-bold sb-text-primary">
               Rôle A · {scenario.roleAName}
             </span>
-            <span className="font-medium text-slate-600">
+            <span className="font-semibold sb-text-muted">
               {roleplay.studentRole === 'A' ? 'Joué par l’Élève' : 'Joué par le Prof'}
             </span>
           </div>
-          <div className="p-3 rounded-lg bg-indigo-50/60 border border-indigo-200/80 flex items-center justify-between">
-            <span className="font-semibold text-indigo-950">
+          <div className="p-3 rounded-xl border sb-chip-active flex items-center justify-between">
+            <span className="font-bold sb-text-accent">
               Rôle B · {scenario.roleBName}
             </span>
-            <span className="font-medium text-indigo-700">
+            <span className="font-bold sb-text-reward">
               {roleplay.studentRole === 'B' ? 'Joué par l’Élève' : 'Joué par le Prof'}
             </span>
           </div>
@@ -138,27 +136,25 @@ export function RoleplayModule({
               <div
                 key={`${scenario.id}-${index}`}
                 onClick={() => onUpdate({ activeLineIndex: index })}
-                className={`p-4 rounded-xl border transition-colors cursor-pointer ${
-                  isActive
-                    ? 'bg-indigo-50/70 border-indigo-500'
-                    : 'bg-white border-slate-200 hover:bg-slate-50/70'
+                className={`p-4 rounded-2xl border border-b-4 transition-all cursor-pointer ${
+                  isActive ? 'sb-card-selected' : 'sb-card-option'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <span className="font-mono text-slate-400 tabular-nums">
+                      <span className="font-mono sb-text-muted tabular-nums">
                         0{index + 1}
                       </span>
                       <span
-                        className={`font-semibold ${
-                          isStudentLine ? 'text-indigo-700' : 'text-slate-700'
+                        className={`font-bold ${
+                          isStudentLine ? 'sb-text-accent' : 'sb-text-secondary'
                         }`}
                       >
                         {roleLabel} ({isStudentLine ? 'Élève' : 'Prof'})
                       </span>
                       {isActive && (
-                        <span className="text-indigo-700 font-semibold">
+                        <span className="sb-text-reward font-bold">
                           · Tour actif
                         </span>
                       )}
@@ -166,7 +162,7 @@ export function RoleplayModule({
 
                     {isMasked ? (
                       <div className="space-y-2 pt-1">
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-semibold sb-text-primary">
                           À toi de traduire à l’oral : « {line.fr} »
                         </p>
                         <button
@@ -175,24 +171,24 @@ export function RoleplayModule({
                             e.stopPropagation();
                             handleToggleRevealLine(index);
                           }}
-                          className="px-3 py-1.5 rounded-md bg-white border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl border sb-reward-btn text-xs font-bold cursor-pointer"
                         >
                           Révéler la phrase anglaise
                         </button>
                       </div>
                     ) : (
                       <>
-                        <p className="text-base font-semibold text-slate-900 leading-snug">
+                        <p className="text-base font-bold sb-text-primary leading-snug">
                           {line.en}
                         </p>
                         {showTranslations && (
-                          <p className="text-xs text-slate-500">{line.fr}</p>
+                          <p className="text-xs sb-text-muted">{line.fr}</p>
                         )}
                       </>
                     )}
 
                     {line.tip && (
-                      <p className="text-xs text-amber-800 pt-1">
+                      <p className="text-xs sb-text-reward pt-1">
                         Astuce : {line.tip}
                       </p>
                     )}
@@ -205,7 +201,7 @@ export function RoleplayModule({
                       speakEnglish(line.en, { accent, rate: speechRate });
                     }}
                     aria-label="Écouter cette réplique"
-                    className="p-2 rounded-lg bg-white border border-slate-200 text-indigo-700 hover:bg-indigo-50 shrink-0 cursor-pointer"
+                    className="p-2 rounded-xl border sb-audio-btn shrink-0 cursor-pointer"
                   >
                     <Volume2 className="w-4 h-4" />
                   </button>
@@ -216,11 +212,11 @@ export function RoleplayModule({
         </div>
 
         {/* Footer Controls */}
-        <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-4 border-t sb-divider flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={() => setShowTranslations((v) => !v)}
-            className="text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
+            className="text-xs font-bold sb-text-muted hover:sb-text-accent cursor-pointer"
           >
             {showTranslations
               ? 'Masquer les traductions françaises'
@@ -236,7 +232,7 @@ export function RoleplayModule({
                     (roleplay.activeLineIndex + 1) % scenario.lines.length,
                 })
               }
-              className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 cursor-pointer"
+              className="manga-btn-primary inline-flex items-center gap-1 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
             >
               Réplique suivante
               <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -245,9 +241,9 @@ export function RoleplayModule({
               <button
                 type="button"
                 onClick={onAwardStar}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 text-xs font-semibold hover:bg-amber-100 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-b-2 sb-reward-btn text-xs font-bold cursor-pointer"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" aria-hidden="true" />
+                <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
                 Bravo +1 étoile
               </button>
             )}
@@ -258,7 +254,7 @@ export function RoleplayModule({
       {/* Right Column: Scenario Selector (4 cols) */}
       <aside className="lg:col-span-4 space-y-4">
         <div className="manga-panel p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-bold tracking-wide sb-text-primary">
             Scénarios de jeu de rôle
           </h2>
           <div className="space-y-2">
@@ -275,16 +271,14 @@ export function RoleplayModule({
                       revealedIndices: [],
                     })
                   }
-                  className={`w-full p-3.5 rounded-lg border text-left transition-colors cursor-pointer ${
-                    active
-                      ? 'bg-indigo-50 border-indigo-600'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-slate-100'
+                  className={`w-full p-3.5 rounded-2xl border border-b-4 text-left transition-all cursor-pointer ${
+                    active ? 'sb-card-selected' : 'sb-card-option'
                   }`}
                 >
-                  <div className="text-sm font-semibold text-slate-900">
+                  <div className="text-sm font-bold sb-text-primary">
                     {sc.titleFr}
                   </div>
-                  <div className="text-xs text-slate-500 mt-1">
+                  <div className="text-xs sb-text-muted mt-1">
                     Niveau {sc.level} · {sc.lines.length} répliques
                   </div>
                 </button>
@@ -294,10 +288,10 @@ export function RoleplayModule({
         </div>
 
         <div className="manga-panel p-5 space-y-2">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-bold tracking-wide sb-text-accent">
             Conseil pour la visio
           </h2>
-          <p className="text-xs text-slate-600 leading-relaxed">
+          <p className="text-xs sb-text-secondary leading-relaxed">
             Lisez d’abord le dialogue une fois avec les traductions affichées, puis
             activez « Masquer répliques élève » et inversez les rôles pour travailler
             la spontanéité à l’oral.

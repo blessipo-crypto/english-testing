@@ -131,12 +131,12 @@ export function BuilderModule({
       <div className="lg:col-span-8 manga-panel p-6 lg:p-8 space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
-            <div className="text-xs text-slate-500">
+            <div className="text-xs font-bold tracking-wide sb-text-accent">
               {builder.isCustomActive
                 ? 'Exercice en direct · Phrase sur mesure'
                 : `${activeChallenge.topicFr} · Niveau ${activeChallenge.level}`}
             </div>
-            <h1 className="text-xl lg:text-2xl font-bold text-slate-900">
+            <h1 className="text-xl lg:text-2xl font-bold tracking-wide sb-text-primary">
               {promptFr}
             </h1>
           </div>
@@ -145,16 +145,16 @@ export function BuilderModule({
             <button
               type="button"
               onClick={() => setShowHint((v) => !v)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border sb-reward-pill text-xs font-bold hover:opacity-90 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-600" aria-hidden="true" />
+              <Lightbulb className="w-3.5 h-3.5 sb-text-reward" aria-hidden="true" />
               {showHint ? 'Masquer l’indice' : 'Indice grammaire'}
             </button>
           )}
         </div>
 
         {showHint && !builder.isCustomActive && (
-          <div className="p-3.5 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-950">
+          <div className="p-3.5 rounded-2xl border sb-status-warn text-sm">
             {activeChallenge.grammarHintFr}
           </div>
         )}
@@ -162,7 +162,7 @@ export function BuilderModule({
         {/* Construction Tray */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-600">
+            <span className="text-xs font-bold tracking-wide sb-text-secondary">
               Ta phrase en anglais (clique sur les étiquettes pour les placer ou retirer)
             </span>
             {builtWords.length > 0 && (
@@ -171,7 +171,7 @@ export function BuilderModule({
                 onClick={() =>
                   speakEnglish(builtWords.join(' '), { accent, rate: speechRate })
                 }
-                className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 hover:text-indigo-900 cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs font-bold sb-text-accent hover:opacity-80 cursor-pointer"
               >
                 <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                 Écouter l’essai
@@ -179,9 +179,9 @@ export function BuilderModule({
             )}
           </div>
 
-          <div className="min-h-[88px] p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center gap-2">
+          <div className="min-h-[88px] p-4 rounded-2xl border sb-surface flex flex-wrap items-center gap-2">
             {builder.selectedIndices.length === 0 ? (
-              <span className="text-sm text-slate-400">
+              <span className="text-sm sb-text-muted">
                 Clique sur les mots ci-dessous dans le bon ordre...
               </span>
             ) : (
@@ -190,7 +190,7 @@ export function BuilderModule({
                   key={`placed-${idx}`}
                   type="button"
                   onClick={() => handleRemoveToken(idx)}
-                  className="px-3.5 py-2 rounded-lg bg-white border border-indigo-300 text-sm font-semibold text-slate-900 shadow-2xs hover:bg-rose-50 hover:border-rose-300 transition-colors cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl border border-b-4 sb-card-selected text-sm font-bold hover:bg-[var(--sb-danger-soft)] hover:border-[var(--sb-danger)] hover:text-[var(--sb-danger-text)] transition-colors cursor-pointer"
                 >
                   {scrambledWords[idx]}
                 </button>
@@ -201,7 +201,7 @@ export function BuilderModule({
 
         {/* Available Word Magnets */}
         <div className="space-y-2">
-          <div className="text-xs font-semibold text-slate-600">
+          <div className="text-xs font-bold tracking-wide sb-text-accent">
             Mots disponibles
           </div>
           <div className="flex flex-wrap gap-2">
@@ -213,10 +213,10 @@ export function BuilderModule({
                   type="button"
                   disabled={used}
                   onClick={() => handleAddToken(idx)}
-                  className={`px-3.5 py-2 rounded-lg border text-sm font-semibold transition-colors ${
+                  className={`px-3.5 py-2 rounded-xl border border-b-4 text-sm font-bold transition-all ${
                     used
-                      ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-default'
-                      : 'bg-white border-slate-300 text-slate-800 hover:border-indigo-600 hover:bg-indigo-50 cursor-pointer'
+                      ? 'sb-card-used cursor-default'
+                      : 'sb-card-option hover:sb-text-reward cursor-pointer'
                   }`}
                 >
                   {word}
@@ -230,10 +230,10 @@ export function BuilderModule({
         {builder.checkedStatus === 'correct' && (
           <div
             role="status"
-            className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 flex flex-wrap items-center justify-between gap-3"
+            className="p-4 rounded-2xl border sb-status-success flex flex-wrap items-center justify-between gap-3"
           >
-            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-2 text-sm font-bold">
+              <CheckCircle2 className="w-5 h-5 sb-text-success shrink-0" aria-hidden="true" />
               <span>Exact ! Tu as gagné 1 étoile pour cette phrase.</span>
             </div>
             <button
@@ -241,7 +241,7 @@ export function BuilderModule({
               onClick={() =>
                 speakEnglish(targetSentence, { accent, rate: speechRate })
               }
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 text-white text-xs font-semibold hover:bg-emerald-800 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 border-b-2 border-emerald-800 text-white text-xs font-bold hover:bg-emerald-500 cursor-pointer"
             >
               <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
               Réécouter
@@ -252,9 +252,9 @@ export function BuilderModule({
         {builder.checkedStatus === 'incorrect' && (
           <div
             role="status"
-            className="p-4 rounded-lg bg-amber-50 border border-amber-200 flex items-center gap-2 text-sm font-medium text-amber-950"
+            className="p-4 rounded-2xl border sb-status-warn flex items-center gap-2 text-sm font-semibold"
           >
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" aria-hidden="true" />
+            <AlertCircle className="w-5 h-5 sb-text-reward shrink-0" aria-hidden="true" />
             <span>
               Presque ! Vérifie l’ordre du sujet, du verbe ou des compléments, puis réessaie.
             </span>
@@ -262,13 +262,13 @@ export function BuilderModule({
         )}
 
         {/* Action Bar */}
-        <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        <div className="pt-4 border-t sb-divider flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
             onClick={() =>
               onUpdate({ selectedIndices: [], checkedStatus: 'idle' })
             }
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border sb-chip-idle text-xs font-bold cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
             Vider le plateau
@@ -283,7 +283,7 @@ export function BuilderModule({
                     (builder.challengeIndex + 1) % SENTENCE_CHALLENGES.length
                   )
                 }
-                className="px-3.5 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+                className="px-3.5 py-2 rounded-xl border sb-chip-idle text-xs font-bold cursor-pointer"
               >
                 Défi suivant
               </button>
@@ -292,7 +292,7 @@ export function BuilderModule({
               type="button"
               disabled={builder.selectedIndices.length === 0}
               onClick={handleCheck}
-              className="px-4 py-2 rounded-lg bg-indigo-700 text-white text-xs font-semibold hover:bg-indigo-800 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="manga-btn-primary px-4 py-2 rounded-xl text-xs font-bold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               Vérifier la phrase
             </button>
@@ -305,14 +305,14 @@ export function BuilderModule({
         {/* Live Custom Sentence Generator for Visio */}
         <div className="manga-panel p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-900">
+            <h2 className="text-sm font-bold tracking-wide sb-text-primary">
               Créer une phrase en direct
             </h2>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs font-bold sb-text-reward">
               {role === 'tutor' ? 'Outil Prof' : 'Libre'}
             </span>
           </div>
-          <p className="text-xs text-slate-500 leading-relaxed">
+          <p className="text-xs sb-text-muted leading-relaxed">
             Idéal pendant la visio : écris n’importe quelle phrase anglaise pour la
             découper immédiatement en étiquettes mélangées.
           </p>
@@ -322,19 +322,19 @@ export function BuilderModule({
               value={draftFr}
               onChange={(e) => setDraftFr(e.target.value)}
               placeholder="Consigne en français (optionnel)"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              className="w-full rounded-xl border sb-input px-3 py-2 text-xs"
             />
             <input
               type="text"
               value={draftEn}
               onChange={(e) => setDraftEn(e.target.value)}
               placeholder="Phrase cible en anglais (ex: She has two cats)"
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              className="w-full rounded-xl border sb-input px-3 py-2 text-xs"
             />
             <button
               type="submit"
               disabled={!draftEn.trim()}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
+              className="w-full manga-btn-primary inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold disabled:opacity-40 cursor-pointer"
             >
               <PlusCircle className="w-3.5 h-3.5" aria-hidden="true" />
               Lancer aux tuiles
@@ -344,7 +344,7 @@ export function BuilderModule({
 
         {/* Curated Challenge List */}
         <div className="manga-panel p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-bold tracking-wide sb-text-primary">
             Défis de grammaire ({SENTENCE_CHALLENGES.length})
           </h2>
           <div className="space-y-1.5">
@@ -356,16 +356,14 @@ export function BuilderModule({
                   key={sc.id}
                   type="button"
                   onClick={() => handleSelectChallenge(idx)}
-                  className={`w-full p-2.5 rounded-lg border text-left transition-colors cursor-pointer ${
-                    active
-                      ? 'bg-indigo-50 border-indigo-600'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-slate-100'
+                  className={`w-full p-2.5 rounded-2xl border border-b-2 text-left transition-colors cursor-pointer ${
+                    active ? 'sb-card-selected' : 'sb-card-option'
                   }`}
                 >
-                  <div className="text-xs font-semibold text-slate-900">
+                  <div className="text-xs font-bold sb-text-primary">
                     {idx + 1}. {sc.topicFr}
                   </div>
-                  <div className="text-xs text-slate-500 truncate mt-0.5">
+                  <div className="text-xs sb-text-muted truncate mt-0.5">
                     {sc.promptFr}
                   </div>
                 </button>

@@ -167,15 +167,15 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
     <div
       role="region"
       aria-label="Clavier tactile à l'écran"
-      className="fixed bottom-0 inset-x-0 z-50 bg-white border-t-2 border-slate-900 shadow-[0_-4px_0px_#0f172a] select-none"
+      className="fixed bottom-0 inset-x-0 z-50 sb-surface backdrop-blur-md border-t shadow-[0_-10px_30px_rgba(2,6,23,0.45)] select-none transition-colors duration-300"
       onPointerDown={(e) => e.preventDefault()}
     >
       <div className="max-w-4xl mx-auto px-3 py-2.5 space-y-2">
         {/* Keyboard Top Toolbar */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <Keyboard className="w-4 h-4 text-rose-600 shrink-0" aria-hidden="true" />
-            <span className="text-xs font-bold text-slate-900 truncate max-w-[240px] sm:max-w-sm">
+            <Keyboard className="w-4 h-4 sb-text-accent shrink-0" aria-hidden="true" />
+            <span className="text-xs font-bold tracking-wide sb-text-primary truncate max-w-[240px] sm:max-w-sm">
               {activeTarget
                 ? `Saisie : ${activeHint}`
                 : 'Touchez une zone de texte pour écrire'}
@@ -183,7 +183,7 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <div className="flex items-center gap-0.5 p-0.5 bg-slate-100 border border-slate-300 rounded-lg">
+            <div className="flex items-center gap-0.5 p-0.5 manga-panel-sm border rounded-xl">
               {(
                 [
                   { id: 'azerty', label: 'AZERTY' },
@@ -195,10 +195,8 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
                   key={opt.id}
                   type="button"
                   onClick={() => setLayout(opt.id)}
-                  className={`px-2 py-1 text-[11px] font-bold rounded-md cursor-pointer ${
-                    layout === opt.id
-                      ? 'bg-slate-900 text-white'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-colors duration-300 cursor-pointer ${
+                    layout === opt.id ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   {opt.label}
@@ -210,7 +208,7 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
               type="button"
               onClick={onClose}
               aria-label="Fermer le clavier à l'écran"
-              className="p-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-rose-50 hover:text-rose-700 cursor-pointer"
+              className="p-1.5 rounded-xl border sb-chip-idle hover:text-red-500 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -224,7 +222,7 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
               key={chip}
               type="button"
               onClick={() => insertText(chip)}
-              className="px-2.5 py-1 rounded-md border border-slate-300 bg-amber-50 text-xs font-bold text-slate-900 hover:bg-amber-100 active:scale-95 cursor-pointer"
+              className="px-2.5 py-1 rounded-lg border sb-reward-btn text-xs font-bold active:scale-95 cursor-pointer"
             >
               {chip.trim()}
             </button>
@@ -243,7 +241,7 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
                     key={`key-${rIdx}-${keyChar}`}
                     type="button"
                     onClick={() => insertText(display)}
-                    className="h-10 sm:h-11 rounded-lg border-2 border-slate-900 bg-white text-sm sm:text-base font-bold text-slate-900 hover:bg-slate-50 active:bg-rose-50 active:translate-y-0.5 flex items-center justify-center cursor-pointer"
+                    className="h-10 sm:h-11 rounded-xl border border-b-4 sb-key-btn text-sm sm:text-base font-bold active:translate-y-0.5 flex items-center justify-center cursor-pointer"
                   >
                     {display}
                   </button>
@@ -257,8 +255,8 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
             <button
               type="button"
               onClick={() => setShift((s) => !s)}
-              className={`col-span-2 h-10 sm:h-11 rounded-lg border-2 border-slate-900 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer ${
-                shift ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-900'
+              className={`col-span-2 h-10 sm:h-11 rounded-xl border border-b-4 text-xs font-bold flex items-center justify-center gap-1 cursor-pointer ${
+                shift ? 'sb-seg-active-danger' : 'sb-key-btn'
               }`}
             >
               <ArrowUp className="w-4 h-4" aria-hidden="true" />
@@ -268,7 +266,7 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
             <button
               type="button"
               onClick={() => insertText(' ')}
-              className="col-span-6 h-10 sm:h-11 rounded-lg border-2 border-slate-900 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 active:bg-rose-50 cursor-pointer"
+              className="col-span-6 h-10 sm:h-11 rounded-xl border border-b-4 sb-key-btn text-xs font-bold cursor-pointer"
             >
               Espace
             </button>
@@ -277,7 +275,7 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
               type="button"
               onClick={handleBackspace}
               aria-label="Effacer le caractère"
-              className="col-span-2 h-10 sm:h-11 rounded-lg border-2 border-slate-900 bg-slate-100 text-slate-900 hover:bg-rose-50 flex items-center justify-center cursor-pointer"
+              className="col-span-2 h-10 sm:h-11 rounded-xl border border-b-4 sb-key-btn hover:text-red-500 flex items-center justify-center cursor-pointer"
             >
               <Delete className="w-4 h-4" />
             </button>
@@ -286,7 +284,7 @@ export function OnScreenKeyboard({ isOpen, onClose }: OnScreenKeyboardProps) {
               type="button"
               onClick={handleEnter}
               aria-label="Valider ou retour à la ligne"
-              className="col-span-2 h-10 sm:h-11 rounded-lg border-2 border-slate-900 bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center gap-1 text-xs font-bold cursor-pointer"
+              className="col-span-2 h-10 sm:h-11 rounded-xl manga-btn-primary flex items-center justify-center gap-1 text-xs font-bold cursor-pointer"
             >
               <CornerDownLeft className="w-4 h-4" aria-hidden="true" />
               <span className="hidden sm:inline">OK</span>

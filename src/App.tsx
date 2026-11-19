@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useRoomSync } from './hooks/useRoomSync';
 import { useFullscreen } from './hooks/useFullscreen';
+import { useTheme } from './hooks/useTheme';
 import type { LessonMilestoneId, ModuleTab, VoiceAccent } from './types/lesson';
 import { WarmupModule } from './components/WarmupModule';
 import { VocabModule } from './components/VocabModule';
@@ -32,6 +33,7 @@ import {
 import { OnScreenKeyboard } from './components/OnScreenKeyboard';
 import { StudentSelector } from './components/StudentSelector';
 import { WritingSpaceModule } from './components/WritingSpaceModule';
+import { ThemeSelector } from './components/ThemeSelector';
 
 const NAV_ITEMS: Array<{ id: ModuleTab; label: string }> = [
   { id: 'warmup', label: 'Rituel' },
@@ -93,6 +95,7 @@ export default function App() {
     dismissNotice,
     toggleFullscreen,
   } = useFullscreen();
+  const { theme, setTheme } = useTheme();
 
   const handleChangeSpeechRate = (nextRate: number) => {
     const clamped = Math.max(0.5, Math.min(1.4, Math.round(nextRate * 20) / 20));
@@ -138,26 +141,60 @@ export default function App() {
 
   return (
     <div
-      className={
+      className={`transition-colors duration-300 ${
         isImmersiveFallback
-          ? 'fixed inset-0 z-40 overflow-y-auto bg-[#faf9f6] bg-[radial-gradient(rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:18px_18px] flex flex-col text-slate-900'
-          : 'min-h-[100dvh] flex flex-col text-slate-900'
-      }
+          ? 'fixed inset-0 z-40 overflow-y-auto sb-app-fallback flex flex-col'
+          : 'min-h-[100dvh] flex flex-col sb-text-primary'
+      }`}
     >
       {/* Top Bar Contract: strictly 1 row, 3 zones separated by gap-8 */}
-      <header className="bg-white border-b-2 border-slate-900 sticky top-0 z-30 pt-[env(safe-area-inset-top)]">
+      <header className="sb-header backdrop-blur-md sticky top-0 z-30 pt-[env(safe-area-inset-top)]">
         <div
           className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-8 transition-[height] duration-150 ${
             isFullscreen ? 'h-14' : 'h-16'
           }`}
         >
-          {/* Zone 1: Single-element brand wordmark */}
+          {/* Zone 1: Single-element brand wordmark with minimalist geometric emblem */}
           <button
             type="button"
             onClick={() => patchState({ activeTab: 'warmup' })}
-            className="font-display text-lg font-bold tracking-tight text-slate-900 whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-2.5 font-display text-lg font-bold tracking-wide sb-header-brand whitespace-nowrap shrink-0 cursor-pointer group"
           >
-            StoryBridge Studio
+            <svg
+              viewBox="0 0 28 28"
+              className="w-6 h-6 shrink-0 drop-shadow-sm"
+              aria-hidden="true"
+            >
+              <circle
+                cx="14"
+                cy="14"
+                r="12"
+                style={{ fill: 'var(--sb-emblem-fill)', stroke: 'var(--sb-emblem-ring)' }}
+                strokeWidth="1.6"
+              />
+              <path
+                d="M 2.5 14 A 11.5 11.5 0 0 1 25.5 14 Z"
+                style={{ fill: 'var(--sb-emblem-top)' }}
+              />
+              <rect
+                x="2"
+                y="12.6"
+                width="24"
+                height="2.8"
+                style={{ fill: 'var(--sb-emblem-ring)' }}
+              />
+              <circle
+                cx="14"
+                cy="14"
+                r="4.2"
+                style={{ fill: 'var(--sb-emblem-fill)', stroke: 'var(--sb-emblem-ring)' }}
+                strokeWidth="1.6"
+              />
+              <circle cx="14" cy="14" r="1.7" style={{ fill: 'var(--sb-emblem-core)' }} />
+            </svg>
+            <span className="sb-header-brand-text transition-colors duration-300">
+              StoryBridge Studio
+            </span>
           </button>
 
           {/* Zone 2: 5 concise single-line text nav links */}
@@ -172,10 +209,8 @@ export default function App() {
                   key={item.id}
                   type="button"
                   onClick={() => patchState({ activeTab: item.id })}
-                  className={`py-2 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    active
-                      ? 'border-rose-600 text-rose-600'
-                      : 'border-transparent text-slate-700 hover:text-slate-900 hover:border-slate-900'
+                  className={`py-2 text-sm font-bold tracking-wide border-b-2 transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    active ? 'sb-header-nav-active' : 'sb-header-nav-idle'
                   }`}
                 >
                   {item.label}
@@ -190,12 +225,12 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setIsSessionModalOpen(true)}
-                className="manga-btn-primary px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+                className="manga-btn-primary px-4 py-2 rounded-xl text-xs font-bold tracking-wide whitespace-nowrap shrink-0 cursor-pointer"
               >
                 {roomCode ? `Salle ${roomCode}` : 'Session Visio'}
               </button>
             ) : (
-              <div className="px-3.5 py-2 rounded-lg border-2 border-slate-900 bg-slate-50 text-xs font-bold text-slate-900 whitespace-nowrap shrink-0">
+              <div className="px-3.5 py-2 rounded-xl border sb-header-pill text-xs font-bold tracking-wide whitespace-nowrap shrink-0 transition-colors duration-300">
                 {roomCode ? `Salle ${roomCode}` : activeStudent.name}
               </div>
             )}
@@ -209,7 +244,7 @@ export default function App() {
       </header>
 
       {/* Mobile Navigation Strip (below header, compact) */}
-      <div className="md:hidden bg-white border-b-2 border-slate-900 overflow-x-auto">
+      <div className="md:hidden sb-toolbar overflow-x-auto">
         <div className="flex items-center gap-2 px-4 py-2">
           {NAV_ITEMS.map((item) => {
             const active = state.activeTab === item.id;
@@ -218,10 +253,8 @@ export default function App() {
                 key={item.id}
                 type="button"
                 onClick={() => patchState({ activeTab: item.id })}
-                className={`px-3 py-1.5 rounded-md text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
-                  active
-                    ? 'bg-rose-600 text-white border border-slate-900'
-                    : 'text-slate-700 hover:bg-slate-100'
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide whitespace-nowrap shrink-0 cursor-pointer border transition-colors duration-300 ${
+                  active ? 'sb-chip-solid border-b-2' : 'border-transparent sb-seg-idle'
                 }`}
               >
                 {item.label}
@@ -232,7 +265,7 @@ export default function App() {
       </div>
 
       {/* Workspace Control Bar (Role, Voice Accent, Live Connection Telemetry, Stars) */}
-      <div className="border-b-2 border-slate-900 bg-white/95">
+      <div className="sb-toolbar backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-3">
             {/* Tutor / Student Segmented Control + Multi-Student Profile Switcher */}
@@ -252,14 +285,12 @@ export default function App() {
             {/* Audio Accent & Speed Parameters (Tutor only) */}
             {role === 'tutor' && (
               <>
-                <div className="flex items-center gap-1 p-0.5 bg-slate-200/70 rounded-lg">
+                <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
                   <button
                     type="button"
                     onClick={() => setAccent('en-GB')}
-                    className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                      accent === 'en-GB'
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                    className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                      accent === 'en-GB' ? 'sb-seg-active' : 'sb-seg-idle'
                     }`}
                   >
                     Audio UK
@@ -267,10 +298,8 @@ export default function App() {
                   <button
                     type="button"
                     onClick={() => setAccent('en-US')}
-                    className={`px-2 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                      accent === 'en-US'
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                    className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                      accent === 'en-US' ? 'sb-seg-active' : 'sb-seg-idle'
                     }`}
                   >
                     Audio US
@@ -289,13 +318,14 @@ export default function App() {
               type="button"
               onClick={() => setIsWritingDrawerOpen((v) => !v)}
               aria-pressed={isWritingDrawerOpen}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                isWritingDrawerOpen
-                  ? 'bg-rose-600 border-slate-900 text-white'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                isWritingDrawerOpen ? 'sb-chip-danger-solid' : 'sb-chip-idle'
               }`}
             >
-              <PenLine className="w-3.5 h-3.5" aria-hidden="true" />
+              <PenLine
+                className={`w-3.5 h-3.5 ${isWritingDrawerOpen ? 'text-white' : 'sb-text-accent'}`}
+                aria-hidden="true"
+              />
               <span>Cahier Prof / Élève</span>
             </button>
 
@@ -303,10 +333,8 @@ export default function App() {
               type="button"
               onClick={() => setIsKeyboardOpen((v) => !v)}
               aria-pressed={isKeyboardOpen}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                isKeyboardOpen
-                  ? 'bg-slate-900 border-slate-900 text-white'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                isKeyboardOpen ? 'sb-chip-solid' : 'sb-chip-idle'
               }`}
             >
               <Keyboard className="w-3.5 h-3.5" aria-hidden="true" />
@@ -327,10 +355,8 @@ export default function App() {
                   ? 'Quitter le plein écran (Échap)'
                   : 'Passer en plein écran pour masquer l’interface du navigateur'
               }
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] md:min-h-[30px] md:py-1 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                isFullscreen
-                  ? 'bg-slate-900 border-slate-900 text-white'
-                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] md:min-h-[30px] md:py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                isFullscreen ? 'sb-chip-solid' : 'sb-chip-idle'
               }`}
             >
               {isFullscreen ? (
@@ -346,22 +372,24 @@ export default function App() {
               )}
             </button>
 
+            <ThemeSelector theme={theme} onSelectTheme={setTheme} />
+
             {/* Real WebSocket connection state (only when room active) */}
             {roomCode && (
-              <div className="inline-flex items-center gap-1.5 text-xs text-slate-600 pl-1">
+              <div className="inline-flex items-center gap-1.5 text-xs sb-text-secondary pl-1">
                 {connected ? (
                   <>
                     <span
-                      className="w-2 h-2 rounded-full bg-emerald-500"
+                      className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.75)]"
                       aria-hidden="true"
                     />
-                    <span className="tabular-nums">
+                    <span className="tabular-nums font-semibold">
                       En direct · {participants.length} connecté
                       {participants.length > 1 ? 's' : ''}
                     </span>
                   </>
                 ) : (
-                  <span className="text-amber-700">Connexion à la salle...</span>
+                  <span className="sb-text-reward font-semibold">Connexion à la salle...</span>
                 )}
               </div>
             )}
@@ -380,12 +408,12 @@ export default function App() {
             />
 
             <div
-              className={`inline-flex items-center gap-1.5 text-xs font-semibold tabular-nums transition-transform ${
-                showStarPulse ? 'scale-105 text-amber-700' : 'text-slate-800'
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border sb-reward-pill text-xs font-bold tracking-wide tabular-nums transition-transform ${
+                showStarPulse ? 'scale-105 shadow-md' : ''
               }`}
             >
               <Star
-                className="w-4 h-4 text-amber-500 fill-amber-400"
+                className="w-4 h-4 fill-current shrink-0"
                 aria-hidden="true"
               />
               <span>
@@ -398,16 +426,16 @@ export default function App() {
                 <button
                   type="button"
                   onClick={awardStar}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-300 bg-amber-50 text-amber-900 text-xs font-semibold hover:bg-amber-100 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl border border-b-2 sb-reward-btn text-xs font-bold tracking-wide whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" aria-hidden="true" />1 étoile
                 </button>
                 <button
                   type="button"
                   onClick={handleQuickInvite}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-900 text-xs font-semibold hover:bg-emerald-100 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-b-2 sb-status-success border-b-emerald-700 text-xs font-bold tracking-wide hover:opacity-90 transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer"
                 >
-                  <UserPlus className="w-3.5 h-3.5 text-emerald-700" aria-hidden="true" />
+                  <UserPlus className="w-3.5 h-3.5" aria-hidden="true" />
                   Inviter l’élève
                 </button>
               </>
@@ -417,14 +445,14 @@ export default function App() {
       </div>
 
       {fullscreenNotice && (
-        <div className="bg-amber-50 border-b border-amber-300 text-amber-950">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3 text-xs font-medium">
+        <div className="sb-status-warn border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3 text-xs font-semibold">
             <span>{fullscreenNotice}</span>
             <button
               type="button"
               onClick={dismissNotice}
               aria-label="Fermer l’information"
-              className="p-1 rounded hover:bg-amber-100 text-amber-900 shrink-0 cursor-pointer"
+              className="p-1 rounded hover:opacity-80 shrink-0 cursor-pointer"
             >
               <X className="w-3.5 h-3.5" aria-hidden="true" />
             </button>
@@ -495,16 +523,14 @@ export default function App() {
         {state.activeTab === 'builder' && (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="inline-flex items-center gap-1 p-1 bg-slate-200/70 rounded-lg">
+              <div className="inline-flex items-center gap-1 p-1 sb-surface border rounded-2xl">
                 <button
                   type="button"
                   onClick={() =>
                     patchState({ guide: { ...state.guide, subTab: 'guide' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    state.guide.subTab === 'guide'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.guide.subTab === 'guide' ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Guide de grammaire
@@ -514,10 +540,8 @@ export default function App() {
                   onClick={() =>
                     patchState({ guide: { ...state.guide, subTab: 'builder' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    state.guide.subTab === 'builder'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.guide.subTab === 'builder' ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Atelier Phrases
@@ -566,16 +590,14 @@ export default function App() {
         {state.activeTab === 'roleplay' && (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="inline-flex flex-wrap items-center gap-1 p-1 bg-slate-200/70 rounded-lg">
+              <div className="inline-flex flex-wrap items-center gap-1 p-1 sb-surface border rounded-2xl">
                 <button
                   type="button"
                   onClick={() =>
                     patchState({ quiz: { ...state.quiz, subTab: 'games' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    state.quiz.subTab === 'games'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.quiz.subTab === 'games' ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Mini-Jeux
@@ -585,10 +607,8 @@ export default function App() {
                   onClick={() =>
                     patchState({ quiz: { ...state.quiz, subTab: 'time' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    state.quiz.subTab === 'time'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.quiz.subTab === 'time' ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   L’heure
@@ -598,10 +618,8 @@ export default function App() {
                   onClick={() =>
                     patchState({ quiz: { ...state.quiz, subTab: 'quiz' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    state.quiz.subTab === 'quiz'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.quiz.subTab === 'quiz' ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Quiz Bruno Mars
@@ -611,10 +629,8 @@ export default function App() {
                   onClick={() =>
                     patchState({ quiz: { ...state.quiz, subTab: 'dialogue' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    state.quiz.subTab === 'dialogue'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.quiz.subTab === 'dialogue' ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Jeux de rôle
@@ -689,16 +705,14 @@ export default function App() {
         {state.activeTab === 'board' && (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="inline-flex flex-wrap items-center gap-1 p-1 bg-slate-200/70 rounded-lg">
+              <div className="inline-flex flex-wrap items-center gap-1 p-1 sb-surface border rounded-2xl">
                 <button
                   type="button"
                   onClick={() =>
                     patchState({ recap: { ...state.recap, subTab: 'writing' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    state.recap.subTab === 'writing'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.recap.subTab === 'writing' ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   Cahier Prof &amp; Élève
@@ -708,11 +722,11 @@ export default function App() {
                   onClick={() =>
                     patchState({ recap: { ...state.recap, subTab: 'board' } })
                   }
-                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
                     state.recap.subTab === 'board' ||
                     (role === 'student' && state.recap.subTab === 'recap')
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'sb-seg-active'
+                      : 'sb-seg-idle'
                   }`}
                 >
                   Tableau &amp; Carnet
@@ -723,10 +737,8 @@ export default function App() {
                     onClick={() =>
                       patchState({ recap: { ...state.recap, subTab: 'recap' } })
                     }
-                    className={`px-3.5 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                      state.recap.subTab === 'recap'
-                        ? 'bg-white text-slate-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                    className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                      state.recap.subTab === 'recap' ? 'sb-seg-active' : 'sb-seg-idle'
                     }`}
                   >
                     Récapitulatif Prof (Oral &amp; Écrit)
@@ -780,9 +792,9 @@ export default function App() {
       </main>
 
       {!isFullscreen && (
-        <footer className="border-t-2 border-slate-900 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-600">
-            <span className="font-medium">StoryBridge Studio · Édition Manga Interactive pour cours en visio</span>
+        <footer className="sb-footer">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4 text-xs sb-text-muted">
+            <span className="font-semibold tracking-wide">StoryBridge Studio · Édition Manga Interactive pour cours en visio</span>
             {role === 'tutor' && (
               <button
                 type="button"
@@ -792,7 +804,7 @@ export default function App() {
                     recap: { ...state.recap, subTab: 'recap' },
                   })
                 }
-                className="text-rose-600 hover:underline font-semibold cursor-pointer"
+                className="sb-text-accent hover:underline font-bold tracking-wide cursor-pointer"
               >
                 Ouvrir le récapitulatif Prof de fin de séance
               </button>
@@ -832,9 +844,9 @@ export default function App() {
           onClick={toggleFullscreen}
           aria-label="Quitter le mode plein écran"
           title="Quitter le mode plein écran (Échap)"
-          className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-40 inline-flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-lg border-2 border-slate-900 bg-white/95 text-slate-900 text-xs font-bold shadow-[2px_2px_0px_#0f172a] hover:bg-slate-100 transition-colors whitespace-nowrap cursor-pointer"
+          className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-40 inline-flex items-center gap-1.5 px-3 py-2 min-h-[40px] rounded-xl border border-b-4 sb-card-option text-xs font-bold tracking-wide shadow-lg whitespace-nowrap cursor-pointer"
         >
-          <Minimize2 className="w-3.5 h-3.5" aria-hidden="true" />
+          <Minimize2 className="w-3.5 h-3.5 sb-text-accent" aria-hidden="true" />
           <span>Quitter plein écran</span>
         </button>
       )}

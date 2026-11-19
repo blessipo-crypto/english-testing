@@ -37,12 +37,12 @@ interface PlacedWord {
 const GRID_SIZE = 9;
 const FILLER_LETTERS = 'ABCDEFGHIJKLMNOPRSTUVWY';
 const WORD_COLOR_PALETTE = [
-  'bg-sky-100 text-sky-950 border-sky-400',
-  'bg-emerald-100 text-emerald-950 border-emerald-400',
-  'bg-amber-100 text-amber-950 border-amber-400',
-  'bg-rose-100 text-rose-950 border-rose-400',
-  'bg-indigo-100 text-indigo-950 border-indigo-400',
-  'bg-teal-100 text-teal-950 border-teal-400',
+  'bg-sky-500/20 sb-text-primary border-sky-500',
+  'bg-emerald-500/20 sb-text-primary border-emerald-500',
+  'bg-amber-400/25 sb-text-primary border-amber-500',
+  'bg-rose-500/20 sb-text-primary border-rose-500',
+  'bg-violet-500/20 sb-text-primary border-violet-500',
+  'bg-teal-500/20 sb-text-primary border-teal-500',
 ];
 
 function createSeededRng(seed: number) {
@@ -304,16 +304,16 @@ export function WordSearchGame({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      {/* Left 7 cols: 9x9 Manga Word Search Grid */}
+      {/* Left 7 cols: 9x9 Interactive Word Search Grid */}
       <div className="lg:col-span-7 manga-panel p-5 sm:p-6 space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-xs text-slate-500">
+            <div className="text-xs font-semibold sb-text-accent">
               Mots mêlés · Clique et glisse (ou clique 1re puis dernière lettre)
             </div>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold tracking-wide sb-text-primary">
               Grille 9×9 ·{' '}
-              <span className="tabular-nums">
+              <span className="tabular-nums sb-text-reward">
                 {foundWords.length}/{placed.length} trouvés
               </span>
             </h2>
@@ -324,15 +324,15 @@ export function WordSearchGame({
               type="button"
               onClick={handleHint}
               disabled={allFound}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-slate-900 bg-amber-50 text-amber-950 text-xs font-bold hover:bg-amber-100 disabled:opacity-40 whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 sb-reward-btn text-xs font-bold disabled:opacity-40 whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <Lightbulb className="w-3.5 h-3.5 text-amber-600" aria-hidden="true" />
+              <Lightbulb className="w-3.5 h-3.5" aria-hidden="true" />
               Indice {hintTier > 0 ? `(${hintTier}/3)` : ''}
             </button>
             <button
               type="button"
               onClick={() => setSeed((s) => s + 17)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-slate-900 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 whitespace-nowrap shrink-0 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 sb-chip-idle border-b-[var(--sb-border-3d)] text-xs font-bold whitespace-nowrap shrink-0 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               Nouvelle grille
@@ -342,8 +342,8 @@ export function WordSearchGame({
 
         {/* Progressive Hint Banner */}
         {activeHintObj && hintTier > 0 && !foundWords.includes(activeHintObj.entry.word) && (
-          <div className="p-3.5 rounded-lg bg-amber-50 border-2 border-slate-900 text-xs text-slate-900 space-y-1">
-            <div className="font-bold">
+          <div className="p-3.5 rounded-2xl sb-status-warn border text-xs space-y-1">
+            <div className="font-bold sb-text-reward">
               Indice 1 : Cherche « {activeHintObj.entry.word} » ({activeHintObj.entry.fr})
             </div>
             {hintTier >= 2 && (
@@ -351,7 +351,7 @@ export function WordSearchGame({
             )}
             {hintTier >= 3 && (
               <div>
-                Indice 3 : La 1re lettre est surlignée en jaune vif sur la grille !
+                Indice 3 : La 1re lettre est surlignée sur la grille !
               </div>
             )}
           </div>
@@ -360,16 +360,16 @@ export function WordSearchGame({
         {allFound && (
           <div
             role="status"
-            className="p-4 rounded-xl bg-emerald-50 border-2 border-slate-900 flex flex-wrap items-center justify-between gap-3"
+            className="p-4 rounded-2xl sb-status-success border flex flex-wrap items-center justify-between gap-3"
           >
-            <div className="flex items-center gap-2 text-sm font-bold text-emerald-950">
-              <Sparkles className="w-5 h-5 text-emerald-600 shrink-0" aria-hidden="true" />
+            <div className="flex items-center gap-2 text-sm font-bold sb-text-success">
+              <Sparkles className="w-5 h-5 sb-text-reward shrink-0" aria-hidden="true" />
               <span>Bravo ! Grille complétée à 100 % (+1 étoile) !</span>
             </div>
             <button
               type="button"
               onClick={() => setSeed((s) => s + 23)}
-              className="manga-btn-primary px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+              className="manga-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
             >
               Rejouer une grille
             </button>
@@ -410,12 +410,13 @@ export function WordSearchGame({
                   activeHintObj.cells[0]?.c === c;
 
                 let cellStyle =
-                  'bg-white border-slate-300 text-slate-900 hover:bg-slate-100';
+                  'sb-surface hover:border-[var(--sb-accent)] hover:bg-[var(--sb-bg-panel)]';
                 if (isSelected) {
-                  cellStyle = 'bg-rose-600 border-slate-900 text-white scale-105';
+                  cellStyle =
+                    'bg-[var(--sb-danger)] border-[var(--sb-danger)] text-white scale-105 shadow-md';
                 } else if (isHintCell) {
                   cellStyle =
-                    'bg-amber-300 border-slate-900 text-slate-950 ring-2 ring-amber-500';
+                    'bg-[var(--sb-reward)] border-[var(--sb-reward-3d)] text-[var(--sb-reward-contrast)] ring-2 ring-[var(--sb-reward)]/70';
                 } else if (foundOwners.length > 0) {
                   cellStyle = foundOwners[0].colorClass;
                 }
@@ -433,7 +434,7 @@ export function WordSearchGame({
                       handleCellPointerDown({ r, c });
                     }}
                     onPointerEnter={() => handleCellPointerEnter({ r, c })}
-                    className={`aspect-square min-h-[38px] sm:min-h-[44px] rounded-lg border-2 font-display text-base sm:text-lg font-extrabold flex items-center justify-center transition-transform cursor-pointer ${cellStyle}`}
+                    className={`aspect-square min-h-[38px] sm:min-h-[44px] rounded-xl border-2 font-display text-base sm:text-lg font-extrabold flex items-center justify-center transition-all cursor-pointer ${cellStyle}`}
                   >
                     {letter}
                   </button>
@@ -444,7 +445,7 @@ export function WordSearchGame({
         </div>
 
         {statusMsg && !allFound && (
-          <p className="text-xs font-semibold text-slate-700 text-center">{statusMsg}</p>
+          <p className="text-xs font-bold sb-text-reward text-center">{statusMsg}</p>
         )}
       </div>
 
@@ -452,14 +453,12 @@ export function WordSearchGame({
       <aside className="lg:col-span-5 space-y-4">
         <div className="manga-panel p-5 space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-bold text-slate-900">Thème de la grille</h3>
+            <h3 className="text-sm font-bold tracking-wide sb-text-primary">Thème de la grille</h3>
             <button
               type="button"
               onClick={() => setAllowReverse((v) => !v)}
-              className={`px-2.5 py-1 rounded-md border text-xs font-semibold cursor-pointer ${
-                allowReverse
-                  ? 'bg-slate-900 text-white border-slate-900'
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+              className={`px-2.5 py-1 rounded-lg border text-xs font-bold transition-colors cursor-pointer ${
+                allowReverse ? 'sb-chip-solid' : 'sb-chip-idle'
               }`}
             >
               {allowReverse ? 'Sens inversés : ON' : 'Mode standard'}
@@ -474,10 +473,8 @@ export function WordSearchGame({
                   key={t.id}
                   type="button"
                   onClick={() => onChangeTheme(t.id)}
-                  className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    active
-                      ? 'bg-rose-600 text-white border-slate-900'
-                      : 'bg-slate-50 text-slate-700 border-slate-300 hover:bg-slate-100'
+                  className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                    active ? 'sb-chip-danger-solid' : 'sb-chip-idle'
                   }`}
                 >
                   {t.titleFr}
@@ -488,10 +485,10 @@ export function WordSearchGame({
               <button
                 type="button"
                 onClick={() => onChangeTheme('wordbank')}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
                   themeId === 'wordbank'
-                    ? 'bg-rose-600 text-white border-slate-900'
-                    : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+                    ? 'sb-chip-danger-solid'
+                    : 'sb-reward-pill hover:bg-[var(--sb-reward)] hover:text-[var(--sb-reward-contrast)]'
                 }`}
               >
                 Mon Carnet ({Math.min(6, customCarnetEntries.length)})
@@ -502,13 +499,13 @@ export function WordSearchGame({
 
         <div className="manga-panel p-5 space-y-3">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-sm font-bold text-slate-900">
+            <h3 className="text-sm font-bold tracking-wide sb-text-primary">
               Mots anglais à repérer
             </h3>
             <button
               type="button"
               onClick={() => setHideFrench((v) => !v)}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-bold sb-text-accent hover:sb-text-primary cursor-pointer"
             >
               {hideFrench ? (
                 <Eye className="w-3.5 h-3.5" aria-hidden="true" />
@@ -525,10 +522,8 @@ export function WordSearchGame({
               return (
                 <div
                   key={p.entry.word}
-                  className={`p-3 rounded-lg border-2 flex items-center justify-between gap-3 ${
-                    found
-                      ? `${p.colorClass}`
-                      : 'bg-slate-50 border-slate-200 text-slate-900'
+                  className={`p-3 rounded-2xl border flex items-center justify-between gap-3 transition-colors duration-300 ${
+                    found ? p.colorClass : 'sb-surface-soft'
                   }`}
                 >
                   <div className="min-w-0">
@@ -538,13 +533,13 @@ export function WordSearchGame({
                       )}
                       <span
                         className={`font-mono text-sm font-bold tracking-wider ${
-                          found ? 'line-through opacity-80' : ''
+                          found ? 'line-through opacity-85' : ''
                         }`}
                       >
                         {p.entry.word}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-600 mt-0.5">
+                    <div className={`text-xs mt-0.5 ${found ? 'opacity-90' : 'sb-text-muted'}`}>
                       {hideFrench && !found ? 'Traduction masquée' : p.entry.fr}
                     </div>
                   </div>
@@ -558,7 +553,7 @@ export function WordSearchGame({
                       })
                     }
                     aria-label={`Prononcer ${p.entry.word}`}
-                    className="p-2 rounded-lg bg-white border border-slate-300 text-slate-800 hover:bg-slate-100 shrink-0 cursor-pointer"
+                    className="p-2 rounded-xl sb-audio-btn border shrink-0 cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                   </button>

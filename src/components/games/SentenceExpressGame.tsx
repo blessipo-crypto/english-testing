@@ -148,30 +148,30 @@ export function SentenceExpressGame({
   return (
     <div className="manga-panel p-5 sm:p-7 space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b sb-divider">
         <div>
-          <div className="text-xs text-slate-500">
+          <div className="text-xs font-semibold sb-text-accent">
             Phrase Express · Remets les étiquettes dans le bon ordre grammatical
           </div>
-          <h2 className="text-xl font-bold text-slate-900">
-            Manche <span className="tabular-nums">{roundIdx + 1}/{ROUND_COUNT}</span> ·{' '}
-            <span className="text-rose-600">{activeRound.grammarTag}</span>
+          <h2 className="text-xl font-bold tracking-wide sb-text-primary">
+            Manche <span className="tabular-nums sb-text-accent">{roundIdx + 1}/{ROUND_COUNT}</span> ·{' '}
+            <span className="text-[var(--sb-danger)]">{activeRound.grammarTag}</span>
           </h2>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800 tabular-nums">
-            <Flame className="w-4 h-4 text-rose-600" aria-hidden="true" />
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold sb-text-reward tabular-nums tracking-wide">
+            <Flame className="w-4 h-4 text-[var(--sb-danger)]" aria-hidden="true" />
             <span>Score : {score}/{ROUND_COUNT}</span>
-            {streak >= 2 && <span className="text-emerald-700">· Série x{streak}</span>}
+            {streak >= 2 && <span className="sb-text-success">· Série x{streak}</span>}
           </div>
 
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 border border-slate-300 rounded-lg">
+          <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
             <button
               type="button"
               onClick={() => handleToggleMode(false)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-md whitespace-nowrap shrink-0 cursor-pointer ${
-                !trapMode ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600'
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                !trapMode ? 'sb-seg-active' : 'sb-seg-idle'
               }`}
             >
               Classique
@@ -179,8 +179,8 @@ export function SentenceExpressGame({
             <button
               type="button"
               onClick={() => handleToggleMode(true)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-md whitespace-nowrap shrink-0 cursor-pointer ${
-                trapMode ? 'bg-slate-900 text-white' : 'text-slate-600'
+              className={`px-2.5 py-1 text-xs font-bold rounded-lg whitespace-nowrap shrink-0 transition-colors cursor-pointer ${
+                trapMode ? 'sb-seg-active-danger' : 'sb-seg-idle'
               }`}
             >
               Défi (+1 piège)
@@ -190,7 +190,7 @@ export function SentenceExpressGame({
           <button
             type="button"
             onClick={() => handleRestartSet(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-slate-900 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 sb-chip-idle border-b-[var(--sb-border-3d)] text-xs font-bold hover:border-[var(--sb-reward)] hover:sb-text-reward whitespace-nowrap shrink-0 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
             Nouvelle série
@@ -199,28 +199,28 @@ export function SentenceExpressGame({
       </div>
 
       {completed ? (
-        <div className="p-6 rounded-xl bg-emerald-50 border-2 border-slate-900 space-y-4">
-          <div className="flex items-center gap-2 text-lg font-bold text-emerald-950">
-            <Sparkles className="w-6 h-6 text-emerald-600 shrink-0" aria-hidden="true" />
+        <div className="p-6 rounded-2xl sb-status-success border space-y-4">
+          <div className="flex items-center gap-2 text-lg font-bold tracking-wide sb-text-success">
+            <Sparkles className="w-6 h-6 sb-text-reward shrink-0" aria-hidden="true" />
             <span>
               Série terminée ! Score : {score} / {ROUND_COUNT} (+1 étoile gagnée)
             </span>
           </div>
-          <p className="text-sm text-emerald-900">
+          <p className="text-sm sb-text-secondary">
             Tu maîtrises encore mieux l’ordre des mots en anglais ! Tu peux lancer une nouvelle série de 5 phrases inédites ou activer le mode « Défi (+1 piège) ».
           </p>
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={() => handleRestartSet(true)}
-              className="manga-btn-primary px-4 py-2 rounded-lg text-xs font-bold cursor-pointer"
+              className="manga-btn-primary px-4 py-2 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
             >
               5 nouvelles phrases
             </button>
             <button
               type="button"
               onClick={() => handleRestartSet(false)}
-              className="px-4 py-2 rounded-lg border-2 border-slate-900 bg-white text-slate-900 text-xs font-bold hover:bg-slate-50 cursor-pointer"
+              className="px-4 py-2 rounded-xl border border-b-4 sb-chip-idle border-b-[var(--sb-border-3d)] text-xs font-bold cursor-pointer"
             >
               Rejouer cette série
             </button>
@@ -229,13 +229,13 @@ export function SentenceExpressGame({
       ) : (
         <>
           {/* French Target Prompt */}
-          <div className="p-5 rounded-xl bg-slate-50 border-2 border-slate-900 space-y-1">
-            <div className="text-xs font-semibold text-slate-500">
+          <div className="p-5 rounded-2xl sb-surface-soft border space-y-1">
+            <div className="text-xs font-semibold sb-text-accent">
               Traduis en anglais en cliquant sur les tuiles :
             </div>
-            <p className="text-xl font-bold text-slate-900">{activeRound.promptFr}</p>
+            <p className="text-xl font-bold sb-text-primary">{activeRound.promptFr}</p>
             {trapMode && (
-              <p className="text-xs text-rose-700 font-semibold pt-1">
+              <p className="text-xs sb-text-reward font-bold pt-1">
                 Attention : 1 mot piège s’est glissé dans la réserve, ne l’utilise pas !
               </p>
             )}
@@ -244,14 +244,14 @@ export function SentenceExpressGame({
           {/* Answer Tray */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-600">Ta phrase :</span>
+              <span className="text-xs font-bold tracking-wide sb-text-secondary">Ta phrase :</span>
               {builtWords.length > 0 && (
                 <button
                   type="button"
                   onClick={() =>
                     speakEnglish(builtWords.join(' '), { accent, rate: speechRate })
                   }
-                  className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 cursor-pointer"
+                  className="inline-flex items-center gap-1 text-xs font-bold sb-text-accent hover:sb-text-primary cursor-pointer"
                 >
                   <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                   Écouter
@@ -259,9 +259,9 @@ export function SentenceExpressGame({
               )}
             </div>
 
-            <div className="min-h-[78px] p-4 rounded-xl bg-white border-2 border-dashed border-slate-400 flex flex-wrap items-center gap-2">
+            <div className="min-h-[78px] p-4 rounded-2xl sb-surface-soft border-2 border-dashed flex flex-wrap items-center gap-2">
               {selectedIndices.length === 0 ? (
-                <span className="text-sm text-slate-400">
+                <span className="text-sm sb-text-muted">
                   Clique sur les mots ci-dessous pour former la phrase...
                 </span>
               ) : (
@@ -270,7 +270,7 @@ export function SentenceExpressGame({
                     key={`built-${idx}`}
                     type="button"
                     onClick={() => handleRemoveWord(idx)}
-                    className="px-3.5 py-2 rounded-lg bg-slate-900 text-white text-sm font-bold hover:bg-rose-600 transition-colors cursor-pointer"
+                    className="px-3.5 py-2 rounded-xl sb-chip-solid border-b-4 border-b-[var(--sb-accent-3d)] text-sm font-extrabold hover:bg-[var(--sb-danger)] hover:border-b-[var(--sb-danger-3d)] hover:text-white transition-colors cursor-pointer"
                   >
                     {tokens[idx]}
                   </button>
@@ -289,10 +289,10 @@ export function SentenceExpressGame({
                   type="button"
                   disabled={used || solvedCurrent}
                   onClick={() => handleAddWord(idx)}
-                  className={`min-h-[42px] px-4 py-2 rounded-lg border-2 text-sm font-bold transition-colors ${
+                  className={`min-h-[44px] px-4 py-2 rounded-xl border border-b-4 text-sm font-bold transition-all ${
                     used
-                      ? 'bg-slate-100 border-slate-200 text-slate-300 cursor-default'
-                      : 'bg-white border-slate-900 text-slate-900 hover:bg-amber-50 cursor-pointer'
+                      ? 'sb-card-used cursor-default'
+                      : 'sb-card-option hover:sb-text-accent cursor-pointer'
                   }`}
                 >
                   {word}
@@ -305,31 +305,31 @@ export function SentenceExpressGame({
           {status === 'correct' && (
             <div
               role="status"
-              className="p-4 rounded-xl bg-emerald-50 border-2 border-slate-900 space-y-1.5"
+              className="p-4 rounded-2xl sb-status-success border space-y-1.5"
             >
-              <div className="flex items-center gap-2 text-sm font-bold text-emerald-950">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <div className="flex items-center gap-2 text-sm font-bold sb-text-success">
+                <CheckCircle2 className="w-5 h-5 sb-text-success shrink-0" />
                 <span>Exact ! « {activeRound.targetEn} »</span>
               </div>
-              <p className="text-xs text-emerald-900">{activeRound.tipFr}</p>
+              <p className="text-xs sb-text-secondary">{activeRound.tipFr}</p>
             </div>
           )}
 
           {status === 'incorrect' && (
             <div
               role="status"
-              className="p-4 rounded-xl bg-amber-50 border-2 border-slate-900 space-y-1"
+              className="p-4 rounded-2xl sb-status-warn border space-y-1"
             >
-              <div className="flex items-center gap-2 text-sm font-bold text-amber-950">
-                <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+              <div className="flex items-center gap-2 text-sm font-bold sb-text-reward">
+                <AlertCircle className="w-5 h-5 sb-text-reward shrink-0" />
                 <span>Presque ! Vérifie l’ordre ou le mot piège.</span>
               </div>
-              <p className="text-xs text-amber-900">Astuce : {activeRound.tipFr}</p>
+              <p className="text-xs sb-text-secondary">Astuce : {activeRound.tipFr}</p>
             </div>
           )}
 
           {/* Bottom Controls */}
-          <div className="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div className="pt-4 border-t sb-divider flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
               disabled={solvedCurrent || selectedIndices.length === 0}
@@ -337,7 +337,7 @@ export function SentenceExpressGame({
                 setSelectedIndices([]);
                 setStatus('idle');
               }}
-              className="px-3.5 py-2 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer"
+              className="px-3.5 py-2 rounded-xl border sb-chip-idle text-xs font-bold hover:border-[var(--sb-danger)] hover:sb-text-danger disabled:opacity-40 cursor-pointer"
             >
               Effacer
             </button>
@@ -348,7 +348,7 @@ export function SentenceExpressGame({
                   type="button"
                   disabled={selectedIndices.length === 0}
                   onClick={handleVerify}
-                  className="manga-btn-primary px-5 py-2 rounded-lg text-xs font-bold disabled:opacity-40 cursor-pointer"
+                  className="manga-btn-primary px-5 py-2 rounded-xl text-xs font-bold tracking-wide disabled:opacity-40 cursor-pointer"
                 >
                   Vérifier
                 </button>
@@ -356,7 +356,7 @@ export function SentenceExpressGame({
                 <button
                   type="button"
                   onClick={handleNextRound}
-                  className="manga-btn-primary inline-flex items-center gap-1.5 px-5 py-2 rounded-lg text-xs font-bold cursor-pointer"
+                  className="manga-btn-primary inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
                 >
                   Manche suivante
                   <ChevronRight className="w-4 h-4" aria-hidden="true" />

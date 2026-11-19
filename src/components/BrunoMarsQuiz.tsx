@@ -162,25 +162,25 @@ export function BrunoMarsQuiz({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       {/* Main Quiz Stage (8 cols) */}
       <div className="lg:col-span-8 manga-panel p-6 lg:p-8 space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-4 pb-5 border-b border-slate-100">
+        <div className="flex flex-wrap items-start justify-between gap-4 pb-5 border-b sb-divider">
           <div className="space-y-1">
-            <div className="text-xs text-slate-500 flex items-center gap-2">
-              <Music className="w-3.5 h-3.5 text-indigo-700" aria-hidden="true" />
+            <div className="text-xs font-bold tracking-wide sb-text-accent flex items-center gap-2">
+              <Music className="w-3.5 h-3.5 text-[var(--sb-danger)]" aria-hidden="true" />
               <span>Quiz facile · Niveau A1–A2 · Musique & Anglais</span>
             </div>
-            <h1 className="text-xl lg:text-2xl font-bold text-slate-900">
+            <h1 className="text-xl lg:text-2xl font-bold tracking-wide sb-text-primary">
               Spécial Bruno Mars
             </h1>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-semibold text-slate-700 tabular-nums">
+            <span className="text-xs font-bold tracking-wide sb-text-reward tabular-nums">
               Question {currentIdx + 1} / {BRUNO_MARS_QUESTIONS.length}
             </span>
             <button
               type="button"
               onClick={handleRestart}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border border-b-2 sb-chip-idle border-b-[var(--sb-border-3d)] text-xs font-bold hover:border-[var(--sb-reward)] hover:sb-text-reward transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               Recommencer
@@ -189,9 +189,9 @@ export function BrunoMarsQuiz({
         </div>
 
         {/* Question Card */}
-        <div className="p-5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3">
+        <div className="p-5 rounded-2xl sb-surface-soft border space-y-3">
           <div className="flex items-start justify-between gap-3">
-            <p className="text-lg lg:text-xl font-bold text-slate-900 leading-snug">
+            <p className="text-lg lg:text-xl font-bold sb-text-primary leading-snug">
               {question.questionEn}
             </p>
             <button
@@ -200,7 +200,7 @@ export function BrunoMarsQuiz({
                 speakEnglish(question.questionEn, { accent, rate: speechRate })
               }
               aria-label="Écouter la question en anglais"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-700 text-white text-xs font-semibold hover:bg-indigo-800 shrink-0 cursor-pointer"
+              className="manga-btn-primary inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold shrink-0 cursor-pointer"
             >
               <Volume2 className="w-4 h-4" aria-hidden="true" />
               Écouter
@@ -210,7 +210,7 @@ export function BrunoMarsQuiz({
           <button
             type="button"
             onClick={() => setShowFrench((v) => !v)}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-bold sb-text-accent hover:sb-text-primary cursor-pointer"
           >
             {showFrench ? (
               <EyeOff className="w-3.5 h-3.5" aria-hidden="true" />
@@ -221,7 +221,7 @@ export function BrunoMarsQuiz({
           </button>
 
           {showFrench && (
-            <p className="text-sm text-indigo-800 font-medium pt-2 border-t border-slate-200/70">
+            <p className="text-sm sb-text-reward font-semibold pt-2 border-t sb-divider">
               {question.questionFr}
             </p>
           )}
@@ -233,18 +233,24 @@ export function BrunoMarsQuiz({
             const isPicked = selectedChoice === idx;
             const isRightOption = idx === question.correctIndex;
 
-            let styleClass =
-              'bg-white border-slate-200 text-slate-900 hover:border-indigo-500 hover:bg-indigo-50/40 cursor-pointer';
+            let styleClass = 'sb-card-option cursor-pointer';
+            let markerClass = 'bg-[var(--sb-accent)] group-hover:bg-[var(--sb-hover-accent)]';
+            let letterClass = 'sb-text-accent group-hover:sb-text-reward';
             if (isAnswered) {
               if (isRightOption) {
                 styleClass =
-                  'bg-emerald-50 border-emerald-500 text-emerald-950 cursor-default';
+                  'sb-status-success border-b-[var(--sb-success-3d)] cursor-default';
+                markerClass = 'bg-[var(--sb-success)]';
+                letterClass = 'sb-text-success';
               } else if (isPicked) {
                 styleClass =
-                  'bg-rose-50 border-rose-400 text-rose-950 cursor-default';
+                  'sb-status-danger border-b-[var(--sb-danger-3d)] cursor-default';
+                markerClass = 'bg-[var(--sb-danger)]';
+                letterClass = 'sb-text-danger';
               } else {
-                styleClass =
-                  'bg-slate-50 border-slate-200 text-slate-400 cursor-default';
+                styleClass = 'sb-card-used cursor-default';
+                markerClass = 'bg-[var(--sb-text-used)]';
+                letterClass = 'text-[var(--sb-text-used)]';
               }
             }
 
@@ -254,23 +260,27 @@ export function BrunoMarsQuiz({
                 type="button"
                 disabled={isAnswered}
                 onClick={() => handleChooseOption(idx)}
-                className={`w-full px-4 py-3.5 rounded-xl border text-left text-sm font-semibold flex items-center justify-between gap-3 transition-colors ${styleClass}`}
+                className={`group w-full px-4 py-3.5 rounded-2xl border border-b-4 text-left text-sm font-bold flex items-center justify-between gap-3 transition-all ${styleClass}`}
               >
                 <span className="flex items-center gap-3">
-                  <span className="font-mono text-xs text-slate-400">
+                  <span
+                    aria-hidden="true"
+                    className={`w-2.5 h-2.5 rotate-45 shrink-0 transition-colors ${markerClass}`}
+                  />
+                  <span className={`font-mono text-xs font-extrabold transition-colors ${letterClass}`}>
                     {String.fromCharCode(65 + idx)}
                   </span>
                   <span>{opt}</span>
                 </span>
 
                 {isAnswered && isRightOption && (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 shrink-0">
+                  <span className="inline-flex items-center gap-1 text-xs font-bold sb-text-success shrink-0">
                     <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
                     Bonne réponse
                   </span>
                 )}
                 {isAnswered && isPicked && !isRightOption && (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-700 shrink-0">
+                  <span className="inline-flex items-center gap-1 text-xs font-bold sb-text-danger shrink-0">
                     <XCircle className="w-4 h-4" aria-hidden="true" />
                     Pas celle-ci
                   </span>
@@ -284,14 +294,12 @@ export function BrunoMarsQuiz({
         {isAnswered && (
           <div
             role="status"
-            className={`p-4 rounded-xl border space-y-2 ${
-              isCorrect
-                ? 'bg-emerald-50/70 border-emerald-200'
-                : 'bg-amber-50/80 border-amber-200'
+            className={`p-4 rounded-2xl border space-y-2 ${
+              isCorrect ? 'sb-status-success' : 'sb-status-warn'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="text-sm font-semibold text-slate-900">
+              <div className="text-sm font-bold sb-text-primary">
                 {isCorrect ? 'Bravo !' : 'Bien essayé !'} {question.funFactEn}
               </div>
               <button
@@ -300,28 +308,28 @@ export function BrunoMarsQuiz({
                   speakEnglish(question.funFactEn, { accent, rate: speechRate })
                 }
                 aria-label="Écouter l'anecdote en anglais"
-                className="p-1.5 rounded-md bg-white border border-slate-200 text-indigo-700 hover:bg-indigo-50 shrink-0 cursor-pointer"
+                className="p-1.5 rounded-lg sb-audio-btn border shrink-0 cursor-pointer"
               >
                 <Volume2 className="w-3.5 h-3.5" />
               </button>
             </div>
-            <p className="text-xs text-slate-600">{question.funFactFr}</p>
-            <p className="text-xs font-mono text-indigo-800">
+            <p className="text-xs sb-text-secondary">{question.funFactFr}</p>
+            <p className="text-xs font-mono font-bold sb-text-reward">
               Mot à retenir : {question.vocabTip}
             </p>
           </div>
         )}
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
-          <div className="text-xs font-semibold text-slate-600 tabular-nums">
+        <div className="pt-4 border-t sb-divider flex flex-wrap items-center justify-between gap-3">
+          <div className="text-xs font-bold tracking-wide sb-text-reward tabular-nums">
             Score actuel : {score} / {BRUNO_MARS_QUESTIONS.length}
           </div>
 
           <button
             type="button"
             onClick={handleNext}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 cursor-pointer"
+            className="manga-btn-primary inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
           >
             Question suivante
             <ChevronRight className="w-4 h-4" aria-hidden="true" />
@@ -332,13 +340,13 @@ export function BrunoMarsQuiz({
       {/* Right Column: Progress & Score Summary (4 cols) */}
       <aside className="lg:col-span-4 space-y-4">
         <div className="manga-panel p-5 space-y-3">
-          <h2 className="text-sm font-semibold text-slate-900">
+          <h2 className="text-sm font-bold tracking-wide sb-text-primary">
             Progression du quiz
           </h2>
 
           {allCompleted && (
-            <div className="p-3.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" aria-hidden="true" />
+            <div className="p-3.5 rounded-xl sb-status-success border text-xs font-bold flex items-center gap-2">
+              <Sparkles className="w-4 h-4 sb-text-reward shrink-0" aria-hidden="true" />
               <span>
                 Quiz terminé ! Score final : {score}/{BRUNO_MARS_QUESTIONS.length} (+1 étoile).
               </span>
@@ -360,22 +368,20 @@ export function BrunoMarsQuiz({
                     setShowFrench(false);
                     onUpdate({ questionIndex: idx });
                   }}
-                  className={`w-full p-2.5 rounded-lg border text-left flex items-center justify-between gap-2 transition-colors cursor-pointer ${
-                    isCurrent
-                      ? 'bg-indigo-50 border-indigo-600'
-                      : 'bg-slate-50/60 border-slate-200 hover:bg-slate-100'
+                  className={`w-full p-2.5 rounded-xl border border-b-2 text-left flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                    isCurrent ? 'sb-card-selected' : 'sb-card-option'
                   }`}
                 >
-                  <span className="text-xs font-medium text-slate-800 truncate">
+                  <span className="text-xs font-semibold sb-text-primary truncate">
                     {idx + 1}. {q.questionEn}
                   </span>
-                  <span className="text-xs font-semibold shrink-0">
+                  <span className="text-xs font-bold shrink-0">
                     {!answered ? (
-                      <span className="text-slate-400">À faire</span>
+                      <span className="sb-text-muted">À faire</span>
                     ) : ok ? (
-                      <span className="text-emerald-700">Juste</span>
+                      <span className="sb-text-success">Juste</span>
                     ) : (
-                      <span className="text-rose-700">Raté</span>
+                      <span className="text-[var(--sb-danger)]">Raté</span>
                     )}
                   </span>
                 </button>

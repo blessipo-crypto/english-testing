@@ -92,18 +92,16 @@ export function StudentSelector({
     <div ref={containerRef} className="relative flex items-center gap-1.5">
       {/* Tutor / Student Segmented Control (hidden Mode Prof for invited remote students) */}
       {isInvitedStudent ? (
-        <div className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-rose-600 text-white border border-slate-900 whitespace-nowrap shrink-0">
+        <div className="px-2.5 py-1 text-xs font-bold tracking-wide rounded-xl sb-seg-active-danger border whitespace-nowrap shrink-0">
           Mode Élève
         </div>
       ) : (
-        <div className="flex items-center gap-1 p-0.5 bg-slate-100 border border-slate-300 rounded-lg">
+        <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
           <button
             type="button"
             onClick={() => onSwitchRole('tutor')}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-              role === 'tutor'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+              role === 'tutor' ? 'sb-seg-active' : 'sb-seg-idle'
             }`}
           >
             Mode Prof
@@ -112,10 +110,8 @@ export function StudentSelector({
           <button
             type="button"
             onClick={() => onSwitchRole('student')}
-            className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-              role === 'student'
-                ? 'bg-rose-600 text-white shadow-2xs'
-                : 'text-slate-600 hover:text-slate-900'
+            className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+              role === 'student' ? 'sb-seg-active-danger' : 'sb-seg-idle'
             }`}
           >
             Mode Élève
@@ -131,35 +127,31 @@ export function StudentSelector({
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           title="Changer d'élève ou ajouter un autre élève"
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-            isOpen
-              ? 'bg-slate-900 border-slate-900 text-white'
-              : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50'
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+            isOpen ? 'sb-chip-active' : 'sb-chip-idle'
           }`}
         >
-          <Users className="w-3.5 h-3.5 text-rose-600 shrink-0" aria-hidden="true" />
+          <Users className="w-3.5 h-3.5 sb-text-accent shrink-0" aria-hidden="true" />
           <span className="max-w-[110px] truncate">{activeStudent.name}</span>
           {studentProfiles.length > 1 && (
             <span
-              className={`px-1 py-0.2 rounded text-[10px] font-bold tabular-nums ${
-                isOpen
-                  ? 'bg-white/20 text-white'
-                  : 'bg-slate-100 text-slate-700 border border-slate-300'
+              className={`px-1.5 py-0.2 rounded-md text-[10px] font-bold tabular-nums border ${
+                isOpen ? 'sb-seg-active' : 'sb-reward-pill'
               }`}
             >
               {studentProfiles.length}
             </span>
           )}
           <ChevronDown
-            className={`w-3.5 h-3.5 transition-transform ${
+            className={`w-3.5 h-3.5 sb-text-muted transition-transform ${
               isOpen ? 'rotate-180' : ''
             }`}
             aria-hidden="true"
           />
         </button>
       ) : (
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 whitespace-nowrap shrink-0">
-          <Users className="w-3.5 h-3.5 text-rose-600 shrink-0" aria-hidden="true" />
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border sb-surface-soft text-xs font-bold tracking-wide sb-text-primary whitespace-nowrap shrink-0">
+          <Users className="w-3.5 h-3.5 sb-text-accent shrink-0" aria-hidden="true" />
           <span className="max-w-[110px] truncate">{activeStudent.name}</span>
         </div>
       )}
@@ -168,14 +160,14 @@ export function StudentSelector({
         <div
           role="dialog"
           aria-label="Gestion des profils élèves"
-          className="absolute left-0 top-full mt-2 z-50 w-80 max-w-[calc(100vw-2rem)] manga-panel p-4 space-y-3.5 bg-white"
+          className="absolute left-0 top-full mt-2 z-50 w-80 max-w-[calc(100vw-2rem)] manga-panel p-4 space-y-3.5"
         >
-          <div className="flex items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+          <div className="flex items-center justify-between gap-2 border-b sb-divider pb-2.5">
             <div>
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+              <h3 className="text-xs font-bold sb-text-primary uppercase tracking-wide">
                 Élèves ({studentProfiles.length})
               </h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-[11px] sb-text-muted mt-0.5">
                 Chaque élève garde son carnet, ses étoiles et sa progression.
               </p>
             </div>
@@ -190,10 +182,8 @@ export function StudentSelector({
               return (
                 <div
                   key={profile.id}
-                  className={`flex items-center justify-between gap-2 p-2 rounded-lg border transition-colors ${
-                    isSelected
-                      ? 'bg-rose-50/80 border-slate-900'
-                      : 'bg-slate-50 border-slate-200 hover:border-slate-400'
+                  className={`flex items-center justify-between gap-2 p-2 rounded-xl border transition-colors duration-300 ${
+                    isSelected ? 'sb-chip-active' : 'sb-surface-soft'
                   }`}
                 >
                   {isEditing ? (
@@ -210,12 +200,12 @@ export function StudentSelector({
                         onChange={(e) => setEditingName(e.target.value)}
                         maxLength={32}
                         autoFocus
-                        className="flex-1 min-w-0 rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                        className="flex-1 min-w-0 rounded-lg border sb-input px-2 py-1 text-xs font-medium"
                       />
                       <button
                         type="submit"
                         aria-label="Valider le prénom"
-                        className="p-1 rounded bg-slate-900 text-white hover:bg-slate-800 cursor-pointer shrink-0"
+                        className="p-1 rounded-lg sb-seg-active cursor-pointer shrink-0"
                       >
                         <Check className="w-3.5 h-3.5" />
                       </button>
@@ -231,25 +221,23 @@ export function StudentSelector({
                         className="flex items-center gap-2 flex-1 min-w-0 text-left cursor-pointer"
                       >
                         <span
-                          className={`w-6 h-6 rounded-md border border-slate-900 flex items-center justify-center text-[11px] font-bold shrink-0 ${
-                            isSelected
-                              ? 'bg-rose-600 text-white'
-                              : 'bg-white text-slate-800'
+                          className={`w-6 h-6 rounded-lg border flex items-center justify-center text-[11px] font-bold shrink-0 ${
+                            isSelected ? 'sb-seg-active-danger' : 'sb-chip-idle sb-text-accent'
                           }`}
                         >
                           {profile.name.slice(0, 1).toUpperCase()}
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-slate-900 truncate">
+                            <span className="text-xs font-bold sb-text-primary truncate">
                               {profile.name}
                             </span>
-                            <span className="px-1 py-0.2 rounded border border-slate-300 bg-white text-[10px] font-bold text-slate-700 shrink-0">
+                            <span className="px-1.5 py-0.2 rounded border sb-reward-pill text-[10px] font-bold shrink-0">
                               {profile.level}
                             </span>
                           </div>
                           {isSelected && (
-                            <span className="text-[10px] font-semibold text-rose-700 block">
+                            <span className="text-[10px] font-bold sb-text-accent block">
                               Élève actif
                             </span>
                           )}
@@ -262,7 +250,7 @@ export function StudentSelector({
                           onClick={() => handleStartEdit(profile)}
                           aria-label={`Renommer ${profile.name}`}
                           title="Renommer"
-                          className="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-white cursor-pointer"
+                          className="p-1 rounded-lg sb-text-muted hover:sb-text-primary cursor-pointer"
                         >
                           <Pencil className="w-3 h-3" />
                         </button>
@@ -272,7 +260,7 @@ export function StudentSelector({
                             onClick={() => onRemoveStudent(profile.id)}
                             aria-label={`Supprimer ${profile.name}`}
                             title="Supprimer ce profil"
-                            className="p-1 rounded text-slate-400 hover:text-rose-700 hover:bg-white cursor-pointer"
+                            className="p-1 rounded-lg sb-text-muted hover:text-red-500 cursor-pointer"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -288,11 +276,11 @@ export function StudentSelector({
           {/* Add Another Student Form */}
           <form
             onSubmit={handleAddSubmit}
-            className="pt-3 border-t border-slate-200 space-y-2"
+            className="pt-3 border-t sb-divider space-y-2"
           >
             <label
               htmlFor="new-student-name"
-              className="text-[11px] font-bold text-slate-700 block"
+              className="text-[11px] font-bold tracking-wide sb-text-secondary block"
             >
               Ajouter un autre élève
             </label>
@@ -304,18 +292,16 @@ export function StudentSelector({
                 onChange={(e) => setNewName(e.target.value)}
                 maxLength={32}
                 placeholder={`Prénom (ex : Élève ${studentProfiles.length + 1})`}
-                className="flex-1 min-w-0 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="flex-1 min-w-0 rounded-xl border sb-input px-2.5 py-1.5 text-xs"
               />
-              <div className="flex items-center rounded-lg border border-slate-300 bg-slate-100 p-0.5 shrink-0">
+              <div className="flex items-center rounded-xl border sb-seg-track p-0.5 shrink-0">
                 {(['A1', 'A2'] as const).map((lvl) => (
                   <button
                     key={lvl}
                     type="button"
                     onClick={() => setNewLevel(lvl)}
-                    className={`px-1.5 py-1 text-[10px] font-bold rounded cursor-pointer ${
-                      newLevel === lvl
-                        ? 'bg-slate-900 text-white'
-                        : 'text-slate-600 hover:text-slate-900'
+                    className={`px-1.5 py-1 text-[10px] font-bold rounded-lg cursor-pointer transition-colors ${
+                      newLevel === lvl ? 'sb-seg-active-reward' : 'sb-seg-idle'
                     }`}
                   >
                     {lvl}
@@ -327,7 +313,7 @@ export function StudentSelector({
             <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 whitespace-nowrap cursor-pointer"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl manga-btn-primary text-xs font-bold whitespace-nowrap cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                 Créer & activer
@@ -339,9 +325,9 @@ export function StudentSelector({
                   onOpenInviteModal();
                 }}
                 title="Inviter un 2e élève dans la salle visio"
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-emerald-300 bg-emerald-50 text-emerald-900 text-xs font-semibold hover:bg-emerald-100 whitespace-nowrap shrink-0 cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border sb-status-success text-xs font-bold hover:opacity-90 whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <UserPlus className="w-3.5 h-3.5 text-emerald-700" aria-hidden="true" />
+                <UserPlus className="w-3.5 h-3.5" aria-hidden="true" />
                 Binôme visio
               </button>
             </div>

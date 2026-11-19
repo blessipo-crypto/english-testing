@@ -63,13 +63,11 @@ export function SpeechSpeedControl({
         onClick={() => setIsOpen((v) => !v)}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer tabular-nums ${
-          isOpen
-            ? 'bg-indigo-50 border-indigo-400 text-indigo-900'
-            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer tabular-nums ${
+          isOpen ? 'sb-chip-active' : 'sb-chip-idle'
         }`}
       >
-        <Gauge className="w-3.5 h-3.5 text-indigo-700" aria-hidden="true" />
+        <Gauge className="w-3.5 h-3.5 sb-text-accent" aria-hidden="true" />
         <span>Vitesse : {formatRate(speechRate)}</span>
       </button>
 
@@ -83,14 +81,14 @@ export function SpeechSpeedControl({
             <div>
               <label
                 htmlFor="speech-rate-slider"
-                className="text-xs font-bold text-slate-900 block"
+                className="text-xs font-bold tracking-wide sb-text-primary block"
               >
                 Vitesse de lecture :{' '}
-                <span className="font-mono text-indigo-700 tabular-nums">
+                <span className="font-mono sb-text-accent tabular-nums">
                   {formatRate(speechRate)}
                 </span>
               </label>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs sb-text-muted mt-0.5">
                 {describeRate(speechRate)}
               </p>
             </div>
@@ -99,7 +97,7 @@ export function SpeechSpeedControl({
               onClick={() => onChangeRate(1)}
               aria-label="Réinitialiser à 1.0x"
               title="Réinitialiser à 1.0x"
-              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+              className="p-1.5 rounded-lg sb-text-muted hover:sb-text-accent cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -115,9 +113,10 @@ export function SpeechSpeedControl({
               step={0.05}
               value={speechRate}
               onChange={(e) => onChangeRate(parseFloat(e.target.value))}
-              className="w-full accent-indigo-700 cursor-pointer"
+              className="w-full cursor-pointer"
+              style={{ accentColor: 'var(--sb-accent)' }}
             />
-            <div className="flex items-center justify-between text-[11px] text-slate-400 font-mono tabular-nums">
+            <div className="flex items-center justify-between text-[11px] sb-text-muted font-mono tabular-nums">
               <span>0.5x Lent</span>
               <span>1.0x Normal</span>
               <span>1.4x Rapide</span>
@@ -133,16 +132,14 @@ export function SpeechSpeedControl({
                   key={preset.value}
                   type="button"
                   onClick={() => onChangeRate(preset.value)}
-                  className={`py-1.5 px-2 rounded-lg border text-center transition-colors cursor-pointer ${
-                    active
-                      ? 'bg-indigo-50 border-indigo-600 text-indigo-900'
-                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                  className={`py-1.5 px-2 rounded-xl border border-b-2 text-center transition-colors duration-300 cursor-pointer ${
+                    active ? 'sb-card-selected' : 'sb-card-option'
                   }`}
                 >
                   <div className="text-xs font-bold font-mono tabular-nums">
                     {preset.label}
                   </div>
-                  <div className="text-[10px] text-slate-500 truncate">
+                  <div className="text-[10px] sb-text-muted truncate">
                     {preset.hint}
                   </div>
                 </button>
@@ -151,7 +148,7 @@ export function SpeechSpeedControl({
           </div>
 
           {/* Live Voice Test */}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+          <div className="pt-3 border-t sb-divider flex items-center justify-between gap-2">
             <button
               type="button"
               onClick={() =>
@@ -160,7 +157,7 @@ export function SpeechSpeedControl({
                   { accent, rate: speechRate }
                 )
               }
-              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-indigo-700 text-white text-xs font-semibold hover:bg-indigo-800 transition-colors cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl manga-btn-primary text-xs font-bold cursor-pointer"
             >
               <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
               Tester la voix
@@ -169,7 +166,7 @@ export function SpeechSpeedControl({
               type="button"
               onClick={stopSpeaking}
               aria-label="Arrêter la lecture"
-              className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl border sb-chip-idle text-xs font-bold cursor-pointer"
             >
               <Square className="w-3 h-3" aria-hidden="true" />
               Stop

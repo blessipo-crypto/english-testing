@@ -301,17 +301,17 @@ export function SessionRecapModule({
       <section className="manga-panel p-5 lg:p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="text-xs font-semibold text-rose-600 flex items-center gap-1.5">
+            <div className="text-xs font-bold tracking-wide text-[var(--sb-danger)] flex items-center gap-1.5">
               <ClipboardCheck className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Espace Professeur · Fin de séance</span>
             </div>
-            <h1 className="text-xl lg:text-2xl font-bold text-slate-900">
+            <h1 className="text-xl lg:text-2xl font-bold tracking-wide sb-text-primary">
               Récapitulatif Oral & Écrit avec synthèse automatique
             </h1>
           </div>
 
           <div className="flex items-center gap-2">
-            <label htmlFor="recap-student-name" className="text-xs font-semibold text-slate-600 whitespace-nowrap">
+            <label htmlFor="recap-student-name" className="text-xs font-semibold sb-text-secondary whitespace-nowrap">
               Prénom de l’élève :
             </label>
             <input
@@ -320,36 +320,36 @@ export function SessionRecapModule({
               value={recap.studentName}
               onChange={(e) => onUpdateRecap({ studentName: e.target.value })}
               placeholder="Ex: Chloé"
-              className="w-36 rounded-lg border-2 border-slate-900 bg-white px-3 py-1.5 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-600"
+              className="w-36 rounded-xl border sb-input px-3 py-1.5 text-xs font-bold"
             />
           </div>
         </div>
 
         {/* Real Session Indicators */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t border-slate-200">
-          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-            <div className="text-xs text-slate-500">Étoiles de la séance</div>
-            <div className="text-lg font-bold text-slate-900 tabular-nums mt-0.5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-3 border-t sb-divider">
+          <div className="p-3 rounded-xl border sb-surface-soft">
+            <div className="text-xs sb-text-muted">Étoiles de la séance</div>
+            <div className="text-lg font-bold sb-text-reward tabular-nums mt-0.5">
               {roomState.stars} étoile{roomState.stars > 1 ? 's' : ''}
             </div>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-            <div className="text-xs text-slate-500">Carnet de mots</div>
-            <div className="text-lg font-bold text-slate-900 tabular-nums mt-0.5">
+          <div className="p-3 rounded-xl border sb-surface-soft">
+            <div className="text-xs sb-text-muted">Carnet de mots</div>
+            <div className="text-lg font-bold sb-text-accent tabular-nums mt-0.5">
               {roomState.wordbank.length} mot{roomState.wordbank.length > 1 ? 's' : ''}
             </div>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-            <div className="text-xs text-slate-500">Quiz Bruno Mars</div>
-            <div className="text-lg font-bold text-slate-900 tabular-nums mt-0.5">
+          <div className="p-3 rounded-xl border sb-surface-soft">
+            <div className="text-xs sb-text-muted">Quiz Bruno Mars</div>
+            <div className="text-lg font-bold sb-text-primary tabular-nums mt-0.5">
               {quizAnsweredCount > 0
                 ? `${quizScore} / ${BRUNO_MARS_QUESTIONS.length}`
                 : 'Non commencé'}
             </div>
           </div>
-          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
-            <div className="text-xs text-slate-500">Paires vocabulaire</div>
-            <div className="text-lg font-bold text-slate-900 tabular-nums mt-0.5">
+          <div className="p-3 rounded-xl border sb-surface-soft">
+            <div className="text-xs sb-text-muted">Paires vocabulaire</div>
+            <div className="text-lg font-bold sb-text-success tabular-nums mt-0.5">
               {roomState.vocab.matchedIds.length} trouvée
               {roomState.vocab.matchedIds.length > 1 ? 's' : ''}
             </div>
@@ -362,16 +362,16 @@ export function SessionRecapModule({
         <div className="lg:col-span-7 space-y-6">
           {/* Oral Evaluation Panel */}
           <section className="manga-panel p-6 space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <Mic className="w-4 h-4 text-rose-600" aria-hidden="true" />
-              <h2 className="text-base font-bold text-slate-900">
+            <div className="flex items-center gap-2 pb-3 border-b sb-divider">
+              <Mic className="w-4 h-4 text-[var(--sb-danger)]" aria-hidden="true" />
+              <h2 className="text-base font-bold tracking-wide sb-text-primary">
                 1. Bilan à l’Oral (Expression & Compréhension)
               </h2>
             </div>
 
             <div className="space-y-3">
               <div>
-                <div className="text-xs font-semibold text-slate-600 mb-1.5">
+                <div className="text-xs font-semibold sb-text-secondary mb-1.5">
                   Aisance & prise de parole
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -380,10 +380,8 @@ export function SessionRecapModule({
                       key={opt}
                       type="button"
                       onClick={() => onUpdateRecap({ oralFluency: opt })}
-                      className={`px-2.5 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
-                        recap.oralFluency === opt
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      className={`px-2.5 py-2 rounded-xl border border-b-2 text-xs font-bold transition-colors cursor-pointer ${
+                        recap.oralFluency === opt ? 'sb-seg-active' : 'sb-card-option'
                       }`}
                     >
                       {opt}
@@ -393,7 +391,7 @@ export function SessionRecapModule({
               </div>
 
               <div>
-                <div className="text-xs font-semibold text-slate-600 mb-1.5">
+                <div className="text-xs font-semibold sb-text-secondary mb-1.5">
                   Prononciation & intonation
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -402,10 +400,8 @@ export function SessionRecapModule({
                       key={opt}
                       type="button"
                       onClick={() => onUpdateRecap({ oralPronunciation: opt })}
-                      className={`px-2.5 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
-                        recap.oralPronunciation === opt
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      className={`px-2.5 py-2 rounded-xl border border-b-2 text-xs font-bold transition-colors cursor-pointer ${
+                        recap.oralPronunciation === opt ? 'sb-seg-active' : 'sb-card-option'
                       }`}
                     >
                       {opt}
@@ -415,7 +411,7 @@ export function SessionRecapModule({
               </div>
 
               <div>
-                <div className="text-xs font-semibold text-slate-600 mb-1.5">
+                <div className="text-xs font-semibold sb-text-secondary mb-1.5">
                   Compréhension orale en visio
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -424,10 +420,8 @@ export function SessionRecapModule({
                       key={opt}
                       type="button"
                       onClick={() => onUpdateRecap({ oralComprehension: opt })}
-                      className={`px-2.5 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
-                        recap.oralComprehension === opt
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      className={`px-2.5 py-2 rounded-xl border border-b-2 text-xs font-bold transition-colors cursor-pointer ${
+                        recap.oralComprehension === opt ? 'sb-seg-active' : 'sb-card-option'
                       }`}
                     >
                       {opt}
@@ -439,7 +433,7 @@ export function SessionRecapModule({
               <div className="pt-1">
                 <label
                   htmlFor="oral-notes-input"
-                  className="text-xs font-semibold text-slate-600 block mb-1"
+                  className="text-xs font-semibold sb-text-secondary block mb-1"
                 >
                   Remarque ciblée à l’oral (optionnel)
                 </label>
@@ -449,7 +443,7 @@ export function SessionRecapModule({
                   value={recap.oralNotes}
                   onChange={(e) => onUpdateRecap({ oralNotes: e.target.value })}
                   placeholder="Ex : Très bonne participation au jeu de rôle, penser à bien prononcer le -s final."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-600"
+                  className="w-full rounded-xl border sb-input px-3 py-2 text-xs"
                 />
               </div>
             </div>
@@ -457,16 +451,16 @@ export function SessionRecapModule({
 
           {/* Written Evaluation Panel */}
           <section className="manga-panel p-6 space-y-4">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
-              <PenLine className="w-4 h-4 text-rose-600" aria-hidden="true" />
-              <h2 className="text-base font-bold text-slate-900">
+            <div className="flex items-center gap-2 pb-3 border-b sb-divider">
+              <PenLine className="w-4 h-4 text-[var(--sb-danger)]" aria-hidden="true" />
+              <h2 className="text-base font-bold tracking-wide sb-text-primary">
                 2. Bilan à l’Écrit (Phrases, Orthographe & Grammaire)
               </h2>
             </div>
 
             <div className="space-y-3">
               <div>
-                <div className="text-xs font-semibold text-slate-600 mb-1.5">
+                <div className="text-xs font-semibold sb-text-secondary mb-1.5">
                   Construction de phrases
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -475,10 +469,8 @@ export function SessionRecapModule({
                       key={opt}
                       type="button"
                       onClick={() => onUpdateRecap({ writtenSyntax: opt })}
-                      className={`px-2.5 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
-                        recap.writtenSyntax === opt
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      className={`px-2.5 py-2 rounded-xl border border-b-2 text-xs font-bold transition-colors cursor-pointer ${
+                        recap.writtenSyntax === opt ? 'sb-seg-active' : 'sb-card-option'
                       }`}
                     >
                       {opt}
@@ -488,7 +480,7 @@ export function SessionRecapModule({
               </div>
 
               <div>
-                <div className="text-xs font-semibold text-slate-600 mb-1.5">
+                <div className="text-xs font-semibold sb-text-secondary mb-1.5">
                   Orthographe & vocabulaire
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -497,10 +489,8 @@ export function SessionRecapModule({
                       key={opt}
                       type="button"
                       onClick={() => onUpdateRecap({ writtenSpelling: opt })}
-                      className={`px-2.5 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
-                        recap.writtenSpelling === opt
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      className={`px-2.5 py-2 rounded-xl border border-b-2 text-xs font-bold transition-colors cursor-pointer ${
+                        recap.writtenSpelling === opt ? 'sb-seg-active' : 'sb-card-option'
                       }`}
                     >
                       {opt}
@@ -510,7 +500,7 @@ export function SessionRecapModule({
               </div>
 
               <div>
-                <div className="text-xs font-semibold text-slate-600 mb-1.5">
+                <div className="text-xs font-semibold sb-text-secondary mb-1.5">
                   Application des règles (temps, modaux, prépositions)
                 </div>
                 <div className="grid grid-cols-3 gap-2">
@@ -519,10 +509,8 @@ export function SessionRecapModule({
                       key={opt}
                       type="button"
                       onClick={() => onUpdateRecap({ writtenGrammar: opt })}
-                      className={`px-2.5 py-2 rounded-lg border text-xs font-semibold transition-colors cursor-pointer ${
-                        recap.writtenGrammar === opt
-                          ? 'bg-slate-900 border-slate-900 text-white'
-                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                      className={`px-2.5 py-2 rounded-xl border border-b-2 text-xs font-bold transition-colors cursor-pointer ${
+                        recap.writtenGrammar === opt ? 'sb-seg-active' : 'sb-card-option'
                       }`}
                     >
                       {opt}
@@ -534,7 +522,7 @@ export function SessionRecapModule({
               <div className="pt-1">
                 <label
                   htmlFor="written-notes-input"
-                  className="text-xs font-semibold text-slate-600 block mb-1"
+                  className="text-xs font-semibold sb-text-secondary block mb-1"
                 >
                   Remarque ciblée à l’écrit (optionnel)
                 </label>
@@ -544,14 +532,14 @@ export function SessionRecapModule({
                   value={recap.writtenNotes}
                   onChange={(e) => onUpdateRecap({ writtenNotes: e.target.value })}
                   placeholder="Ex : Ordre des mots bien compris dans les questions avec Do/Does."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-600"
+                  className="w-full rounded-xl border sb-input px-3 py-2 text-xs"
                 />
               </div>
 
-              <div className="pt-2 border-t border-slate-100 space-y-2">
+              <div className="pt-2 border-t sb-divider space-y-2">
                 <label
                   htmlFor="next-goal-input"
-                  className="text-xs font-semibold text-slate-600 block"
+                  className="text-xs font-semibold sb-text-secondary block"
                 >
                   Objectif / Mini-devoir pour le prochain cours
                 </label>
@@ -561,7 +549,7 @@ export function SessionRecapModule({
                   value={recap.nextGoal}
                   onChange={(e) => onUpdateRecap({ nextGoal: e.target.value })}
                   placeholder="Choisis une suggestion ci-dessous ou écris ton objectif..."
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-600"
+                  className="w-full rounded-xl border sb-input px-3 py-2 text-xs"
                 />
                 <div className="flex flex-wrap gap-1.5">
                   {NEXT_GOAL_PRESETS.map((preset) => (
@@ -569,7 +557,7 @@ export function SessionRecapModule({
                       key={preset}
                       type="button"
                       onClick={() => onUpdateRecap({ nextGoal: preset })}
-                      className="px-2.5 py-1 rounded-md border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:border-rose-300 text-[11px] font-medium text-slate-700 cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg border sb-chip-idle hover:sb-text-reward text-[11px] font-semibold transition-colors cursor-pointer"
                     >
                       + {preset}
                     </button>
@@ -585,8 +573,8 @@ export function SessionRecapModule({
           <div className="manga-panel p-5 space-y-4">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-rose-600" aria-hidden="true" />
-                <h2 className="text-base font-bold text-slate-900">
+                <Sparkles className="w-4 h-4 sb-text-reward" aria-hidden="true" />
+                <h2 className="text-base font-bold tracking-wide sb-text-primary">
                   Synthèse automatique
                 </h2>
               </div>
@@ -595,11 +583,11 @@ export function SessionRecapModule({
                 <button
                   type="button"
                   onClick={handleCopy}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-800 text-xs font-semibold hover:bg-slate-50 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border sb-chip-idle text-xs font-bold cursor-pointer"
                 >
                   {copied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                      <Check className="w-3.5 h-3.5 sb-text-success" aria-hidden="true" />
                       Copié
                     </>
                   ) : (
@@ -613,7 +601,7 @@ export function SessionRecapModule({
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 border-2 border-slate-900 text-white text-xs font-bold hover:bg-emerald-700"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 border-b-2 border-emerald-800 text-white text-xs font-bold hover:bg-emerald-500"
                 >
                   <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
                   WhatsApp
@@ -621,14 +609,14 @@ export function SessionRecapModule({
               </div>
             </div>
 
-            <pre className="whitespace-pre-wrap font-sans text-xs text-slate-800 leading-relaxed bg-slate-50 border border-slate-200 rounded-lg p-4 max-h-[420px] overflow-y-auto">
+            <pre className="whitespace-pre-wrap font-sans text-xs sb-text-secondary leading-relaxed sb-surface border rounded-xl p-4 max-h-[420px] overflow-y-auto">
               {automaticSynthesis}
             </pre>
 
             <button
               type="button"
               onClick={handleSaveSession}
-              className="manga-btn-primary w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold cursor-pointer"
+              className="manga-btn-primary w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold tracking-wide cursor-pointer"
             >
               {savedConfirmed ? (
                 <>
@@ -647,7 +635,7 @@ export function SessionRecapModule({
           {/* Closing English Audio Praise for the Student */}
           <div className="manga-panel p-5 space-y-3">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold tracking-wide sb-text-primary">
                 Mot de fin en anglais pour l’élève
               </h3>
               <button
@@ -655,13 +643,13 @@ export function SessionRecapModule({
                 onClick={() =>
                   speakEnglish(englishPraiseLine, { accent, rate: speechRate })
                 }
-                className="manga-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                className="manga-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer"
               >
                 <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                 Lire
               </button>
             </div>
-            <p className="text-sm font-medium text-slate-800 leading-relaxed">
+            <p className="text-sm font-medium sb-text-accent leading-relaxed">
               “{englishPraiseLine}”
             </p>
           </div>
@@ -672,18 +660,18 @@ export function SessionRecapModule({
       <section className="manga-panel p-6 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <History className="w-4 h-4 text-rose-600" aria-hidden="true" />
-            <h2 className="text-base font-bold text-slate-900">
+            <History className="w-4 h-4 sb-text-accent" aria-hidden="true" />
+            <h2 className="text-base font-bold tracking-wide sb-text-primary">
               Historique sauvegardé ({savedRecaps.length})
             </h2>
           </div>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs sb-text-muted">
             Conservé automatiquement pour les prochains cours
           </span>
         </div>
 
         {savedRecaps.length === 0 ? (
-          <p className="text-xs text-slate-500 py-3">
+          <p className="text-xs sb-text-muted py-3">
             Aucune séance archivée pour l’instant. Cliquez sur « Sauvegarder ce bilan pour la prochaine fois » ci-dessus à la fin du cours.
           </p>
         ) : (
@@ -691,14 +679,14 @@ export function SessionRecapModule({
             {savedRecaps.map((item) => (
               <article
                 key={item.id}
-                className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5"
+                className="p-4 rounded-2xl border sb-surface-soft space-y-2.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="text-xs font-bold text-slate-900">
+                    <div className="text-xs font-bold sb-text-primary">
                       {item.dateLabel} · {item.studentName}
                     </div>
-                    <div className="text-[11px] text-slate-500 tabular-nums mt-0.5">
+                    <div className="text-[11px] sb-text-reward font-semibold tabular-nums mt-0.5">
                       {item.stars} étoiles · {item.wordCount} mots au carnet
                     </div>
                   </div>
@@ -710,7 +698,7 @@ export function SessionRecapModule({
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label="Envoyer ce bilan archivé sur WhatsApp"
-                      className="p-1.5 rounded-md text-emerald-700 hover:bg-emerald-100"
+                      className="p-1.5 rounded-lg sb-text-success hover:bg-[var(--sb-success-soft)]"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                     </a>
@@ -718,7 +706,7 @@ export function SessionRecapModule({
                       type="button"
                       onClick={() => handleDeleteSavedRecap(item.id)}
                       aria-label="Supprimer cette archive"
-                      className="p-1.5 rounded-md text-slate-400 hover:text-rose-700 hover:bg-rose-50 cursor-pointer"
+                      className="p-1.5 rounded-lg sb-text-muted hover:sb-text-danger hover:bg-[var(--sb-danger-soft)] cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -726,16 +714,16 @@ export function SessionRecapModule({
                 </div>
 
                 {item.nextGoal && (
-                  <p className="text-xs font-medium text-indigo-800">
+                  <p className="text-xs font-semibold sb-text-accent">
                     Objectif fixé : {item.nextGoal}
                   </p>
                 )}
 
-                <details className="text-xs text-slate-600">
-                  <summary className="cursor-pointer font-semibold text-slate-700 hover:text-slate-900">
+                <details className="text-xs sb-text-muted">
+                  <summary className="cursor-pointer font-bold sb-text-secondary hover:sb-text-primary">
                     Lire le bilan complet
                   </summary>
-                  <pre className="mt-2 whitespace-pre-wrap font-sans text-xs text-slate-700 bg-white border border-slate-200 rounded-lg p-3">
+                  <pre className="mt-2 whitespace-pre-wrap font-sans text-xs sb-text-secondary manga-panel-sm p-3">
                     {item.summaryText}
                   </pre>
                 </details>

@@ -70,34 +70,44 @@ export function MiniGamesHub({
               key={id}
               type="button"
               onClick={() => onUpdate({ activeGame: id })}
-              className={`p-4 rounded-xl border-2 text-left transition-transform cursor-pointer flex flex-col justify-between gap-2 ${
-                active
-                  ? 'bg-slate-900 border-slate-900 text-white shadow-[3px_3px_0px_#e11d48]'
-                  : 'bg-white border-slate-900 text-slate-900 hover:bg-amber-50/50 shadow-[3px_3px_0px_#0f172a]'
+              className={`group p-4 rounded-2xl border border-b-4 text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                active ? 'sb-card-selected' : 'sb-card-option'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
                 <span
-                  className={`text-xs font-semibold ${
-                    active ? 'text-rose-300' : 'text-slate-500'
+                  className={`text-xs font-bold tracking-wide flex items-center gap-2 ${
+                    active
+                      ? 'sb-text-reward'
+                      : 'sb-text-accent group-hover:sb-text-reward'
                   }`}
                 >
+                  <span
+                    aria-hidden="true"
+                    className={`w-2 h-2 rotate-45 shrink-0 ${
+                      active
+                        ? 'bg-[var(--sb-danger)]'
+                        : 'bg-[var(--sb-accent)] group-hover:bg-[var(--sb-reward)]'
+                    }`}
+                  />
                   {category}
                 </span>
                 <Icon
                   className={`w-4 h-4 shrink-0 ${
-                    active ? 'text-rose-400' : 'text-slate-700'
+                    active
+                      ? 'sb-text-accent'
+                      : 'sb-text-muted group-hover:sb-text-reward'
                   }`}
                   aria-hidden="true"
                 />
               </div>
               <div>
-                <div className="font-display text-base font-bold leading-snug">
+                <div className="font-display text-base font-bold tracking-wide leading-snug sb-text-primary">
                   {title}
                 </div>
                 <div
                   className={`text-xs mt-0.5 ${
-                    active ? 'text-slate-300' : 'text-slate-600'
+                    active ? 'sb-text-secondary' : 'sb-text-muted'
                   }`}
                 >
                   {subtitle}

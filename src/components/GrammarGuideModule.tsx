@@ -49,58 +49,59 @@ function PrepositionDiagram({ type }: { type: PlacePrepositionItem['visualType']
         y="4"
         width="112"
         height="56"
-        rx="8"
-        fill="#F8FAFC"
-        stroke="#E2E8F0"
+        rx="10"
+        fill="var(--sb-bg-surface)"
+        stroke="var(--sb-accent)"
+        strokeOpacity="0.45"
       />
       {type === 'in' && (
         <>
-          <rect x="38" y="20" width="44" height="30" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
-          <circle cx="60" cy="36" r="8" fill="#4338CA" />
+          <rect x="38" y="20" width="44" height="30" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
+          <circle cx="60" cy="36" r="8" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
         </>
       )}
       {type === 'on' && (
         <>
-          <rect x="38" y="30" width="44" height="22" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
-          <circle cx="60" cy="21" r="8" fill="#4338CA" />
+          <rect x="38" y="30" width="44" height="22" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
+          <circle cx="60" cy="21" r="8" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
         </>
       )}
       {type === 'under' && (
         <>
-          <rect x="36" y="14" width="48" height="16" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
-          <circle cx="60" cy="43" r="8" fill="#4338CA" />
+          <rect x="36" y="14" width="48" height="16" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
+          <circle cx="60" cy="43" r="8" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
         </>
       )}
       {type === 'next_to' && (
         <>
-          <rect x="28" y="22" width="32" height="26" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
-          <circle cx="78" cy="36" r="8" fill="#4338CA" />
+          <rect x="28" y="22" width="32" height="26" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
+          <circle cx="78" cy="36" r="8" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
         </>
       )}
       {type === 'between' && (
         <>
-          <rect x="16" y="22" width="24" height="26" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
-          <circle cx="60" cy="36" r="8" fill="#4338CA" />
-          <rect x="80" y="22" width="24" height="26" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
+          <rect x="16" y="22" width="24" height="26" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
+          <circle cx="60" cy="36" r="8" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
+          <rect x="80" y="22" width="24" height="26" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
         </>
       )}
       {type === 'behind' && (
         <>
-          <circle cx="72" cy="26" r="9" fill="#4338CA" />
-          <rect x="36" y="24" width="36" height="26" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
+          <circle cx="72" cy="26" r="9" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
+          <rect x="36" y="24" width="36" height="26" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
         </>
       )}
       {type === 'in_front_of' && (
         <>
-          <rect x="44" y="18" width="38" height="28" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
-          <circle cx="52" cy="38" r="9" fill="#4338CA" />
+          <rect x="44" y="18" width="38" height="28" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
+          <circle cx="52" cy="38" r="9" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
         </>
       )}
       {type === 'opposite' && (
         <>
-          <rect x="18" y="22" width="22" height="24" rx="4" fill="#E2E8F0" stroke="#64748B" strokeWidth="1.5" />
-          <line x1="60" y1="14" x2="60" y2="50" stroke="#94A3B8" strokeWidth="1.5" strokeDasharray="3 3" />
-          <circle cx="88" cy="34" r="9" fill="#4338CA" />
+          <rect x="18" y="22" width="22" height="24" rx="4" fill="var(--sb-diagram-box)" stroke="var(--sb-accent)" strokeWidth="1.5" />
+          <line x1="60" y1="14" x2="60" y2="50" stroke="var(--sb-reward)" strokeWidth="1.5" strokeDasharray="3 3" />
+          <circle cx="88" cy="34" r="9" fill="var(--sb-diagram-dot)" stroke="var(--sb-diagram-dot-stroke)" strokeWidth="1.2" />
         </>
       )}
     </svg>
@@ -148,16 +149,16 @@ export function GrammarGuideModule({
       {/* Header + Sub-Section Tabs */}
       <div className="manga-panel p-5 lg:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="space-y-1">
-          <div className="text-xs text-slate-500 flex items-center gap-2">
-            <BookMarked className="w-3.5 h-3.5 text-indigo-700" aria-hidden="true" />
+          <div className="text-xs font-bold tracking-wide sb-text-accent flex items-center gap-2">
+            <BookMarked className="w-3.5 h-3.5 sb-text-accent" aria-hidden="true" />
             <span>Guide pratique de référence · Niveau A1–A2 (11 ans)</span>
           </div>
-          <h1 className="text-xl lg:text-2xl font-bold text-slate-900">
+          <h1 className="text-xl lg:text-2xl font-bold tracking-wide sb-text-primary">
             Fiches de grammaire interactives avec audio
           </h1>
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-lg self-start lg:self-auto">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 sb-seg-track border rounded-2xl self-start lg:self-auto">
           {GUIDE_SECTIONS.map((tab) => {
             const active = section === tab.id;
             return (
@@ -165,10 +166,8 @@ export function GrammarGuideModule({
                 key={tab.id}
                 type="button"
                 onClick={() => onChangeSection(tab.id)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                  active
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                className={`px-3 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  active ? 'sb-seg-active' : 'sb-seg-idle'
                 }`}
               >
                 {tab.label}
@@ -183,10 +182,10 @@ export function GrammarGuideModule({
         <div className="manga-panel p-5 lg:p-6 space-y-5">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold tracking-wide sb-text-primary">
                 Les verbes irréguliers essentiels ({filteredVerbs.length})
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs sb-text-muted mt-0.5">
                 Clique sur le haut-parleur pour entendre les 3 formes à la suite (ex : go, went, gone).
               </p>
             </div>
@@ -194,7 +193,7 @@ export function GrammarGuideModule({
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">
                 <Search
-                  className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+                  className="w-3.5 h-3.5 sb-text-muted absolute left-3 top-1/2 -translate-y-1/2"
                   aria-hidden="true"
                 />
                 <input
@@ -202,7 +201,7 @@ export function GrammarGuideModule({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Chercher un verbe..."
-                  className="pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="pl-8 pr-3 py-1.5 rounded-xl border sb-input text-xs"
                 />
               </div>
 
@@ -212,10 +211,8 @@ export function GrammarGuideModule({
                   setRevealedVerbIds([]);
                   onToggleHideIrregular();
                 }}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                  hideIrregularForms
-                    ? 'bg-indigo-50 border-indigo-400 text-indigo-900'
-                    : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                  hideIrregularForms ? 'sb-reward-pill' : 'sb-chip-idle'
                 }`}
               >
                 {hideIrregularForms ? (
@@ -241,10 +238,8 @@ export function GrammarGuideModule({
                 key={grp}
                 type="button"
                 onClick={() => setGroupFilter(grp)}
-                className={`px-3 py-1 rounded-md text-xs font-medium border transition-colors cursor-pointer ${
-                  groupFilter === grp
-                    ? 'bg-slate-900 border-slate-900 text-white'
-                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                className={`px-3 py-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                  groupFilter === grp ? 'sb-chip-solid' : 'sb-chip-idle'
                 }`}
               >
                 {grp}
@@ -253,10 +248,10 @@ export function GrammarGuideModule({
           </div>
 
           {/* Clean Table */}
-          <div className="overflow-x-auto border border-slate-200 rounded-lg">
+          <div className="overflow-x-auto border sb-surface-soft rounded-2xl">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-600">
+                <tr className="sb-surface border-b sb-divider text-xs font-bold tracking-wide sb-text-accent">
                   <th className="py-3 px-4">Base verbale</th>
                   <th className="py-3 px-4">Prétérit (Past)</th>
                   <th className="py-3 px-4">Participe passé</th>
@@ -265,7 +260,7 @@ export function GrammarGuideModule({
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-sm">
+              <tbody className="divide-y sb-divide text-sm">
                 {filteredVerbs.map((verb) => {
                   const isHidden =
                     hideIrregularForms && !revealedVerbIds.includes(verb.id);
@@ -274,16 +269,16 @@ export function GrammarGuideModule({
                   );
 
                   return (
-                    <tr key={verb.id} className="hover:bg-slate-50/70">
-                      <td className="py-3 px-4 font-bold text-slate-900">
+                    <tr key={verb.id} className="hover:bg-[var(--sb-accent-soft)] transition-colors">
+                      <td className="py-3 px-4 font-bold sb-text-primary">
                         {verb.base}
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs text-indigo-800 font-semibold">
+                      <td className="py-3 px-4 font-mono text-xs sb-text-reward font-bold">
                         {isHidden ? (
                           <button
                             type="button"
                             onClick={() => toggleRevealVerb(verb.id)}
-                            className="px-2 py-1 rounded bg-slate-100 hover:bg-indigo-100 text-slate-700 font-sans text-xs cursor-pointer"
+                            className="px-2.5 py-1 rounded-lg border sb-reward-btn font-sans text-xs font-bold cursor-pointer"
                           >
                             Révéler
                           </button>
@@ -291,11 +286,11 @@ export function GrammarGuideModule({
                           verb.past
                         )}
                       </td>
-                      <td className="py-3 px-4 font-mono text-xs text-slate-700">
+                      <td className="py-3 px-4 font-mono text-xs sb-text-secondary">
                         {isHidden ? '•••' : verb.participle}
                       </td>
-                      <td className="py-3 px-4 text-slate-700">{verb.fr}</td>
-                      <td className="py-3 px-4 text-xs text-slate-500 max-w-xs">
+                      <td className="py-3 px-4 sb-text-secondary">{verb.fr}</td>
+                      <td className="py-3 px-4 text-xs sb-text-muted max-w-xs">
                         {verb.exampleEn}
                       </td>
                       <td className="py-3 px-4 text-right">
@@ -309,7 +304,7 @@ export function GrammarGuideModule({
                               )
                             }
                             aria-label={`Écouter les 3 formes de ${verb.base}`}
-                            className="p-1.5 rounded-md border border-slate-200 text-indigo-700 hover:bg-indigo-50 cursor-pointer"
+                            className="p-1.5 rounded-lg border sb-audio-btn cursor-pointer"
                           >
                             <Volume2 className="w-3.5 h-3.5" />
                           </button>
@@ -324,10 +319,10 @@ export function GrammarGuideModule({
                               })
                             }
                             aria-label={`Ajouter ${verb.base} au carnet`}
-                            className={`p-1.5 rounded-md border ${
+                            className={`p-1.5 rounded-lg border ${
                               saved
-                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700 cursor-default'
-                                : 'border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer'
+                                ? 'sb-status-success cursor-default'
+                                : 'sb-chip-idle hover:border-[var(--sb-reward)] hover:sb-text-reward cursor-pointer'
                             }`}
                           >
                             {saved ? (
@@ -351,18 +346,18 @@ export function GrammarGuideModule({
       {section === 'modals' && (
         <div className="space-y-5">
           {/* Golden Rule Banner */}
-          <div className="bg-indigo-50/70 border border-indigo-200 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="manga-panel p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="space-y-1">
-              <div className="text-xs font-bold text-indigo-900">
+              <div className="text-xs font-bold tracking-wide sb-text-reward">
                 La règle d’or des auxiliaires modaux
               </div>
-              <p className="text-sm text-indigo-950">
-                Un modal ne change <strong>jamais</strong> (pas de <span className="font-mono">-s</span> à he/she/it)
-                et il est toujours suivi d’un verbe sans <span className="font-mono">to</span> (sauf <em>would like to</em>).
+              <p className="text-sm sb-text-secondary">
+                Un modal ne change <strong>jamais</strong> (pas de <span className="font-mono sb-text-accent">-s</span> à he/she/it)
+                et il est toujours suivi d’un verbe sans <span className="font-mono sb-text-accent">to</span> (sauf <em>would like to</em>).
               </p>
             </div>
-            <div className="font-mono text-xs bg-white border border-indigo-200 rounded-lg px-3.5 py-2 text-indigo-900 shrink-0">
-              She <strong>can</strong> swim (jamais <em>cans</em> / <em>can to</em>)
+            <div className="font-mono text-xs sb-surface border rounded-xl px-3.5 py-2 sb-text-accent shrink-0">
+              She <strong className="sb-text-reward">can</strong> swim (jamais <em>cans</em> / <em>can to</em>)
             </div>
           </div>
 
@@ -375,10 +370,10 @@ export function GrammarGuideModule({
                 <div className="space-y-2.5">
                   <div className="flex items-baseline justify-between gap-3">
                     <div className="flex items-baseline gap-2.5">
-                      <h3 className="text-xl font-bold text-slate-900">
+                      <h3 className="text-xl font-bold tracking-wide sb-text-primary">
                         {m.modal}
                       </h3>
-                      <span className="font-mono text-xs text-slate-500">
+                      <span className="font-mono text-xs sb-text-muted">
                         Négatif : {m.negative}
                       </span>
                     </div>
@@ -388,25 +383,25 @@ export function GrammarGuideModule({
                         speakEnglish(m.exampleEn, { accent, rate: speechRate })
                       }
                       aria-label={`Écouter l'exemple avec ${m.modal}`}
-                      className="p-2 rounded-lg border border-slate-200 text-indigo-700 hover:bg-indigo-50 shrink-0 cursor-pointer"
+                      className="p-2 rounded-xl border sb-audio-btn shrink-0 cursor-pointer"
                     >
                       <Volume2 className="w-4 h-4" />
                     </button>
                   </div>
 
-                  <p className="text-sm font-semibold text-indigo-800">
+                  <p className="text-sm font-bold sb-text-reward">
                     {m.meaningFr}
                   </p>
-                  <p className="text-xs text-slate-600 leading-relaxed">
+                  <p className="text-xs sb-text-secondary leading-relaxed">
                     {m.usageFr}
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200/70 space-y-1">
-                  <p className="text-sm font-medium text-slate-900">
+                <div className="p-3.5 rounded-2xl border sb-surface-soft space-y-1">
+                  <p className="text-sm font-semibold sb-text-primary">
                     “{m.exampleEn}”
                   </p>
-                  <p className="text-xs text-slate-500">{m.exampleFr}</p>
+                  <p className="text-xs sb-text-muted">{m.exampleFr}</p>
                 </div>
               </article>
             ))}
@@ -422,15 +417,15 @@ export function GrammarGuideModule({
               key={t.id}
               className="manga-panel p-6 space-y-4"
             >
-              <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-100">
+              <div className="flex items-start justify-between gap-3 pb-3 border-b sb-divider">
                 <div>
-                  <div className="text-xs text-indigo-700 font-semibold">
+                  <div className="text-xs sb-text-accent font-bold tracking-wide">
                     {t.titleEn}
                   </div>
-                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">
+                  <h2 className="text-lg font-bold tracking-wide sb-text-primary mt-0.5">
                     {t.titleFr}
                   </h2>
-                  <p className="text-xs text-slate-500 mt-1">{t.whenFr}</p>
+                  <p className="text-xs sb-text-muted mt-1">{t.whenFr}</p>
                 </div>
                 <button
                   type="button"
@@ -438,23 +433,23 @@ export function GrammarGuideModule({
                     speakEnglish(t.affirmative, { accent, rate: speechRate })
                   }
                   aria-label={`Écouter l'exemple au ${t.titleEn}`}
-                  className="p-2 rounded-lg bg-indigo-700 text-white hover:bg-indigo-800 shrink-0 cursor-pointer"
+                  className="manga-btn-primary p-2 rounded-xl shrink-0 cursor-pointer"
                 >
                   <Volume2 className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="text-xs font-mono bg-slate-50 border border-slate-200/80 rounded-lg px-3 py-2 text-slate-800">
+              <div className="text-xs font-mono sb-surface border rounded-xl px-3 py-2 sb-text-reward">
                 Formule : {t.formula}
               </div>
 
               <div className="space-y-2.5 text-sm">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-xs font-bold text-emerald-700 mr-2">
+                    <span className="text-xs font-bold sb-text-success mr-2">
                       (+) Affirmatif :
                     </span>
-                    <span className="font-medium text-slate-900">
+                    <span className="font-semibold sb-text-primary">
                       {t.affirmative}
                     </span>
                   </div>
@@ -464,7 +459,7 @@ export function GrammarGuideModule({
                       speakEnglish(t.affirmative, { accent, rate: speechRate })
                     }
                     aria-label="Écouter la forme affirmative"
-                    className="text-indigo-700 hover:text-indigo-900 p-1 shrink-0 cursor-pointer"
+                    className="sb-text-accent hover:opacity-80 p-1 shrink-0 cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                   </button>
@@ -472,10 +467,10 @@ export function GrammarGuideModule({
 
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-xs font-bold text-rose-700 mr-2">
+                    <span className="text-xs font-bold sb-text-danger mr-2">
                       (−) Négatif :
                     </span>
-                    <span className="font-medium text-slate-800">
+                    <span className="font-semibold sb-text-secondary">
                       {t.negative}
                     </span>
                   </div>
@@ -485,7 +480,7 @@ export function GrammarGuideModule({
                       speakEnglish(t.negative, { accent, rate: speechRate })
                     }
                     aria-label="Écouter la forme négative"
-                    className="text-indigo-700 hover:text-indigo-900 p-1 shrink-0 cursor-pointer"
+                    className="sb-text-accent hover:opacity-80 p-1 shrink-0 cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                   </button>
@@ -493,10 +488,10 @@ export function GrammarGuideModule({
 
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-xs font-bold text-indigo-700 mr-2">
+                    <span className="text-xs font-bold sb-text-accent mr-2">
                       (?) Question :
                     </span>
-                    <span className="font-medium text-slate-800">
+                    <span className="font-semibold sb-text-secondary">
                       {t.question}
                     </span>
                   </div>
@@ -506,16 +501,16 @@ export function GrammarGuideModule({
                       speakEnglish(t.question, { accent, rate: speechRate })
                     }
                     aria-label="Écouter la question"
-                    className="text-indigo-700 hover:text-indigo-900 p-1 shrink-0 cursor-pointer"
+                    className="sb-text-accent hover:opacity-80 p-1 shrink-0 cursor-pointer"
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-slate-100 text-xs text-slate-500">
+              <div className="pt-3 border-t sb-divider text-xs sb-text-muted">
                 Mots indices :{' '}
-                <span className="font-mono text-slate-700">{t.markers}</span>
+                <span className="font-mono sb-text-secondary">{t.markers}</span>
               </div>
             </article>
           ))}
@@ -528,11 +523,11 @@ export function GrammarGuideModule({
           {/* Time Prepositions: AT / ON / IN */}
           <section className="manga-panel p-6 space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold tracking-wide sb-text-primary">
                 1. Prépositions de temps : AT · ON · IN
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Astuce : du plus précis (<span className="font-mono">AT</span> l’heure) au plus large (<span className="font-mono">IN</span> le mois ou l’année).
+              <p className="text-xs sb-text-muted mt-0.5">
+                Astuce : du plus précis (<span className="font-mono sb-text-reward">AT</span> l’heure) au plus large (<span className="font-mono sb-text-accent">IN</span> le mois ou l’année).
               </p>
             </div>
 
@@ -540,13 +535,13 @@ export function GrammarGuideModule({
               {TIME_PREPOSITIONS.map((tp) => (
                 <div
                   key={tp.id}
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-3"
+                  className="p-4 rounded-2xl border sb-surface-soft space-y-3"
                 >
                   <div>
-                    <span className="text-lg font-bold font-mono text-indigo-800">
+                    <span className="text-lg font-bold font-mono sb-text-reward">
                       {tp.prep}
                     </span>
-                    <p className="text-xs font-semibold text-slate-700 mt-0.5">
+                    <p className="text-xs font-bold sb-text-secondary mt-0.5">
                       {tp.scopeFr}
                     </p>
                   </div>
@@ -559,18 +554,18 @@ export function GrammarGuideModule({
                         onClick={() =>
                           speakEnglish(ex, { accent, rate: speechRate })
                         }
-                        className="w-full p-2.5 rounded-lg bg-white border border-slate-200 hover:border-indigo-400 text-left flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                        className="w-full p-2.5 rounded-xl border border-b-2 sb-card-option text-left flex items-center justify-between gap-2 transition-colors cursor-pointer"
                       >
                         <div>
-                          <div className="text-xs font-semibold text-slate-900">
+                          <div className="text-xs font-bold sb-text-primary">
                             {ex}
                           </div>
-                          <div className="text-[11px] text-slate-500">
+                          <div className="text-[11px] sb-text-muted">
                             {tp.examplesFr[i]}
                           </div>
                         </div>
                         <Volume2
-                          className="w-3.5 h-3.5 text-indigo-700 shrink-0"
+                          className="w-3.5 h-3.5 sb-text-accent shrink-0"
                           aria-hidden="true"
                         />
                       </button>
@@ -584,10 +579,10 @@ export function GrammarGuideModule({
           {/* Place Prepositions with Spatial Diagrams */}
           <section className="manga-panel p-6 space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold tracking-wide sb-text-primary">
                 2. Prépositions de lieu (où se trouve le point indigo ?)
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs sb-text-muted mt-0.5">
                 Clique sur une carte pour entendre la préposition et son exemple en anglais.
               </p>
             </div>
@@ -603,25 +598,25 @@ export function GrammarGuideModule({
                       rate: speechRate,
                     })
                   }
-                  className="p-4 rounded-xl bg-white border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/30 text-left space-y-3 transition-colors cursor-pointer"
+                  className="p-4 rounded-2xl border border-b-4 sb-card-option text-left space-y-3 transition-all cursor-pointer"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <PrepositionDiagram type={pp.visualType} />
                     <Volume2
-                      className="w-4 h-4 text-indigo-700 shrink-0"
+                      className="w-4 h-4 sb-text-accent shrink-0"
                       aria-hidden="true"
                     />
                   </div>
                   <div>
                     <div className="flex items-baseline gap-2">
-                      <span className="text-base font-bold text-slate-900">
+                      <span className="text-base font-bold sb-text-primary">
                         {pp.en}
                       </span>
-                      <span className="text-xs font-semibold text-indigo-700">
+                      <span className="text-xs font-bold sb-text-reward">
                         {pp.fr}
                       </span>
                     </div>
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    <p className="text-xs sb-text-secondary mt-1 leading-relaxed">
                       {pp.exampleEn}
                     </p>
                   </div>

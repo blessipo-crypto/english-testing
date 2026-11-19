@@ -221,8 +221,8 @@ function WritingPadCanvas({
               }}
               className={`w-5 h-5 rounded-full border-2 transition-transform cursor-pointer ${
                 !isEraser && inkColor === c.value
-                  ? 'border-slate-900 scale-110'
-                  : 'border-white ring-1 ring-slate-300'
+                  ? 'border-[var(--sb-accent)] scale-110 ring-2 ring-[var(--sb-accent)]/40'
+                  : 'border-slate-400 ring-1 ring-slate-500/40'
               }`}
               style={{ backgroundColor: c.value }}
             />
@@ -232,15 +232,13 @@ function WritingPadCanvas({
             onClick={() => setIsEraser((v) => !v)}
             aria-label="Gomme"
             title="Gomme"
-            className={`p-1 rounded border text-xs cursor-pointer ${
-              isEraser
-                ? 'bg-rose-50 border-rose-600 text-rose-700'
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+            className={`p-1 rounded-lg border text-xs cursor-pointer ${
+              isEraser ? 'sb-status-danger' : 'sb-chip-idle'
             }`}
           >
             <Eraser className="w-3.5 h-3.5" />
           </button>
-          <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded ml-1">
+          <div className="flex items-center gap-0.5 sb-seg-track border p-0.5 rounded-lg ml-1">
             {[
               { label: 'Fin', width: 2 },
               { label: 'Moy', width: 4 },
@@ -249,10 +247,8 @@ function WritingPadCanvas({
                 key={b.width}
                 type="button"
                 onClick={() => setBrushWidth(b.width)}
-                className={`px-1.5 py-0.5 text-[10px] font-semibold rounded cursor-pointer ${
-                  brushWidth === b.width
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-600'
+                className={`px-1.5 py-0.5 text-[10px] font-bold rounded cursor-pointer ${
+                  brushWidth === b.width ? 'sb-seg-active' : 'sb-seg-idle'
                 }`}
               >
                 {b.label}
@@ -267,7 +263,7 @@ function WritingPadCanvas({
             onClick={onUndoStroke}
             disabled={strokes.length === 0}
             aria-label="Annuler le dernier trait"
-            className="p-1.5 rounded border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer"
+            className="p-1.5 rounded-lg border sb-chip-idle hover:sb-text-accent disabled:opacity-40 cursor-pointer"
           >
             <Undo2 className="w-3.5 h-3.5" />
           </button>
@@ -276,7 +272,7 @@ function WritingPadCanvas({
             onClick={onClearStrokes}
             disabled={strokes.length === 0}
             aria-label="Effacer le tracé"
-            className="p-1.5 rounded border border-slate-200 bg-white text-slate-700 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-40 cursor-pointer"
+            className="p-1.5 rounded-lg border sb-chip-idle hover:border-[var(--sb-danger)] hover:sb-text-danger disabled:opacity-40 cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>
@@ -284,10 +280,10 @@ function WritingPadCanvas({
       </div>
 
       <div
-        className="rounded-lg border-2 border-slate-900 bg-white overflow-hidden select-none"
+        className="rounded-2xl border-2 border-[var(--sb-accent)]/50 bg-slate-50 overflow-hidden select-none shadow-sm"
         style={{
           backgroundImage:
-            'repeating-linear-gradient(to bottom, transparent 0px, transparent 34px, #e2e8f0 34px, #e2e8f0 35px)',
+            'repeating-linear-gradient(to bottom, transparent 0px, transparent 34px, #cbd5e1 34px, #cbd5e1 35px)',
         }}
       >
         <canvas
@@ -348,13 +344,13 @@ export function WritingSpaceModule({
   return (
     <section
       aria-label="Espace d'écriture dédié Prof et Élève"
-      className={compact ? 'manga-panel p-4 space-y-3 bg-white' : 'space-y-5'}
+      className={compact ? 'manga-panel p-4 space-y-3' : 'space-y-5'}
     >
       {/* Header & Input Mode Controls */}
       <div
         className={
           compact
-            ? 'flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3'
+            ? 'flex flex-wrap items-center justify-between gap-3 border-b sb-divider pb-3'
             : 'manga-panel p-5 flex flex-wrap items-center justify-between gap-4'
         }
       >
@@ -362,20 +358,20 @@ export function WritingSpaceModule({
           <h2
             className={
               compact
-                ? 'text-sm font-bold text-slate-900'
-                : 'text-lg font-bold text-slate-900'
+                ? 'text-sm font-bold tracking-wide sb-text-primary'
+                : 'text-lg font-bold tracking-wide sb-text-primary'
             }
           >
             Cahier d’écriture en direct — Prof &amp; {studentName}
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs sb-text-muted mt-0.5">
             Chacun dispose de sa zone dédiée synchronisée en direct : aucun risque
             d’effacer l’écriture de l’autre.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-1 p-0.5 bg-slate-100 border border-slate-300 rounded-lg">
+          <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
             {(
               [
                 { id: 'text', label: 'Clavier', icon: Keyboard },
@@ -390,10 +386,8 @@ export function WritingSpaceModule({
                   key={opt.id}
                   type="button"
                   onClick={() => setInputMode(opt.id)}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
-                    active
-                      ? 'bg-slate-900 text-white'
-                      : 'text-slate-600 hover:text-slate-900'
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg transition-colors whitespace-nowrap shrink-0 cursor-pointer ${
+                    active ? 'sb-seg-active' : 'sb-seg-idle'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" aria-hidden="true" />
@@ -407,10 +401,8 @@ export function WritingSpaceModule({
             <button
               type="button"
               onClick={() => setStylusOnly((v) => !v)}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer ${
-                stylusOnly
-                  ? 'bg-slate-900 border-slate-900 text-white'
-                  : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
+                stylusOnly ? 'sb-chip-solid' : 'sb-chip-idle'
               }`}
             >
               <PenTool className="w-3.5 h-3.5" aria-hidden="true" />
@@ -421,11 +413,11 @@ export function WritingSpaceModule({
           <button
             type="button"
             onClick={handleCopyExchange}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 whitespace-nowrap shrink-0 cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border sb-chip-idle text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
           >
             {copiedDuo ? (
               <>
-                <Check className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
+                <Check className="w-3.5 h-3.5 sb-text-success" aria-hidden="true" />
                 Copié
               </>
             ) : (
@@ -440,7 +432,7 @@ export function WritingSpaceModule({
             <button
               type="button"
               onClick={onOpenFullView}
-              className="px-2.5 py-1 rounded-lg bg-indigo-700 text-white text-xs font-semibold hover:bg-indigo-800 whitespace-nowrap shrink-0 cursor-pointer"
+              className="manga-btn-primary px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
             >
               Plein écran
             </button>
@@ -453,19 +445,19 @@ export function WritingSpaceModule({
         {/* Column 1: Tutor Writing Space */}
         <div
           className={`manga-panel p-4 sm:p-5 flex flex-col gap-3 ${
-            role === 'tutor' ? 'ring-2 ring-slate-900/15' : ''
+            role === 'tutor' ? 'ring-2 ring-[var(--sb-accent)]/45' : ''
           }`}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b sb-divider">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-7 h-7 rounded-md border-2 border-slate-900 bg-slate-900 text-white text-xs font-bold flex items-center justify-center shrink-0">
+              <span className="w-7 h-7 rounded-lg border sb-chip-solid text-xs font-extrabold flex items-center justify-center shrink-0">
                 P
               </span>
               <div className="min-w-0">
-                <h3 className="text-sm font-bold text-slate-900 truncate">
+                <h3 className="text-sm font-bold tracking-wide sb-text-primary truncate">
                   Espace Professeur
                 </h3>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] sb-text-muted">
                   {role === 'tutor'
                     ? 'Écrivez vos consignes, modèles ou corrections ici'
                     : 'Modèle & consignes du professeur en direct'}
@@ -475,10 +467,8 @@ export function WritingSpaceModule({
 
             <div className="flex items-center gap-1.5 shrink-0">
               <span
-                className={`px-2 py-0.5 rounded border text-[11px] font-bold ${
-                  role === 'tutor'
-                    ? 'bg-slate-900 border-slate-900 text-white'
-                    : 'bg-slate-100 border-slate-300 text-slate-700'
+                className={`px-2 py-0.5 rounded-lg border text-[11px] font-bold ${
+                  role === 'tutor' ? 'sb-chip-solid' : 'sb-chip-idle sb-text-accent'
                 }`}
               >
                 {role === 'tutor' ? 'Votre zone' : 'Prof'}
@@ -491,7 +481,7 @@ export function WritingSpaceModule({
                 }
                 aria-label="Écouter le texte du professeur"
                 title="Écouter en anglais"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded border border-indigo-200 bg-indigo-50 text-indigo-800 text-xs font-semibold hover:bg-indigo-100 disabled:opacity-40 cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border sb-chip-active sb-text-accent text-xs font-bold hover:opacity-85 disabled:opacity-40 cursor-pointer"
               >
                 <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                 Écouter
@@ -502,7 +492,7 @@ export function WritingSpaceModule({
                   onClick={() => onUpdateText('tutor', '')}
                   aria-label="Effacer le texte du professeur"
                   title="Effacer le texte"
-                  className="p-1.5 rounded border border-slate-200 text-slate-500 hover:text-rose-700 hover:bg-rose-50 cursor-pointer"
+                  className="p-1.5 rounded-lg border sb-chip-idle hover:sb-text-danger hover:border-[var(--sb-danger)] cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -512,7 +502,7 @@ export function WritingSpaceModule({
 
           {!compact && role === 'tutor' && showText && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-semibold text-slate-500 mr-1">
+              <span className="text-[11px] font-semibold sb-text-muted mr-1">
                 Modèles rapides :
               </span>
               {TUTOR_TEMPLATES.map((tpl) => (
@@ -527,7 +517,7 @@ export function WritingSpaceModule({
                         : tpl.text
                     )
                   }
-                  className="px-2 py-1 rounded-md border border-slate-300 bg-slate-50 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 whitespace-nowrap cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg border border-b-2 sb-card-option text-[11px] font-bold sb-text-accent whitespace-nowrap cursor-pointer"
                 >
                   + {tpl.label}
                 </button>
@@ -542,7 +532,7 @@ export function WritingSpaceModule({
               value={writingSpace.tutorText}
               onChange={(e) => onUpdateText('tutor', e.target.value)}
               placeholder="Prof : écrivez une phrase modèle, un exercice, une question ou une correction..."
-              className="w-full rounded-lg border-2 border-slate-900 bg-slate-50/50 px-3.5 py-2.5 text-sm sm:text-base leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:bg-white"
+              className="w-full rounded-xl border sb-input px-3.5 py-2.5 text-sm sm:text-base leading-relaxed"
             />
           )}
 
@@ -561,19 +551,19 @@ export function WritingSpaceModule({
         {/* Column 2: Student Writing Space */}
         <div
           className={`manga-panel p-4 sm:p-5 flex flex-col gap-3 ${
-            role === 'student' ? 'ring-2 ring-rose-500/25' : ''
+            role === 'student' ? 'ring-2 ring-[var(--sb-danger)]/45' : ''
           }`}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b sb-divider">
             <div className="flex items-center gap-2 min-w-0">
-              <span className="w-7 h-7 rounded-md border-2 border-slate-900 bg-rose-600 text-white text-xs font-bold flex items-center justify-center shrink-0">
+              <span className="w-7 h-7 rounded-lg border sb-chip-danger-solid text-xs font-extrabold flex items-center justify-center shrink-0">
                 {studentName.slice(0, 1).toUpperCase() || 'É'}
               </span>
               <div className="min-w-0">
-                <h3 className="text-sm font-bold text-slate-900 truncate">
+                <h3 className="text-sm font-bold tracking-wide sb-text-primary truncate">
                   Espace Élève — {studentName}
                 </h3>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] sb-text-muted">
                   {role === 'student'
                     ? 'Écris tes phrases ou réponses ici (clavier, écran ou stylet)'
                     : `Ce que ${studentName} écrit apparaît ici en temps réel`}
@@ -583,10 +573,8 @@ export function WritingSpaceModule({
 
             <div className="flex items-center gap-1.5 shrink-0">
               <span
-                className={`px-2 py-0.5 rounded border text-[11px] font-bold ${
-                  role === 'student'
-                    ? 'bg-rose-600 border-slate-900 text-white'
-                    : 'bg-rose-50 border-rose-300 text-rose-800'
+                className={`px-2 py-0.5 rounded-lg border text-[11px] font-bold ${
+                  role === 'student' ? 'sb-chip-danger-solid' : 'sb-status-danger'
                 }`}
               >
                 {role === 'student' ? 'Ta zone' : 'Élève'}
@@ -599,7 +587,7 @@ export function WritingSpaceModule({
                 }
                 aria-label="Écouter le texte de l'élève"
                 title="Écouter en anglais"
-                className="inline-flex items-center gap-1 px-2 py-1 rounded border border-indigo-200 bg-indigo-50 text-indigo-800 text-xs font-semibold hover:bg-indigo-100 disabled:opacity-40 cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border sb-chip-active sb-text-accent text-xs font-bold hover:opacity-85 disabled:opacity-40 cursor-pointer"
               >
                 <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
                 Écouter
@@ -609,7 +597,7 @@ export function WritingSpaceModule({
                   type="button"
                   onClick={onAwardStar}
                   title="Récompenser la phrase de l'élève"
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded border border-amber-300 bg-amber-50 text-amber-900 text-xs font-semibold hover:bg-amber-100 whitespace-nowrap cursor-pointer"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border sb-reward-pill text-xs font-bold hover:opacity-90 whitespace-nowrap cursor-pointer"
                 >
                   <Plus className="w-3 h-3" aria-hidden="true" />1 étoile
                 </button>
@@ -620,7 +608,7 @@ export function WritingSpaceModule({
                   onClick={() => onUpdateText('student', '')}
                   aria-label="Effacer le texte de l'élève"
                   title="Effacer le texte"
-                  className="p-1.5 rounded border border-slate-200 text-slate-500 hover:text-rose-700 hover:bg-rose-50 cursor-pointer"
+                  className="p-1.5 rounded-lg border sb-chip-idle hover:sb-text-danger hover:border-[var(--sb-danger)] cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -630,7 +618,7 @@ export function WritingSpaceModule({
 
           {!compact && showText && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[11px] font-semibold text-slate-500 mr-1">
+              <span className="text-[11px] font-semibold sb-text-muted mr-1">
                 Débuts de phrases :
               </span>
               {[
@@ -650,7 +638,7 @@ export function WritingSpaceModule({
                         : starter
                     )
                   }
-                  className="px-2 py-1 rounded-md border border-rose-200 bg-rose-50/70 text-[11px] font-semibold text-rose-900 hover:bg-rose-100 whitespace-nowrap cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg border border-b-2 sb-reward-btn text-[11px] font-bold whitespace-nowrap cursor-pointer"
                 >
                   + {starter.trim()}
                 </button>
@@ -665,7 +653,7 @@ export function WritingSpaceModule({
               value={writingSpace.studentText}
               onChange={(e) => onUpdateText('student', e.target.value)}
               placeholder={`${studentName} : écris ta réponse ou tes phrases en anglais ici...`}
-              className="w-full rounded-lg border-2 border-slate-900 bg-rose-50/25 px-3.5 py-2.5 text-sm sm:text-base leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:bg-white"
+              className="w-full rounded-xl border sb-input px-3.5 py-2.5 text-sm sm:text-base leading-relaxed"
             />
           )}
 
