@@ -25,7 +25,7 @@ npm run build:packages
 ```
 *(Cette commande alimente directement `packaging/windows/dist-web` et `packaging/android/www` avec tous les assets autonomes nécessaires).*
 
-### Windows `.exe` (depuis Windows avec Node.js 20+)
+### Windows `.exe` (depuis Windows avec Node.js 24+)
 ```powershell
 cd packaging/windows
 npm install
@@ -33,7 +33,7 @@ npm run pack:debug
 ```
 Résultat : `packaging/windows/dist/StoryBridge-Studio-Debug.exe` (exécutable autonome ne nécessitant aucun serveur externe).
 
-### Android `.apk` (avec Node.js 20+, Java 21 et Android SDK)
+### Android `.apk` (avec Node.js 24+, Java 21 et Android SDK)
 ```bash
 rm -rf packaging/android/www && cp -r dist packaging/android/www
 cd packaging/android

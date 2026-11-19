@@ -326,6 +326,15 @@ function broadcastToRoom(roomCode: string, payload: unknown, excludeClientId?: s
   }
 }
 
+function sendToClient(roomCode: string, targetClientId: string, payload: unknown) {
+  const clients = roomClients.get(roomCode);
+  if (!clients) return;
+  const target = clients.get(targetClientId);
+  if (target && target.ws.readyState === WebSocket.OPEN) {
+    target.ws.send(JSON.stringify(payload));
+  }
+}
+
 async function startServer() {
   const app = express();
   app.use(express.json());
@@ -701,23 +710,18 @@ async function startServer() {
           stars: currentState.stars,
           by: clientMeta.name,
         });
-      } else if (
-        msgType === 'rtc:offer' ||
-        msgType === 'rtc:answer' ||
-        msgType === 'rtc:ice' ||
-        msgType === 'rtc:camera-off' ||
-        msgType === 'rtc:request-offer'
-      ) {
-        broadcastToRoom(
-          roomCode,
-          {
-            type: msgType,
-            fromId: clientId,
-            fromRole: clientMeta.role,
-            payload: msg.payload ?? null,
-          },
-          clientId
-        );
+      } else if (typeof msgType === 'string' && msgType.startsWith('rtc:')) {
+        const rtcEnvelope = {
+          type: msgType,
+          fromId: clientId,
+          fromRole: clientMeta.role,
+          payload: msg.payload ?? null,
+        };
+        if (typeof msg.toId === 'string' && msg.toId.trim()) {
+          sendToClient(roomCode, msg.toId.trim(), rtcEnvelope);
+        } else {
+          broadcastToRoom(roomCode, rtcEnvelope, clientId);
+        }
       }
     });
 

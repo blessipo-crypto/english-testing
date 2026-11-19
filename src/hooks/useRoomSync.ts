@@ -326,6 +326,7 @@ export function useRoomSync() {
     )
   );
   const [connected, setConnected] = useState(false);
+  const [selfId, setSelfId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<RoomParticipant[]>([]);
   const [lastCelebrationAt, setLastCelebrationAt] = useState<number>(0);
 
@@ -439,6 +440,9 @@ export function useRoomSync() {
         }
 
         if (msg.type === 'room:init' && msg.state) {
+          if (typeof msg.clientId === 'string') {
+            setSelfId(msg.clientId);
+          }
           setState(msg.state as RoomState);
           if (Array.isArray(msg.participants)) {
             setParticipants(msg.participants as RoomParticipant[]);
@@ -562,6 +566,7 @@ export function useRoomSync() {
         if (heartbeatTimer) clearInterval(heartbeatTimer);
         if (!isUnmounted) {
           setConnected(false);
+          setSelfId(null);
           reconnectTimerRef.current = window.setTimeout(connect, 2000);
         }
       };
@@ -962,8 +967,8 @@ export function useRoomSync() {
   );
 
   const sendRtcSignal = useCallback(
-    (type: string, payload?: unknown) => {
-      sendMessage({ type, payload });
+    (type: string, payload?: unknown, toId?: string) => {
+      sendMessage(toId ? { type, payload, toId } : { type, payload });
     },
     [sendMessage]
   );
@@ -988,6 +993,7 @@ export function useRoomSync() {
   return {
     roomCode,
     connected,
+    selfId,
     participants,
     role,
     isInvitedStudent,

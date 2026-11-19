@@ -20,9 +20,22 @@ function createWindow() {
   });
 
   // Allow camera, microphone, and fullscreen inside the bundled app
+  session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
+    return (
+      permission === 'media' ||
+      permission === 'camera' ||
+      permission === 'microphone' ||
+      permission === 'fullscreen' ||
+      permission === 'clipboard-read' ||
+      permission === 'clipboard-sanitized-write'
+    );
+  });
+
   session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
     if (
       permission === 'media' ||
+      permission === 'camera' ||
+      permission === 'microphone' ||
       permission === 'fullscreen' ||
       permission === 'clipboard-sanitized-write'
     ) {

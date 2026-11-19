@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "StoryBridge Studio Android Debug APK Wrapper",
   "private": true,
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "prepare:android": "npx cap add android && node configure-manifest.cjs && npx cap sync android",
     "build:debug-apk": "cd android && ./gradlew assembleDebug"

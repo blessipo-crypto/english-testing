@@ -4,6 +4,9 @@
   "description": "StoryBridge Studio Windows Debug Portable Wrapper",
   "author": "StoryBridge Studio",
   "main": "main.cjs",
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "scripts": {
     "start": "electron .",
     "pack:debug": "electron-builder --win portable --x64"

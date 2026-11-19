@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Star,
   Plus,
@@ -13,6 +13,7 @@ import {
 import { useRoomSync } from './hooks/useRoomSync';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useTheme } from './hooks/useTheme';
+import { getSavedAccent, initVoiceModules, saveAccent } from './utils/speech';
 import type { LessonMilestoneId, ModuleTab, VoiceAccent } from './types/lesson';
 import { WarmupModule } from './components/WarmupModule';
 import { VocabModule } from './components/VocabModule';
@@ -50,6 +51,7 @@ export default function App() {
   const {
     roomCode,
     connected,
+    selfId,
     participants,
     role,
     isInvitedStudent,
@@ -81,7 +83,7 @@ export default function App() {
     subscribeRtcSignal,
   } = useRoomSync();
 
-  const [accent, setAccent] = useState<VoiceAccent>('en-GB');
+  const [accent, setAccent] = useState<VoiceAccent>(() => getSavedAccent());
   const [speechRate, setSpeechRate] = useState<number>(() => {
     if (typeof window === 'undefined') return 1;
     const saved = window.localStorage.getItem('storybridge_speech_rate');
@@ -100,6 +102,15 @@ export default function App() {
     toggleFullscreen,
   } = useFullscreen();
   const { theme, setTheme } = useTheme();
+
+  useEffect(() => {
+    initVoiceModules();
+  }, []);
+
+  const handleChangeAccent = (nextAccent: VoiceAccent) => {
+    setAccent(nextAccent);
+    saveAccent(nextAccent);
+  };
 
   const handleChangeSpeechRate = (nextRate: number) => {
     const clamped = Math.max(0.5, Math.min(1.4, Math.round(nextRate * 20) / 20));
@@ -286,37 +297,34 @@ export default function App() {
               onOpenInviteModal={handleQuickInvite}
             />
 
-            {/* Audio Accent & Speed Parameters (Tutor only) */}
-            {role === 'tutor' && (
-              <>
-                <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setAccent('en-GB')}
-                    className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
-                      accent === 'en-GB' ? 'sb-seg-active' : 'sb-seg-idle'
-                    }`}
-                  >
-                    Audio UK
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAccent('en-US')}
-                    className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
-                      accent === 'en-US' ? 'sb-seg-active' : 'sb-seg-idle'
-                    }`}
-                  >
-                    Audio US
-                  </button>
-                </div>
+            {/* Audio Accent Modules (UK / US) & Speed Parameters */}
+            <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
+              <button
+                type="button"
+                onClick={() => handleChangeAccent('en-GB')}
+                className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                  accent === 'en-GB' ? 'sb-seg-active' : 'sb-seg-idle'
+                }`}
+              >
+                Audio UK
+              </button>
+              <button
+                type="button"
+                onClick={() => handleChangeAccent('en-US')}
+                className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                  accent === 'en-US' ? 'sb-seg-active' : 'sb-seg-idle'
+                }`}
+              >
+                Audio US
+              </button>
+            </div>
 
-                <SpeechSpeedControl
-                  speechRate={speechRate}
-                  accent={accent}
-                  onChangeRate={handleChangeSpeechRate}
-                />
-              </>
-            )}
+            <SpeechSpeedControl
+              speechRate={speechRate}
+              accent={accent}
+              onChangeRate={handleChangeSpeechRate}
+              onChangeAccent={handleChangeAccent}
+            />
 
             <button
               type="button"
@@ -895,6 +903,8 @@ export default function App() {
       <StudentVideoSlot
         roomCode={roomCode}
         connected={connected}
+        selfId={selfId}
+        participants={participants}
         role={role}
         studentName={activeStudent.name}
         studentCount={participants.filter((p) => p.role === 'student').length || 1}
