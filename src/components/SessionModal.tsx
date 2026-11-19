@@ -12,8 +12,12 @@ import {
   Globe,
   Settings,
   RotateCcw,
+  Lock,
+  Unlock,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
-import type { RoomParticipant, StudentProfile } from '../types/lesson';
+import type { ControlMode, RoomParticipant, StudentProfile } from '../types/lesson';
 
 export const DEFAULT_CLOUD_STUDIO_URL =
   'https://ais-dev-afm5mejj742ehjjk5blxlb-880439402821.europe-west2.run.app';
@@ -50,6 +54,10 @@ interface SessionModalProps {
   onClose: () => void;
   roomCode: string | null;
   connected: boolean;
+  controlMode: ControlMode;
+  audioSync: boolean;
+  onChangeControlMode: (mode: ControlMode) => void;
+  onChangeAudioSync: (enabled: boolean) => void;
   participants: RoomParticipant[];
   studentProfiles: StudentProfile[];
   activeStudent: StudentProfile;
@@ -63,6 +71,10 @@ export function SessionModal({
   onClose,
   roomCode,
   connected,
+  controlMode,
+  audioSync,
+  onChangeControlMode,
+  onChangeAudioSync,
   participants,
   studentProfiles,
   activeStudent,
@@ -450,6 +462,69 @@ export function SessionModal({
                     </div>
                   ))
                 )}
+              </div>
+            </div>
+
+            {/* Live Room Permissions & Audio Sync Controls */}
+            <div className="p-3.5 rounded-2xl sb-surface-soft border space-y-3">
+              <div className="text-xs font-bold sb-text-secondary">
+                Contrôle de la séance &amp; Son en direct
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    onChangeControlMode(controlMode === 'tutor-only' ? 'shared' : 'tutor-only')
+                  }
+                  aria-pressed={controlMode === 'tutor-only'}
+                  className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
+                    controlMode === 'tutor-only' ? 'sb-chip-solid' : 'sb-chip-idle'
+                  }`}
+                >
+                  {controlMode === 'tutor-only' ? (
+                    <Lock className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+                  ) : (
+                    <Unlock className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+                  )}
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold leading-tight">
+                      {controlMode === 'tutor-only'
+                        ? 'Main au professeur (Miroir élève)'
+                        : 'Contrôle partagé (Prof + Élève)'}
+                    </div>
+                    <div className="text-[10px] opacity-85 leading-snug">
+                      {controlMode === 'tutor-only'
+                        ? 'L’élève suit votre écran en direct sans pouvoir modifier.'
+                        : 'L’élève peut cliquer, écrire et manipuler avec vous.'}
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onChangeAudioSync(!audioSync)}
+                  aria-pressed={audioSync}
+                  className={`flex items-start gap-2.5 p-2.5 rounded-xl border text-left transition-colors cursor-pointer ${
+                    audioSync ? 'sb-chip-solid' : 'sb-chip-idle'
+                  }`}
+                >
+                  {audioSync ? (
+                    <Volume2 className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+                  ) : (
+                    <VolumeX className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
+                  )}
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold leading-tight">
+                      {audioSync ? 'Son synchronisé : Activé' : 'Son synchronisé : Désactivé'}
+                    </div>
+                    <div className="text-[10px] opacity-85 leading-snug">
+                      {audioSync
+                        ? 'Les mots lus en anglais sont entendus des deux côtés.'
+                        : 'Chacun écoute les mots uniquement sur son appareil.'}
+                    </div>
+                  </div>
+                </button>
               </div>
             </div>
 

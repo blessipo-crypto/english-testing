@@ -4,6 +4,17 @@ export type UserRole = 'tutor' | 'student';
 
 export type VoiceAccent = 'en-GB' | 'en-US';
 
+export type ControlMode = 'shared' | 'tutor-only';
+
+export interface RemoteAudioEvent {
+  text: string;
+  accent: VoiceAccent;
+  rate: number;
+  by: string;
+  fromRole: UserRole;
+  at: number;
+}
+
 export interface StudentProfile {
   id: string;
   name: string;
@@ -148,6 +159,8 @@ export interface RoomParticipant {
 
 export interface RoomState {
   roomCode: string;
+  controlMode: ControlMode;
+  audioSync: boolean;
   activeTab: ModuleTab;
   stars: number;
   sessionBaseStars: number;

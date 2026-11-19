@@ -32,6 +32,8 @@ interface WordbankItem {
 
 interface RoomState {
   roomCode: string;
+  controlMode: 'shared' | 'tutor-only';
+  audioSync: boolean;
   activeTab: 'warmup' | 'vocab' | 'builder' | 'roleplay' | 'board';
   stars: number;
   sessionBaseStars: number;
@@ -81,9 +83,10 @@ interface RoomState {
     showZones: boolean;
   };
   guide: {
-    subTab: 'guide' | 'builder';
+    subTab: 'tenses' | 'guide' | 'builder';
     section: 'irregular' | 'modals' | 'tenses' | 'prepositions';
     hideIrregularForms: boolean;
+    tensesCategory?: string;
   };
   recap: {
     subTab: 'writing' | 'board' | 'recap';
@@ -120,6 +123,8 @@ interface ClientMeta {
 function createInitialRoomState(roomCode: string): RoomState {
   return {
     roomCode,
+    controlMode: 'shared',
+    audioSync: true,
     activeTab: 'warmup',
     stars: 3,
     sessionBaseStars: 3,
@@ -169,7 +174,7 @@ function createInitialRoomState(roomCode: string): RoomState {
       showZones: true,
     },
     guide: {
-      subTab: 'guide',
+      subTab: 'tenses',
       section: 'irregular',
       hideIrregularForms: false,
     },
@@ -243,6 +248,8 @@ function loadStore() {
         rooms.set(code, {
           ...base,
           ...state,
+          controlMode: state.controlMode === 'tutor-only' ? 'tutor-only' : 'shared',
+          audioSync: typeof state.audioSync === 'boolean' ? state.audioSync : true,
           sessionBaseStars:
             typeof state.sessionBaseStars === 'number'
               ? state.sessionBaseStars
@@ -617,6 +624,8 @@ async function startServer() {
 
       const currentState = getOrCreateRoom(roomCode);
       const msgType = typeof msg.type === 'string' ? msg.type : '';
+      const isMirrorLockedForClient =
+        currentState.controlMode === 'tutor-only' && clientMeta.role === 'student';
 
       if (msgType === 'ping') {
         if (ws.readyState === WebSocket.OPEN) {
@@ -626,7 +635,26 @@ async function startServer() {
       }
 
       if (msgType === 'state:patch' && msg.patch && typeof msg.patch === 'object') {
-        const patch = msg.patch as Partial<RoomState>;
+        if (isMirrorLockedForClient) {
+          return;
+        }
+        const incomingPatch = msg.patch as Partial<RoomState>;
+        const patch: Partial<RoomState> = { ...incomingPatch };
+        if (clientMeta.role === 'tutor') {
+          if (patch.controlMode === 'shared' || patch.controlMode === 'tutor-only') {
+            currentState.controlMode = patch.controlMode;
+          } else {
+            delete patch.controlMode;
+          }
+          if (typeof patch.audioSync === 'boolean') {
+            currentState.audioSync = patch.audioSync;
+          } else {
+            delete patch.audioSync;
+          }
+        } else {
+          delete patch.controlMode;
+          delete patch.audioSync;
+        }
         if (patch.activeTab) currentState.activeTab = patch.activeTab;
         if (typeof patch.stars === 'number') currentState.stars = Math.max(0, Math.min(999, patch.stars));
         if (typeof patch.sessionBaseStars === 'number') {
@@ -671,27 +699,64 @@ async function startServer() {
           type: 'presence:update',
           participants: getParticipants(roomCode),
         });
+      } else if (msgType === 'audio:speak' && typeof msg.text === 'string') {
+        if (!currentState.audioSync) return;
+        const cleanText = msg.text.trim().slice(0, 500);
+        if (!cleanText) return;
+        const accent = msg.accent === 'en-US' ? 'en-US' : 'en-GB';
+        const rate =
+          typeof msg.rate === 'number' && Number.isFinite(msg.rate)
+            ? Math.max(0.5, Math.min(1.4, msg.rate))
+            : 1;
+        broadcastToRoom(
+          roomCode,
+          {
+            type: 'audio:speak',
+            text: cleanText,
+            accent,
+            rate,
+            by: clientMeta.name,
+            fromRole: clientMeta.role,
+          },
+          clientId
+        );
+      } else if (msgType === 'audio:stop') {
+        if (!currentState.audioSync) return;
+        broadcastToRoom(
+          roomCode,
+          {
+            type: 'audio:stop',
+            by: clientMeta.name,
+            fromRole: clientMeta.role,
+          },
+          clientId
+        );
       } else if (msgType === 'wordbank:add' && msg.item && typeof msg.item === 'object') {
+        if (isMirrorLockedForClient) return;
         const item = msg.item as WordbankItem;
         if (!item.id || currentState.wordbank.some((w) => w.id === item.id)) return;
         currentState.wordbank = [item, ...currentState.wordbank].slice(0, 100);
         scheduleSaveStore();
         broadcastToRoom(roomCode, { type: 'wordbank:added', item }, clientId);
       } else if (msgType === 'wordbank:remove' && typeof msg.id === 'string') {
+        if (isMirrorLockedForClient) return;
         currentState.wordbank = currentState.wordbank.filter((w) => w.id !== msg.id);
         scheduleSaveStore();
         broadcastToRoom(roomCode, { type: 'wordbank:removed', id: msg.id }, clientId);
       } else if (msgType === 'stroke:add' && msg.stroke && typeof msg.stroke === 'object') {
+        if (isMirrorLockedForClient) return;
         const stroke = msg.stroke as BoardStroke;
         if (!stroke.id || currentState.strokes.some((s) => s.id === stroke.id)) return;
         currentState.strokes = [...currentState.strokes, stroke].slice(-250);
         scheduleSaveStore();
         broadcastToRoom(roomCode, { type: 'stroke:added', stroke }, clientId);
       } else if (msgType === 'stroke:undo' && typeof msg.id === 'string') {
+        if (isMirrorLockedForClient) return;
         currentState.strokes = currentState.strokes.filter((s) => s.id !== msg.id);
         scheduleSaveStore();
         broadcastToRoom(roomCode, { type: 'stroke:removed', id: msg.id }, clientId);
       } else if (msgType === 'stroke:clear') {
+        if (isMirrorLockedForClient) return;
         currentState.strokes = [];
         scheduleSaveStore();
         broadcastToRoom(roomCode, { type: 'stroke:cleared' }, clientId);
@@ -701,6 +766,7 @@ async function startServer() {
         msg.stroke &&
         typeof msg.stroke === 'object'
       ) {
+        if (isMirrorLockedForClient) return;
         const stroke = msg.stroke as BoardStroke;
         const owner = msg.owner;
         const target =
@@ -725,6 +791,7 @@ async function startServer() {
         (msg.owner === 'tutor' || msg.owner === 'student') &&
         typeof msg.id === 'string'
       ) {
+        if (isMirrorLockedForClient) return;
         const owner = msg.owner;
         if (owner === 'tutor') {
           currentState.writingSpace.tutorStrokes =
@@ -743,6 +810,7 @@ async function startServer() {
         msgType === 'writing:stroke:clear' &&
         (msg.owner === 'tutor' || msg.owner === 'student')
       ) {
+        if (isMirrorLockedForClient) return;
         const owner = msg.owner;
         if (owner === 'tutor') {
           currentState.writingSpace.tutorStrokes = [];
@@ -756,6 +824,7 @@ async function startServer() {
           clientId
         );
       } else if (msgType === 'celebrate:star') {
+        if (isMirrorLockedForClient) return;
         currentState.stars = Math.min(999, currentState.stars + 1);
         scheduleSaveStore();
         broadcastToRoom(roomCode, {

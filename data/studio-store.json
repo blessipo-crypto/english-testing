@@ -1,0 +1,558 @@
+{
+  "rooms": {
+    "LNDN26": {
+      "roomCode": "LNDN26",
+      "activeTab": "board",
+      "stars": 3,
+      "sessionBaseStars": 3,
+      "completedModules": [],
+      "warmup": {
+        "mood": "happy",
+        "weather": null,
+        "promptIndex": 0,
+        "studentAnswer": ""
+      },
+      "vocab": {
+        "deckId": "hobbies",
+        "cardIndex": 0,
+        "blindMode": false,
+        "mode": "cards",
+        "matchedIds": []
+      },
+      "builder": {
+        "challengeIndex": 0,
+        "customPromptFr": "",
+        "customSentenceEn": "",
+        "isCustomActive": false,
+        "selectedIndices": [],
+        "checkedStatus": "idle"
+      },
+      "roleplay": {
+        "scenarioId": "cafe",
+        "activeLineIndex": 0,
+        "hideStudentLines": false,
+        "studentRole": "B",
+        "revealedIndices": []
+      },
+      "quiz": {
+        "subTab": "time",
+        "questionIndex": 0,
+        "answers": {}
+      },
+      "games": {
+        "activeGame": "wordsearch",
+        "themeId": "hobbies"
+      },
+      "timeModule": {
+        "mode": "challenge",
+        "hour": 3,
+        "minute": 45,
+        "isPm": true,
+        "showZones": true
+      },
+      "guide": {
+        "subTab": "guide",
+        "section": "irregular",
+        "hideIrregularForms": false
+      },
+      "recap": {
+        "subTab": "writing",
+        "studentName": "",
+        "oralFluency": "En progrès",
+        "oralPronunciation": "Claire",
+        "oralComprehension": "Bonne",
+        "oralNotes": "",
+        "writtenSyntax": "En progrès",
+        "writtenSpelling": "Correcte",
+        "writtenGrammar": "En cours",
+        "writtenNotes": "",
+        "nextGoal": "Relire à voix haute les mots du carnet (5 min)"
+      },
+      "writingSpace": {
+        "tutorText": "",
+        "studentText": "Hello\n",
+        "tutorStrokes": [],
+        "studentStrokes": []
+      },
+      "wordbank": [
+        {
+          "id": "seed-1",
+          "en": "sketchbook",
+          "fr": "carnet de croquis",
+          "note": "Prononcer : skètch-bouk",
+          "addedAt": 1795093781629
+        },
+        {
+          "id": "seed-2",
+          "en": "Would you like...?",
+          "fr": "Voudriez-vous... ? (poli)",
+          "note": "Très utile au café ou au magasin",
+          "addedAt": 1795093811629
+        }
+      ],
+      "strokes": [
+        {
+          "id": "st-mwnspbtg-y3qe",
+          "color": "#4338CA",
+          "width": 3,
+          "points": [
+            {
+              "x": 843.782303792425,
+              "y": 313.45680245123657,
+              "p": 1
+            },
+            {
+              "x": 842.8876416596164,
+              "y": 315.24647513286544,
+              "p": 1
+            },
+            {
+              "x": 841.9926928067567,
+              "y": 320.6151586684259,
+              "p": 1
+            },
+            {
+              "x": 839.3085152616304,
+              "y": 331.3526691006866,
+              "p": 1
+            },
+            {
+              "x": 836.6241465698034,
+              "y": 349.2484879630901,
+              "p": 1
+            },
+            {
+              "x": 833.9396823046261,
+              "y": 372.5130859351472,
+              "p": 1
+            },
+            {
+              "x": 833.0450201718176,
+              "y": 395.77768390720433,
+              "p": 1
+            },
+            {
+              "x": 832.1500713189579,
+              "y": 416.35789232443466,
+              "p": 1
+            },
+            {
+              "x": 831.255313612799,
+              "y": 431.5693694190578,
+              "p": 1
+            },
+            {
+              "x": 830.3605559066401,
+              "y": 444.99131719319195,
+              "p": 1
+            },
+            {
+              "x": 829.4657026271309,
+              "y": 456.6235444986507,
+              "p": 1
+            },
+            {
+              "x": 829.4657026271309,
+              "y": 465.57152561042227,
+              "p": 1
+            },
+            {
+              "x": 829.4657026271309,
+              "y": 474.51936336105416,
+              "p": 1
+            },
+            {
+              "x": 828.5709449209719,
+              "y": 482.57257981258124,
+              "p": 1
+            },
+            {
+              "x": 827.676187214813,
+              "y": 489.73084045567737,
+              "p": 1
+            },
+            {
+              "x": 826.7815250820046,
+              "y": 495.9943842255756,
+              "p": 1
+            },
+            {
+              "x": 825.886576229145,
+              "y": 502.2579279954738,
+              "p": 1
+            },
+            {
+              "x": 824.9919140963365,
+              "y": 506.73189465783634,
+              "p": 1
+            },
+            {
+              "x": 824.9919140963365,
+              "y": 510.31104887290763,
+              "p": 1
+            },
+            {
+              "x": 824.0970608168273,
+              "y": 513.8902986620722,
+              "p": 1
+            },
+            {
+              "x": 824.0970608168273,
+              "y": 517.4694528771436,
+              "p": 1
+            },
+            {
+              "x": 823.2022075373179,
+              "y": 520.1538424319704,
+              "p": 1
+            },
+            {
+              "x": 823.2022075373179,
+              "y": 522.838136412704,
+              "p": 1
+            },
+            {
+              "x": 823.2022075373179,
+              "y": 524.627809094333,
+              "p": 1
+            },
+            {
+              "x": 822.307449831159,
+              "y": 526.4173862018686,
+              "p": 1
+            },
+            {
+              "x": 822.307449831159,
+              "y": 528.2069633094043,
+              "p": 1
+            },
+            {
+              "x": 822.307449831159,
+              "y": 529.1016801826022,
+              "p": 1
+            },
+            {
+              "x": 821.4126921250001,
+              "y": 529.99654041694,
+              "p": 1
+            },
+            {
+              "x": 821.4126921250001,
+              "y": 530.8913528642312,
+              "p": 1
+            },
+            {
+              "x": 820.5180299921916,
+              "y": 531.7860697374291,
+              "p": 1
+            },
+            {
+              "x": 819.623081139332,
+              "y": 531.7860697374291,
+              "p": 1
+            },
+            {
+              "x": 819.623081139332,
+              "y": 530.8913528642312,
+              "p": 1
+            },
+            {
+              "x": 819.623081139332,
+              "y": 528.2069633094043,
+              "p": 1
+            },
+            {
+              "x": 820.5180299921916,
+              "y": 523.7329966470418,
+              "p": 1
+            },
+            {
+              "x": 822.307449831159,
+              "y": 516.5745926428058,
+              "p": 1
+            },
+            {
+              "x": 824.0970608168273,
+              "y": 508.521471765372,
+              "p": 1
+            },
+            {
+              "x": 826.7815250820046,
+              "y": 498.678821567449,
+              "p": 1
+            },
+            {
+              "x": 829.4657026271309,
+              "y": 487.9412633481416,
+              "p": 1
+            },
+            {
+              "x": 832.1500713189579,
+              "y": 478.99333002341666,
+              "p": 1
+            },
+            {
+              "x": 834.834440010785,
+              "y": 469.1506320384471,
+              "p": 1
+            },
+            {
+              "x": 836.6241465698034,
+              "y": 461.09755894805977,
+              "p": 1
+            },
+            {
+              "x": 838.4135664087707,
+              "y": 452.14957783628813,
+              "p": 1
+            },
+            {
+              "x": 840.203177394439,
+              "y": 444.0964569588542,
+              "p": 1
+            },
+            {
+              "x": 841.0979351005979,
+              "y": 436.04338386846695,
+              "p": 1
+            },
+            {
+              "x": 841.9926928067567,
+              "y": 427.9902629910331,
+              "p": 1
+            },
+            {
+              "x": 842.8876416596164,
+              "y": 421.7267192211349,
+              "p": 1
+            },
+            {
+              "x": 842.8876416596164,
+              "y": 416.35789232443466,
+              "p": 1
+            },
+            {
+              "x": 842.8876416596164,
+              "y": 411.8839256620721,
+              "p": 1
+            },
+            {
+              "x": 842.8876416596164,
+              "y": 408.30477144700075,
+              "p": 1
+            },
+            {
+              "x": 842.8876416596164,
+              "y": 404.7256650189759,
+              "p": 1
+            },
+            {
+              "x": 843.782303792425,
+              "y": 402.04122767710254,
+              "p": 1
+            },
+            {
+              "x": 843.782303792425,
+              "y": 399.3568381222757,
+              "p": 1
+            }
+          ]
+        },
+        {
+          "id": "st-mwntjays-k38m",
+          "color": "#4338CA",
+          "width": 3,
+          "points": [
+            {
+              "x": 716.7227910104981,
+              "y": 193.55473005644944,
+              "p": 1
+            },
+            {
+              "x": 713.1436646125122,
+              "y": 200.7130623801155,
+              "p": 1
+            },
+            {
+              "x": 706.8801695226992,
+              "y": 224.87244890594047,
+              "p": 1
+            },
+            {
+              "x": 697.0375480349004,
+              "y": 266.0328418468778,
+              "p": 1
+            },
+            {
+              "x": 690.7740529450874,
+              "y": 316.14119200606336,
+              "p": 1
+            },
+            {
+              "x": 684.5105578552746,
+              "y": 371.61836906194924,
+              "p": 1
+            },
+            {
+              "x": 680.9314792439638,
+              "y": 427.09540275669536,
+              "p": 1
+            },
+            {
+              "x": 681.8261891634476,
+              "y": 475.4141758083453,
+              "p": 1
+            },
+            {
+              "x": 688.0896842532604,
+              "y": 515.6798757696079,
+              "p": 1
+            },
+            {
+              "x": 697.0375480349004,
+              "y": 564.8933656944557,
+              "p": 1
+            }
+          ]
+        },
+        {
+          "id": "st-mwntjbc6-p8e2",
+          "color": "#4338CA",
+          "width": 3,
+          "points": [
+            {
+              "x": 831.255313612799,
+              "y": 204.29224048871015,
+              "p": 1
+            },
+            {
+              "x": 827.676187214813,
+              "y": 215.0297031339243,
+              "p": 1
+            },
+            {
+              "x": 822.307449831159,
+              "y": 234.71512299738674,
+              "p": 1
+            },
+            {
+              "x": 813.3595860495191,
+              "y": 280.3495064942099,
+              "p": 1
+            },
+            {
+              "x": 804.4117222678792,
+              "y": 350.1433004103812,
+              "p": 1
+            },
+            {
+              "x": 799.9379337370847,
+              "y": 428.884979864231,
+              "p": 1
+            },
+            {
+              "x": 794.5691007800804,
+              "y": 535.3653195265936,
+              "p": 1
+            }
+          ]
+        }
+      ],
+      "boardNote": "how are you?\nFine\n\n"
+    },
+    "TEST": {
+      "roomCode": "TEST",
+      "activeTab": "warmup",
+      "stars": 3,
+      "sessionBaseStars": 3,
+      "completedModules": [],
+      "warmup": {
+        "mood": null,
+        "weather": null,
+        "promptIndex": 0,
+        "studentAnswer": ""
+      },
+      "vocab": {
+        "deckId": "hobbies",
+        "cardIndex": 0,
+        "blindMode": false,
+        "mode": "cards",
+        "matchedIds": []
+      },
+      "builder": {
+        "challengeIndex": 0,
+        "customPromptFr": "",
+        "customSentenceEn": "",
+        "isCustomActive": false,
+        "selectedIndices": [],
+        "checkedStatus": "idle"
+      },
+      "roleplay": {
+        "scenarioId": "cafe",
+        "activeLineIndex": 0,
+        "hideStudentLines": false,
+        "studentRole": "B",
+        "revealedIndices": []
+      },
+      "quiz": {
+        "subTab": "games",
+        "questionIndex": 0,
+        "answers": {}
+      },
+      "games": {
+        "activeGame": "wordsearch",
+        "themeId": "hobbies"
+      },
+      "timeModule": {
+        "mode": "explore",
+        "hour": 3,
+        "minute": 15,
+        "isPm": true,
+        "showZones": true
+      },
+      "guide": {
+        "subTab": "guide",
+        "section": "irregular",
+        "hideIrregularForms": false
+      },
+      "recap": {
+        "subTab": "board",
+        "studentName": "",
+        "oralFluency": "En progrès",
+        "oralPronunciation": "Claire",
+        "oralComprehension": "Bonne",
+        "oralNotes": "",
+        "writtenSyntax": "En progrès",
+        "writtenSpelling": "Correcte",
+        "writtenGrammar": "En cours",
+        "writtenNotes": "",
+        "nextGoal": "Relire à voix haute les mots du carnet (5 min)"
+      },
+      "writingSpace": {
+        "tutorText": "",
+        "studentText": "",
+        "tutorStrokes": [],
+        "studentStrokes": []
+      },
+      "wordbank": [
+        {
+          "id": "seed-1",
+          "en": "sketchbook",
+          "fr": "carnet de croquis",
+          "note": "Prononcer : skètch-bouk",
+          "addedAt": 1795093972415
+        },
+        {
+          "id": "seed-2",
+          "en": "Would you like...?",
+          "fr": "Voudriez-vous... ? (poli)",
+          "note": "Très utile au café ou au magasin",
+          "addedAt": 1795094002415
+        }
+      ],
+      "strokes": [],
+      "boardNote": ""
+    }
+  },
+  "savedRecaps": []
+}

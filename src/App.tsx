@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Star,
   Plus,
@@ -9,11 +9,21 @@ import {
   Minimize2,
   X,
   Download,
+  Lock,
+  Unlock,
+  Volume2,
+  VolumeX,
+  Eye,
 } from 'lucide-react';
 import { useRoomSync } from './hooks/useRoomSync';
 import { useFullscreen } from './hooks/useFullscreen';
 import { useTheme } from './hooks/useTheme';
-import { getSavedAccent, initVoiceModules, saveAccent } from './utils/speech';
+import {
+  getSavedAccent,
+  initVoiceModules,
+  saveAccent,
+  unlockAudioPlayback,
+} from './utils/speech';
 import type { LessonMilestoneId, ModuleTab, VoiceAccent } from './types/lesson';
 import { WarmupModule } from './components/WarmupModule';
 import { VocabModule } from './components/VocabModule';
@@ -64,6 +74,12 @@ export default function App() {
     removeStudentProfile,
     state,
     lastCelebrationAt,
+    remoteAudioNotice,
+    blockedRemoteAudio,
+    dismissRemoteAudioNotice,
+    replayBlockedRemoteAudio,
+    setControlMode,
+    setAudioSync,
     joinRoom,
     leaveRoom,
     patchState,
@@ -102,10 +118,34 @@ export default function App() {
     toggleFullscreen,
   } = useFullscreen();
   const { theme, setTheme } = useTheme();
+  const mainRef = useRef<HTMLElement | null>(null);
+
+  const isMirrorLocked = role === 'student' && state.controlMode === 'tutor-only';
 
   useEffect(() => {
     initVoiceModules();
   }, []);
+
+  useEffect(() => {
+    const handleFirstGesture = () => {
+      unlockAudioPlayback();
+    };
+    document.addEventListener('pointerdown', handleFirstGesture, { once: true, passive: true });
+    document.addEventListener('keydown', handleFirstGesture, { once: true, passive: true });
+    return () => {
+      document.removeEventListener('pointerdown', handleFirstGesture);
+      document.removeEventListener('keydown', handleFirstGesture);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (mainRef.current) {
+      (mainRef.current as HTMLElement & { inert: boolean }).inert = isMirrorLocked;
+    }
+    if (isMirrorLocked) {
+      setIsKeyboardOpen(false);
+    }
+  }, [isMirrorLocked]);
 
   const handleChangeAccent = (nextAccent: VoiceAccent) => {
     setAccent(nextAccent);
@@ -172,8 +212,11 @@ export default function App() {
           {/* Zone 1: Single-element brand wordmark with minimalist geometric emblem */}
           <button
             type="button"
+            disabled={isMirrorLocked}
             onClick={() => patchState({ activeTab: 'warmup' })}
-            className="inline-flex items-center gap-2.5 font-display text-lg font-bold tracking-wide sb-header-brand whitespace-nowrap shrink-0 cursor-pointer group"
+            className={`inline-flex items-center gap-2.5 font-display text-lg font-bold tracking-wide sb-header-brand whitespace-nowrap shrink-0 group ${
+              isMirrorLocked ? 'cursor-default' : 'cursor-pointer'
+            }`}
           >
             <svg
               viewBox="0 0 28 28"
@@ -215,7 +258,9 @@ export default function App() {
           {/* Zone 2: 5 concise single-line text nav links */}
           <nav
             aria-label="Modules du cours"
-            className="hidden md:flex items-center gap-6"
+            className={`hidden md:flex items-center gap-6 ${
+              isMirrorLocked ? 'pointer-events-none opacity-75 select-none' : ''
+            }`}
           >
             {NAV_ITEMS.map((item) => {
               const active = state.activeTab === item.id;
@@ -223,6 +268,7 @@ export default function App() {
                 <button
                   key={item.id}
                   type="button"
+                  disabled={isMirrorLocked}
                   onClick={() => patchState({ activeTab: item.id })}
                   className={`py-2 text-sm font-bold tracking-wide border-b-2 transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
                     active ? 'sb-header-nav-active' : 'sb-header-nav-idle'
@@ -245,8 +291,9 @@ export default function App() {
                 {roomCode ? `Salle ${roomCode}` : 'Session Visio'}
               </button>
             ) : (
-              <div className="px-3.5 py-2 rounded-xl border sb-header-pill text-xs font-bold tracking-wide whitespace-nowrap shrink-0 transition-colors duration-300">
-                {roomCode ? `Salle ${roomCode}` : activeStudent.name}
+              <div className="px-3.5 py-2 rounded-xl border sb-header-pill text-xs font-bold tracking-wide whitespace-nowrap shrink-0 transition-colors duration-300 inline-flex items-center gap-1.5">
+                {isMirrorLocked && <Eye className="w-3.5 h-3.5" aria-hidden="true" />}
+                <span>{roomCode ? `Salle ${roomCode}` : activeStudent.name}</span>
               </div>
             )}
           </div>
@@ -259,7 +306,11 @@ export default function App() {
       </header>
 
       {/* Mobile Navigation Strip (below header, compact) */}
-      <div className="md:hidden sb-toolbar overflow-x-auto">
+      <div
+        className={`md:hidden sb-toolbar overflow-x-auto ${
+          isMirrorLocked ? 'pointer-events-none opacity-75 select-none' : ''
+        }`}
+      >
         <div className="flex items-center gap-2 px-4 py-2">
           {NAV_ITEMS.map((item) => {
             const active = state.activeTab === item.id;
@@ -267,6 +318,7 @@ export default function App() {
               <button
                 key={item.id}
                 type="button"
+                disabled={isMirrorLocked}
                 onClick={() => patchState({ activeTab: item.id })}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold tracking-wide whitespace-nowrap shrink-0 cursor-pointer border transition-colors duration-300 ${
                   active ? 'sb-chip-solid border-b-2' : 'border-transparent sb-seg-idle'
@@ -298,9 +350,14 @@ export default function App() {
             />
 
             {/* Audio Accent Modules (UK / US) & Speed Parameters */}
-            <div className="flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl">
+            <div
+              className={`flex items-center gap-1 p-0.5 sb-seg-track border rounded-xl ${
+                isMirrorLocked ? 'pointer-events-none opacity-65 select-none' : ''
+              }`}
+            >
               <button
                 type="button"
+                disabled={isMirrorLocked}
                 onClick={() => handleChangeAccent('en-GB')}
                 className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
                   accent === 'en-GB' ? 'sb-seg-active' : 'sb-seg-idle'
@@ -310,6 +367,7 @@ export default function App() {
               </button>
               <button
                 type="button"
+                disabled={isMirrorLocked}
                 onClick={() => handleChangeAccent('en-US')}
                 className={`px-2.5 py-1 text-xs font-bold tracking-wide rounded-lg transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
                   accent === 'en-US' ? 'sb-seg-active' : 'sb-seg-idle'
@@ -328,11 +386,12 @@ export default function App() {
 
             <button
               type="button"
+              disabled={isMirrorLocked}
               onClick={() => setIsWritingDrawerOpen((v) => !v)}
               aria-pressed={isWritingDrawerOpen}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
-                isWritingDrawerOpen ? 'sb-chip-danger-solid' : 'sb-chip-idle'
-              }`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 ${
+                isMirrorLocked ? 'pointer-events-none opacity-60 cursor-default' : 'cursor-pointer'
+              } ${isWritingDrawerOpen ? 'sb-chip-danger-solid' : 'sb-chip-idle'}`}
             >
               <PenLine
                 className={`w-3.5 h-3.5 ${isWritingDrawerOpen ? 'text-white' : 'sb-text-accent'}`}
@@ -343,15 +402,66 @@ export default function App() {
 
             <button
               type="button"
+              disabled={isMirrorLocked}
               onClick={() => setIsKeyboardOpen((v) => !v)}
               aria-pressed={isKeyboardOpen}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
-                isKeyboardOpen ? 'sb-chip-solid' : 'sb-chip-idle'
-              }`}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 ${
+                isMirrorLocked ? 'pointer-events-none opacity-60 cursor-default' : 'cursor-pointer'
+              } ${isKeyboardOpen ? 'sb-chip-solid' : 'sb-chip-idle'}`}
             >
               <Keyboard className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Clavier écran</span>
             </button>
+
+            {role === 'tutor' && (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setControlMode(state.controlMode === 'tutor-only' ? 'shared' : 'tutor-only')
+                  }
+                  aria-pressed={state.controlMode === 'tutor-only'}
+                  title={
+                    state.controlMode === 'tutor-only'
+                      ? 'Mode Miroir activé : seul le professeur contrôle l’écran. Cliquer pour repasser en mode partagé.'
+                      : 'Cliquer pour garder la main uniquement (l’élève verra l’écran en mode miroir lecture seule).'
+                  }
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.controlMode === 'tutor-only' ? 'sb-chip-danger-solid' : 'sb-chip-idle'
+                  }`}
+                >
+                  {state.controlMode === 'tutor-only' ? (
+                    <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+                  ) : (
+                    <Unlock className="w-3.5 h-3.5 sb-text-accent" aria-hidden="true" />
+                  )}
+                  <span>
+                    {state.controlMode === 'tutor-only' ? 'Main Prof seul (Miroir)' : 'Main partagée'}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAudioSync(!state.audioSync)}
+                  aria-pressed={state.audioSync}
+                  title={
+                    state.audioSync
+                      ? 'Son synchronisé actif : chaque mot anglais écouté par l’élève ou le professeur est diffusé en direct des deux côtés.'
+                      : 'Son synchronisé coupé : chacun écoute uniquement sur son appareil.'
+                  }
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.audioSync ? 'sb-chip-solid' : 'sb-chip-idle'
+                  }`}
+                >
+                  {state.audioSync ? (
+                    <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
+                  ) : (
+                    <VolumeX className="w-3.5 h-3.5" aria-hidden="true" />
+                  )}
+                  <span>{state.audioSync ? 'Son synchro : ON' : 'Son synchro : OFF'}</span>
+                </button>
+              </>
+            )}
 
             <button
               type="button"
@@ -399,7 +509,7 @@ export default function App() {
 
             {/* Real WebSocket connection state (only when room active) */}
             {roomCode && (
-              <div className="inline-flex items-center gap-1.5 text-xs sb-text-secondary pl-1">
+              <div className="inline-flex items-center gap-2 text-xs sb-text-secondary pl-1">
                 {connected ? (
                   <>
                     <span
@@ -410,6 +520,12 @@ export default function App() {
                       En direct · {participants.length} connecté
                       {participants.length > 1 ? 's' : ''}
                     </span>
+                    {role === 'student' && state.audioSync && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border sb-chip-active text-[11px] font-bold">
+                        <Volume2 className="w-3 h-3 sb-text-accent" aria-hidden="true" />
+                        Son synchro
+                      </span>
+                    )}
                   </>
                 ) : (
                   <span className="sb-text-reward font-semibold">Connexion à la salle...</span>
@@ -420,15 +536,17 @@ export default function App() {
 
           {/* Lesson Progress & Session Star Counter */}
           <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-            <LessonProgressWidget
-              completedModules={state.completedModules}
-              stars={state.stars}
-              sessionBaseStars={state.sessionBaseStars}
-              role={role}
-              onSelectMilestone={handleSelectMilestone}
-              onToggleMilestone={handleToggleMilestone}
-              onResetProgress={resetLessonProgress}
-            />
+            <div className={isMirrorLocked ? 'pointer-events-none opacity-75' : ''}>
+              <LessonProgressWidget
+                completedModules={state.completedModules}
+                stars={state.stars}
+                sessionBaseStars={state.sessionBaseStars}
+                role={role}
+                onSelectMilestone={handleSelectMilestone}
+                onToggleMilestone={handleToggleMilestone}
+                onResetProgress={resetLessonProgress}
+              />
+            </div>
 
             <div
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border sb-reward-pill text-xs font-bold tracking-wide tabular-nums transition-transform ${
@@ -467,6 +585,45 @@ export default function App() {
         </div>
       </div>
 
+      {isMirrorLocked && (
+        <div className="sb-status-warn border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2 text-xs font-bold">
+            <div className="inline-flex items-center gap-2">
+              <Eye className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>
+                Mode Miroir Professeur actif — Vous suivez l’écran du professeur en direct sans pouvoir modifier les exercices.
+              </span>
+            </div>
+            {state.audioSync && (
+              <span className="inline-flex items-center gap-1 text-[11px] opacity-90">
+                <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
+                Écoute anglaise synchronisée en temps réel
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {blockedRemoteAudio && (
+        <div className="sb-status-warn border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2">
+              <Volume2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>
+                Son synchronisé en attente (« {blockedRemoteAudio.text} ») : votre navigateur demande un clic pour autoriser l’écoute en direct.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={replayBlockedRemoteAudio}
+              className="px-3 py-1 rounded-lg manga-btn-primary text-xs font-bold cursor-pointer shrink-0"
+            >
+              Activer &amp; écouter en direct
+            </button>
+          </div>
+        </div>
+      )}
+
       {fullscreenNotice && (
         <div className="sb-status-warn border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between gap-3 text-xs font-semibold">
@@ -485,9 +642,11 @@ export default function App() {
 
       {/* Main Content Stage */}
       <main
+        ref={mainRef}
+        aria-readonly={isMirrorLocked || undefined}
         className={`flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-6 transition-[padding] duration-150 ${
           isFullscreen ? 'max-w-[1440px] py-5' : 'max-w-7xl py-8'
-        }`}
+        } ${isMirrorLocked ? 'pointer-events-none select-none' : ''}`}
       >
         {isWritingDrawerOpen &&
           !(state.activeTab === 'board' && state.recap.subTab === 'writing') && (
@@ -891,6 +1050,10 @@ export default function App() {
           onClose={() => setIsSessionModalOpen(false)}
           roomCode={roomCode}
           connected={connected}
+          controlMode={state.controlMode}
+          audioSync={state.audioSync}
+          onChangeControlMode={setControlMode}
+          onChangeAudioSync={setAudioSync}
           participants={participants}
           studentProfiles={studentProfiles}
           activeStudent={activeStudent}
@@ -898,6 +1061,35 @@ export default function App() {
           onJoinRoom={joinRoom}
           onLeaveRoom={leaveRoom}
         />
+      )}
+
+      {remoteAudioNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-[max(4.5rem,env(safe-area-inset-bottom))] left-[max(1rem,env(safe-area-inset-left))] z-40 max-w-sm manga-panel-sm px-3.5 py-2.5 flex items-center gap-2.5 shadow-xl"
+        >
+          <span className="p-1.5 rounded-lg sb-chip-solid shrink-0">
+            <Volume2 className="w-3.5 h-3.5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0 flex-1 text-xs">
+            <div className="font-bold sb-text-primary truncate">
+              {remoteAudioNotice.fromRole === 'tutor' ? 'Professeur' : remoteAudioNotice.by}{' '}
+              écoute ({remoteAudioNotice.accent === 'en-GB' ? 'UK' : 'US'})
+            </div>
+            <div className="sb-text-accent font-semibold truncate">
+              « {remoteAudioNotice.text} »
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={dismissRemoteAudioNotice}
+            aria-label="Fermer la notification audio"
+            className="p-1 rounded sb-text-muted hover:sb-text-primary shrink-0 cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" aria-hidden="true" />
+          </button>
+        </div>
       )}
 
       <StudentVideoSlot

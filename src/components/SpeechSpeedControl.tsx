@@ -255,7 +255,7 @@ export function SpeechSpeedControl({
                 </button>
                 <button
                   type="button"
-                  onClick={stopSpeaking}
+                  onClick={() => stopSpeaking()}
                   className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border sb-chip-idle text-xs font-bold cursor-pointer"
                 >
                   <Square className="w-3 h-3" aria-hidden="true" />

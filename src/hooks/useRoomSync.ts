@@ -1,16 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type {
   BoardStroke,
+  ControlMode,
   LessonMilestoneId,
+  RemoteAudioEvent,
   RoomParticipant,
   RoomState,
   StudentProfile,
   UserRole,
+  VoiceAccent,
   WordbankItem,
 } from '../types/lesson';
+import {
+  registerAudioSyncBridge,
+  speakEnglish,
+  stopSpeaking,
+  unlockAudioPlayback,
+  type AudioSyncSpeakPayload,
+} from '../utils/speech';
 
 const DEFAULT_LOCAL_STATE: RoomState = {
   roomCode: 'SOLO',
+  controlMode: 'shared',
+  audioSync: true,
   activeTab: 'warmup',
   stars: 3,
   sessionBaseStars: 3,
@@ -152,6 +164,8 @@ function normalizeLoadedState(raw: string | null, fallbackName?: string): RoomSt
     return {
       ...base,
       ...parsed,
+      controlMode: parsed.controlMode === 'tutor-only' ? 'tutor-only' : 'shared',
+      audioSync: typeof parsed.audioSync === 'boolean' ? parsed.audioSync : true,
       sessionBaseStars:
         typeof parsed.sessionBaseStars === 'number'
           ? parsed.sessionBaseStars
@@ -329,9 +343,16 @@ export function useRoomSync() {
   const [selfId, setSelfId] = useState<string | null>(null);
   const [participants, setParticipants] = useState<RoomParticipant[]>([]);
   const [lastCelebrationAt, setLastCelebrationAt] = useState<number>(0);
+  const [remoteAudioNotice, setRemoteAudioNotice] = useState<RemoteAudioEvent | null>(null);
+  const [blockedRemoteAudio, setBlockedRemoteAudio] = useState<AudioSyncSpeakPayload | null>(null);
 
   const activeStudentNameRef = useRef(activeStudent.name);
   activeStudentNameRef.current = activeStudent.name;
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const roleRef = useRef(role);
+  roleRef.current = role;
+  const audioNoticeTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -548,6 +569,39 @@ export function useRoomSync() {
         } else if (msg.type === 'star:celebrated' && typeof msg.stars === 'number') {
           setState((prev) => ({ ...prev, stars: msg.stars as number }));
           setLastCelebrationAt(Date.now());
+        } else if (msg.type === 'audio:speak' && typeof msg.text === 'string') {
+          if (!stateRef.current.audioSync) return;
+          const accent: VoiceAccent = msg.accent === 'en-US' ? 'en-US' : 'en-GB';
+          const rate =
+            typeof msg.rate === 'number' && Number.isFinite(msg.rate)
+              ? Math.max(0.5, Math.min(1.4, msg.rate))
+              : 1;
+          const fromRole: UserRole = msg.fromRole === 'tutor' ? 'tutor' : 'student';
+          const by =
+            typeof msg.by === 'string' && msg.by.trim()
+              ? msg.by.trim()
+              : fromRole === 'tutor'
+                ? 'Professeur'
+                : 'Élève';
+          setBlockedRemoteAudio(null);
+          setRemoteAudioNotice({
+            text: msg.text,
+            accent,
+            rate,
+            by,
+            fromRole,
+            at: Date.now(),
+          });
+          if (audioNoticeTimerRef.current) {
+            window.clearTimeout(audioNoticeTimerRef.current);
+          }
+          audioNoticeTimerRef.current = window.setTimeout(() => {
+            setRemoteAudioNotice(null);
+          }, 4500);
+          speakEnglish(msg.text, { accent, rate, fromRemote: true });
+        } else if (msg.type === 'audio:stop') {
+          if (!stateRef.current.audioSync) return;
+          stopSpeaking({ broadcast: false });
         } else if (typeof msg.type === 'string' && msg.type.startsWith('rtc:')) {
           const signal = {
             type: msg.type,
@@ -586,6 +640,39 @@ export function useRoomSync() {
     };
   }, [roomCode, role]);
 
+  useEffect(() => {
+    if (!roomCode || !connected || !state.audioSync) {
+      registerAudioSyncBridge(null);
+      if (!roomCode || !state.audioSync) {
+        setRemoteAudioNotice(null);
+        setBlockedRemoteAudio(null);
+      }
+      return;
+    }
+    registerAudioSyncBridge({
+      onSpeak: (payload) => {
+        sendMessage({ type: 'audio:speak', ...payload });
+      },
+      onStop: () => {
+        sendMessage({ type: 'audio:stop' });
+      },
+      onAutoplayBlocked: (payload) => {
+        setBlockedRemoteAudio(payload);
+      },
+    });
+    return () => {
+      registerAudioSyncBridge(null);
+    };
+  }, [roomCode, connected, state.audioSync, sendMessage]);
+
+  useEffect(() => {
+    return () => {
+      if (audioNoticeTimerRef.current) {
+        window.clearTimeout(audioNoticeTimerRef.current);
+      }
+    };
+  }, []);
+
   const joinRoom = useCallback((code: string) => {
     const normalized = code.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 12) || 'LNDN';
     setRoomCode(normalized);
@@ -612,31 +699,84 @@ export function useRoomSync() {
     setState(loadSavedSoloState(activeStudentId, activeStudentNameRef.current));
   }, [activeStudentId]);
 
+  const isStudentMirrorLocked = useCallback(() => {
+    return roleRef.current === 'student' && stateRef.current.controlMode === 'tutor-only';
+  }, []);
+
   const patchState = useCallback(
     (patch: Partial<RoomState>) => {
+      if (isStudentMirrorLocked()) return;
+      const sanitizedPatch: Partial<RoomState> = { ...patch };
+      if (roleRef.current !== 'tutor') {
+        delete sanitizedPatch.controlMode;
+        delete sanitizedPatch.audioSync;
+      }
       setState((prev) => ({
         ...prev,
-        ...patch,
-        warmup: patch.warmup ? { ...prev.warmup, ...patch.warmup } : prev.warmup,
-        vocab: patch.vocab ? { ...prev.vocab, ...patch.vocab } : prev.vocab,
-        builder: patch.builder ? { ...prev.builder, ...patch.builder } : prev.builder,
-        roleplay: patch.roleplay ? { ...prev.roleplay, ...patch.roleplay } : prev.roleplay,
-        quiz: patch.quiz ? { ...prev.quiz, ...patch.quiz } : prev.quiz,
-        games: patch.games ? { ...prev.games, ...patch.games } : prev.games,
-        timeModule: patch.timeModule ? { ...prev.timeModule, ...patch.timeModule } : prev.timeModule,
-        guide: patch.guide ? { ...prev.guide, ...patch.guide } : prev.guide,
-        recap: patch.recap ? { ...prev.recap, ...patch.recap } : prev.recap,
-        writingSpace: patch.writingSpace
-          ? { ...prev.writingSpace, ...patch.writingSpace }
+        ...sanitizedPatch,
+        warmup: sanitizedPatch.warmup
+          ? { ...prev.warmup, ...sanitizedPatch.warmup }
+          : prev.warmup,
+        vocab: sanitizedPatch.vocab ? { ...prev.vocab, ...sanitizedPatch.vocab } : prev.vocab,
+        builder: sanitizedPatch.builder
+          ? { ...prev.builder, ...sanitizedPatch.builder }
+          : prev.builder,
+        roleplay: sanitizedPatch.roleplay
+          ? { ...prev.roleplay, ...sanitizedPatch.roleplay }
+          : prev.roleplay,
+        quiz: sanitizedPatch.quiz ? { ...prev.quiz, ...sanitizedPatch.quiz } : prev.quiz,
+        games: sanitizedPatch.games ? { ...prev.games, ...sanitizedPatch.games } : prev.games,
+        timeModule: sanitizedPatch.timeModule
+          ? { ...prev.timeModule, ...sanitizedPatch.timeModule }
+          : prev.timeModule,
+        guide: sanitizedPatch.guide ? { ...prev.guide, ...sanitizedPatch.guide } : prev.guide,
+        recap: sanitizedPatch.recap ? { ...prev.recap, ...sanitizedPatch.recap } : prev.recap,
+        writingSpace: sanitizedPatch.writingSpace
+          ? { ...prev.writingSpace, ...sanitizedPatch.writingSpace }
           : prev.writingSpace,
       }));
-      sendMessage({ type: 'state:patch', patch });
+      sendMessage({ type: 'state:patch', patch: sanitizedPatch });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
+
+  const setControlMode = useCallback(
+    (controlMode: ControlMode) => {
+      if (roleRef.current !== 'tutor') return;
+      patchState({ controlMode });
+    },
+    [patchState]
+  );
+
+  const setAudioSync = useCallback(
+    (audioSync: boolean) => {
+      if (roleRef.current !== 'tutor') return;
+      patchState({ audioSync });
+    },
+    [patchState]
+  );
+
+  const dismissRemoteAudioNotice = useCallback(() => {
+    setRemoteAudioNotice(null);
+  }, []);
+
+  const replayBlockedRemoteAudio = useCallback(() => {
+    unlockAudioPlayback();
+    setBlockedRemoteAudio((pending) => {
+      if (pending) {
+        speakEnglish(pending.text, {
+          accent: pending.accent,
+          rate: pending.rate,
+          fromRemote: true,
+        });
+      }
+      return null;
+    });
+  }, []);
 
   const updateWritingText = useCallback(
     (owner: 'tutor' | 'student', text: string) => {
+      if (isStudentMirrorLocked()) return;
       const field = owner === 'tutor' ? 'tutorText' : 'studentText';
       setState((prev) => ({
         ...prev,
@@ -647,11 +787,12 @@ export function useRoomSync() {
       }));
       sendMessage({ type: 'state:patch', patch: { writingSpace: { [field]: text } } });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const addWritingStroke = useCallback(
     (owner: 'tutor' | 'student', stroke: BoardStroke) => {
+      if (isStudentMirrorLocked()) return;
       const field = owner === 'tutor' ? 'tutorStrokes' : 'studentStrokes';
       setState((prev) => {
         const current = prev.writingSpace[field];
@@ -666,11 +807,12 @@ export function useRoomSync() {
       });
       sendMessage({ type: 'writing:stroke:add', owner, stroke });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const undoWritingStroke = useCallback(
     (owner: 'tutor' | 'student') => {
+      if (isStudentMirrorLocked()) return;
       const field = owner === 'tutor' ? 'tutorStrokes' : 'studentStrokes';
       setState((prev) => {
         const current = prev.writingSpace[field];
@@ -686,11 +828,12 @@ export function useRoomSync() {
         };
       });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const clearWritingStrokes = useCallback(
     (owner: 'tutor' | 'student') => {
+      if (isStudentMirrorLocked()) return;
       const field = owner === 'tutor' ? 'tutorStrokes' : 'studentStrokes';
       setState((prev) => ({
         ...prev,
@@ -701,11 +844,12 @@ export function useRoomSync() {
       }));
       sendMessage({ type: 'writing:stroke:clear', owner });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const addWord = useCallback(
     (item: Omit<WordbankItem, 'id' | 'addedAt'>) => {
+      if (isStudentMirrorLocked()) return;
       const fullItem: WordbankItem = {
         ...item,
         id: `wb-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
@@ -714,56 +858,62 @@ export function useRoomSync() {
       setState((prev) => ({ ...prev, wordbank: [fullItem, ...prev.wordbank] }));
       sendMessage({ type: 'wordbank:add', item: fullItem });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const removeWord = useCallback(
     (id: string) => {
+      if (isStudentMirrorLocked()) return;
       setState((prev) => ({
         ...prev,
         wordbank: prev.wordbank.filter((w) => w.id !== id),
       }));
       sendMessage({ type: 'wordbank:remove', id });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const addStroke = useCallback(
     (stroke: BoardStroke) => {
+      if (isStudentMirrorLocked()) return;
       setState((prev) => {
         if (prev.strokes.some((s) => s.id === stroke.id)) return prev;
         return { ...prev, strokes: [...prev.strokes, stroke] };
       });
       sendMessage({ type: 'stroke:add', stroke });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const undoLastStroke = useCallback(() => {
+    if (isStudentMirrorLocked()) return;
     setState((prev) => {
       const last = prev.strokes[prev.strokes.length - 1];
       if (!last) return prev;
       sendMessage({ type: 'stroke:undo', id: last.id });
       return { ...prev, strokes: prev.strokes.slice(0, -1) };
     });
-  }, [sendMessage]);
+  }, [isStudentMirrorLocked, sendMessage]);
 
   const clearStrokes = useCallback(() => {
+    if (isStudentMirrorLocked()) return;
     setState((prev) => ({ ...prev, strokes: [] }));
     sendMessage({ type: 'stroke:clear' });
-  }, [sendMessage]);
+  }, [isStudentMirrorLocked, sendMessage]);
 
   const awardStar = useCallback(() => {
+    if (isStudentMirrorLocked()) return;
     if (roomCode && connected) {
       sendMessage({ type: 'celebrate:star' });
     } else {
       setState((prev) => ({ ...prev, stars: prev.stars + 1 }));
       setLastCelebrationAt(Date.now());
     }
-  }, [roomCode, connected, sendMessage]);
+  }, [isStudentMirrorLocked, roomCode, connected, sendMessage]);
 
   const completeModule = useCallback(
     (milestone: LessonMilestoneId) => {
+      if (isStudentMirrorLocked()) return;
       setState((prev) => {
         if (prev.completedModules.includes(milestone)) return prev;
         const next = [...prev.completedModules, milestone];
@@ -771,10 +921,11 @@ export function useRoomSync() {
         return { ...prev, completedModules: next };
       });
     },
-    [sendMessage]
+    [isStudentMirrorLocked, sendMessage]
   );
 
   const resetLessonProgress = useCallback(() => {
+    if (isStudentMirrorLocked()) return;
     setState((prev) => {
       const patch = {
         completedModules: [] as LessonMilestoneId[],
@@ -783,7 +934,7 @@ export function useRoomSync() {
       sendMessage({ type: 'state:patch', patch });
       return { ...prev, ...patch };
     });
-  }, [sendMessage]);
+  }, [isStudentMirrorLocked, sendMessage]);
 
   const switchRole = useCallback(
     (nextRole: UserRole, customName?: string) => {
@@ -1006,6 +1157,12 @@ export function useRoomSync() {
     removeStudentProfile,
     state,
     lastCelebrationAt,
+    remoteAudioNotice,
+    blockedRemoteAudio,
+    dismissRemoteAudioNotice,
+    replayBlockedRemoteAudio,
+    setControlMode,
+    setAudioSync,
     joinRoom,
     leaveRoom,
     patchState,

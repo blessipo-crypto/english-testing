@@ -26,6 +26,18 @@ export interface VoiceMatchResult {
   label: string;
 }
 
+export interface AudioSyncSpeakPayload {
+  text: string;
+  accent: VoiceAccent;
+  rate: number;
+}
+
+export interface AudioSyncBridge {
+  onSpeak?: (payload: AudioSyncSpeakPayload) => void;
+  onStop?: () => void;
+  onAutoplayBlocked?: (payload: AudioSyncSpeakPayload) => void;
+}
+
 const listeners = new Set<() => void>();
 let voicesInitialized = false;
 
@@ -33,6 +45,44 @@ let voicesInitialized = false;
 const ttsBlobCache = new Map<string, string>();
 let activeAudio: HTMLAudioElement | null = null;
 let activePlaybackToken = 0;
+let audioSyncBridge: AudioSyncBridge | null = null;
+let sharedUnlockContext: AudioContext | null = null;
+let audioUnlocked = false;
+
+export function registerAudioSyncBridge(bridge: AudioSyncBridge | null): void {
+  audioSyncBridge = bridge;
+}
+
+export function unlockAudioPlayback(): void {
+  if (typeof window === 'undefined' || audioUnlocked) return;
+  try {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (AudioCtx) {
+      if (!sharedUnlockContext) {
+        sharedUnlockContext = new AudioCtx();
+      }
+      if (sharedUnlockContext.state === 'suspended') {
+        void sharedUnlockContext.resume().catch(() => {});
+      }
+    }
+    const silentAudio = new Audio(
+      'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'
+    );
+    silentAudio.volume = 0;
+    void silentAudio
+      .play()
+      .then(() => {
+        audioUnlocked = true;
+      })
+      .catch(() => {
+        // Ignore until next user gesture
+      });
+  } catch {
+    // Ignore audio unlock errors
+  }
+}
 
 function normalizeLang(lang: string | undefined): string {
   return (lang || '').trim().replace(/_/g, '-').toLowerCase();
@@ -411,19 +461,19 @@ async function speakWithStudioHd(
   accent: VoiceAccent,
   rate: number,
   token: number
-): Promise<boolean> {
+): Promise<'ok' | 'blocked' | 'unavailable'> {
   const chunks = splitTextIntoTtsChunks(text);
-  if (chunks.length === 0) return true;
+  if (chunks.length === 0) return 'ok';
 
   for (const chunk of chunks) {
-    if (token !== activePlaybackToken) return true;
+    if (token !== activePlaybackToken) return 'ok';
     const audioUrl = await fetchTtsChunkAudioUrl(chunk, accent);
-    if (token !== activePlaybackToken) return true;
+    if (token !== activePlaybackToken) return 'ok';
     if (!audioUrl) {
-      return false;
+      return 'unavailable';
     }
 
-    const played = await new Promise<boolean>((resolve) => {
+    const result = await new Promise<'ok' | 'blocked' | 'unavailable'>((resolve) => {
       const audio = new Audio(audioUrl);
       activeAudio = audio;
       audio.playbackRate = Math.max(0.5, Math.min(1.5, rate));
@@ -431,27 +481,33 @@ async function speakWithStudioHd(
         (audio as HTMLAudioElement & { preservesPitch: boolean }).preservesPitch = true;
       }
 
-      const finish = (ok: boolean) => {
+      const finish = (status: 'ok' | 'blocked' | 'unavailable') => {
         if (activeAudio === audio) {
           activeAudio = null;
         }
         audio.onended = null;
         audio.onerror = null;
-        resolve(ok);
+        resolve(status);
       };
 
-      audio.onended = () => finish(true);
-      audio.onerror = () => finish(false);
-      audio.play().catch(() => finish(false));
+      audio.onended = () => finish('ok');
+      audio.onerror = () => finish('unavailable');
+      audio.play().catch((err: unknown) => {
+        const errName =
+          err && typeof err === 'object' && 'name' in err
+            ? String((err as { name: unknown }).name)
+            : '';
+        finish(errName === 'NotAllowedError' ? 'blocked' : 'unavailable');
+      });
     });
 
-    if (!played) return false;
+    if (result !== 'ok') return result;
   }
 
-  return true;
+  return 'ok';
 }
 
-export function stopSpeaking(): void {
+function stopLocalPlaybackOnly(): void {
   activePlaybackToken += 1;
   if (activeAudio) {
     try {
@@ -471,24 +527,43 @@ export function stopSpeaking(): void {
   }
 }
 
+export function stopSpeaking(options?: { broadcast?: boolean }): void {
+  stopLocalPlaybackOnly();
+  const shouldBroadcast =
+    !options || typeof options !== 'object' || !('broadcast' in options) || options.broadcast !== false;
+  if (shouldBroadcast) {
+    audioSyncBridge?.onStop?.();
+  }
+}
+
 export function speakEnglish(
   text: string,
-  options: { accent?: VoiceAccent; rate?: number } = {}
+  options: { accent?: VoiceAccent; rate?: number; fromRemote?: boolean } = {}
 ): void {
   if (typeof window === 'undefined') return;
   const trimmed = text.trim();
   if (!trimmed) return;
 
-  stopSpeaking();
+  stopLocalPlaybackOnly();
   const token = activePlaybackToken;
 
   const accent: VoiceAccent = options.accent || getSavedAccent();
   const rate = options.rate ?? 1;
   const resolved = resolveVoiceModule(accent);
 
+  if (!options.fromRemote) {
+    unlockAudioPlayback();
+    audioSyncBridge?.onSpeak?.({ text: trimmed, accent, rate });
+  }
+
   if (resolved.isStudioHdActive) {
-    void speakWithStudioHd(trimmed, accent, rate, token).then((ok) => {
-      if (!ok && token === activePlaybackToken) {
+    void speakWithStudioHd(trimmed, accent, rate, token).then((status) => {
+      if (token !== activePlaybackToken) return;
+      if (status === 'blocked' && options.fromRemote) {
+        audioSyncBridge?.onAutoplayBlocked?.({ text: trimmed, accent, rate });
+        return;
+      }
+      if (status !== 'ok') {
         speakWithSystemSynthesis(trimmed, accent, rate);
       }
     });
