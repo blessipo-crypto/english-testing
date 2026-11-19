@@ -15,6 +15,7 @@ import {
   VOICE_COMPARISON_SAMPLES,
 } from '../data/voiceModules';
 import {
+  STUDIO_HD_VOICE_URI,
   getSavedVoiceUri,
   refreshSystemVoices,
   resolveVoiceModule,
@@ -133,13 +134,13 @@ export function SpeechSpeedControl({
           )}
         </div>
 
-        {/* System Voice Selector for this module */}
+        {/* Voice Engine / System Voice Selector for this module */}
         <div className="space-y-1.5">
           <label
             htmlFor={`voice-select-${moduleAccent}`}
             className="text-[11px] font-bold sb-text-secondary block"
           >
-            Voix système ({mod.bcp47}) :
+            Moteur vocal ({mod.bcp47}) :
           </label>
           <select
             id={`voice-select-${moduleAccent}`}
@@ -147,8 +148,11 @@ export function SpeechSpeedControl({
             onChange={(e) => setSavedVoiceUri(moduleAccent, e.target.value)}
             className="w-full rounded-xl border sb-input px-3 py-2 text-xs cursor-pointer"
           >
-            <option value="">
-              Auto ({match.voice ? match.voice.name : mod.bcp47})
+            <option value={STUDIO_HD_VOICE_URI}>
+              Voix Studio HD · {mod.shortLabel} natif (Recommandé · PC / .exe / Web)
+            </option>
+            <option value="system-auto">
+              Auto hors-ligne ({match.voice ? match.voice.name : `Système ${mod.bcp47}`})
             </option>
             {selectableVoices.map((voice) => (
               <option key={voice.voiceURI} value={voice.voiceURI}>
@@ -157,11 +161,15 @@ export function SpeechSpeedControl({
             ))}
           </select>
 
-          {!match.isExactAccentMatch && (
-            <p className="text-[11px] text-amber-400 leading-snug">
-              Voix native {mod.bcp47} non détectée sur cet appareil — voix de secours utilisée.
+          {match.isStudioHdActive ? (
+            <p className="text-[11px] text-emerald-400 leading-snug">
+              Voix Studio HD {mod.shortLabel} active — accent authentique garanti même sans pack Windows.
             </p>
-          )}
+          ) : !match.isExactAccentMatch ? (
+            <p className="text-[11px] text-amber-400 leading-snug">
+              Voix Windows {mod.bcp47} absente — utilisez « Voix Studio HD » pour l’accent authentique.
+            </p>
+          ) : null}
         </div>
 
         {/* Pronunciation cues */}

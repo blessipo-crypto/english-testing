@@ -358,6 +358,59 @@ async function startServer() {
     res.json({ ok: true, activeRooms: rooms.size, savedRecaps: savedRecaps.length });
   });
 
+  // High-quality UK / US English TTS proxy with in-memory LRU cache
+  const ttsCache = new Map<string, Buffer>();
+  app.get('/api/tts', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const rawText = typeof req.query.q === 'string' ? req.query.q.trim().slice(0, 200) : '';
+    const lang = req.query.tl === 'en-US' ? 'en-US' : 'en-GB';
+    if (!rawText) {
+      res.status(400).json({ error: 'q required' });
+      return;
+    }
+
+    const cacheKey = `${lang}:${rawText}`;
+    const cached = ttsCache.get(cacheKey);
+    if (cached) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.send(cached);
+      return;
+    }
+
+    try {
+      const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(
+        lang
+      )}&q=${encodeURIComponent(rawText)}`;
+      const upstream = await fetch(ttsUrl, {
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+        },
+      });
+      if (!upstream.ok) {
+        res.status(502).json({ error: 'Upstream TTS unavailable' });
+        return;
+      }
+      const arr = await upstream.arrayBuffer();
+      const buf = Buffer.from(arr);
+      if (buf.byteLength === 0) {
+        res.status(502).json({ error: 'Empty TTS audio' });
+        return;
+      }
+      if (ttsCache.size >= 300) {
+        const oldest = ttsCache.keys().next().value;
+        if (oldest) ttsCache.delete(oldest);
+      }
+      ttsCache.set(cacheKey, buf);
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.send(buf);
+    } catch {
+      res.status(502).json({ error: 'TTS request failed' });
+    }
+  });
+
   app.get('/api/recaps', (_req, res) => {
     res.json({ recaps: savedRecaps });
   });

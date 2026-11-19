@@ -1,6 +1,51 @@
-const { app, BrowserWindow, session, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, session, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
+
+const ttsCache = new Map();
+
+function getCachedTts(key) {
+  return ttsCache.get(key);
+}
+
+function setCachedTts(key, value) {
+  if (ttsCache.size >= 250) {
+    const oldestKey = ttsCache.keys().next().value;
+    if (oldestKey) ttsCache.delete(oldestKey);
+  }
+  ttsCache.set(key, value);
+}
+
+ipcMain.handle('tts:fetch', async (_event, { text, lang }) => {
+  const cleanText = String(text || '').trim().slice(0, 200);
+  const targetLang = lang === 'en-US' ? 'en-US' : 'en-GB';
+  if (!cleanText) return null;
+
+  const cacheKey = `${targetLang}:${cleanText}`;
+  const cached = getCachedTts(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(
+      targetLang
+    )}&q=${encodeURIComponent(cleanText)}`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      },
+    });
+    if (!response.ok) return null;
+    const arrayBuffer = await response.arrayBuffer();
+    if (!arrayBuffer || arrayBuffer.byteLength === 0) return null;
+    const base64 = Buffer.from(arrayBuffer).toString('base64');
+    const dataUri = `data:audio/mpeg;base64,${base64}`;
+    setCachedTts(cacheKey, dataUri);
+    return dataUri;
+  } catch {
+    return null;
+  }
+});
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -12,6 +57,7 @@ function createWindow() {
     autoHideMenuBar: true,
     backgroundColor: '#faf9f6',
     webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -19,7 +65,7 @@ function createWindow() {
     },
   });
 
-  // Allow camera, microphone, and fullscreen inside the bundled app
+  // Allow camera, microphone, audio, and fullscreen inside the bundled app
   session.defaultSession.setPermissionCheckHandler((_webContents, permission) => {
     return (
       permission === 'media' ||
