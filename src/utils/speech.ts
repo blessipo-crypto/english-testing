@@ -56,6 +56,12 @@ export function subscribeVoiceChanges(listener: () => void): () => void {
   };
 }
 
+export function refreshSystemVoices(): void {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  window.speechSynthesis.getVoices();
+  notifyVoiceListeners();
+}
+
 export function getSavedAccent(): VoiceAccent {
   if (typeof window === 'undefined') return 'en-GB';
   const raw = window.localStorage.getItem(ACCENT_STORAGE_KEY);
