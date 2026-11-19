@@ -405,6 +405,10 @@ export function useRoomSync() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         wsBase = `${protocol}//${window.location.host}`;
       }
+      // In packaged offline apps (Electron .exe / Capacitor .apk), fallback to live Cloud Run server to sync rooms
+      if (!wsBase && isPackagedLocal) {
+        wsBase = 'wss://ais-dev-afm5mejj742ehjjk5blxlb-880439402821.europe-west2.run.app';
+      }
       if (!wsBase) {
         return;
       }
@@ -415,8 +419,15 @@ export function useRoomSync() {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;
 
+      let heartbeatTimer: number | null = null;
+
       ws.onopen = () => {
         if (!isUnmounted) setConnected(true);
+        heartbeatTimer = window.setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'ping' }));
+          }
+        }, 20000);
       };
 
       ws.onmessage = (event) => {
@@ -548,6 +559,7 @@ export function useRoomSync() {
       };
 
       ws.onclose = () => {
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
         if (!isUnmounted) {
           setConnected(false);
           reconnectTimerRef.current = window.setTimeout(connect, 2000);

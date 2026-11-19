@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Video, VideoOff, Maximize2, Minimize2, ChevronDown } from 'lucide-react';
+import {
+  Video,
+  VideoOff,
+  Maximize2,
+  Minimize2,
+  ChevronDown,
+  User,
+  Radio,
+} from 'lucide-react';
 import type { UserRole } from '../types/lesson';
 
 interface RtcSignal {
@@ -20,7 +28,11 @@ interface StudentVideoSlotProps {
 }
 
 const RTC_CONFIG: RTCConfiguration = {
-  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+  ],
 };
 
 export function StudentVideoSlot({
@@ -40,14 +52,25 @@ export function StudentVideoSlot({
   const [hasRemoteVideo, setHasRemoteVideo] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
 
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  const localVideoRef = useRef<HTMLVideoElement | null>(null);
+
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const remotePeerIdRef = useRef<string | null>(null);
 
-  const attachStream = useCallback((stream: MediaStream | null) => {
-    const el = videoRef.current;
+  const attachRemoteStream = useCallback((stream: MediaStream | null) => {
+    const el = remoteVideoRef.current;
+    if (!el) return;
+    el.srcObject = stream;
+    if (stream) {
+      el.play().catch(() => {});
+    }
+  }, []);
+
+  const attachLocalStream = useCallback((stream: MediaStream | null) => {
+    const el = localVideoRef.current;
     if (!el) return;
     el.srcObject = stream;
     if (stream) {
@@ -63,30 +86,22 @@ export function StudentVideoSlot({
     remoteStreamRef.current = null;
     remotePeerIdRef.current = null;
     setHasRemoteVideo(false);
-  }, []);
+    attachRemoteStream(null);
+  }, [attachRemoteStream]);
 
-  const stopLocalCamera = useCallback(() => {
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((t) => t.stop());
-      localStreamRef.current = null;
-    }
-    setLocalCameraOn(false);
-    attachStream(remoteStreamRef.current);
-    if (roomCode && connected) {
-      sendRtcSignal('rtc:camera-off');
-    }
-    cleanupPeer();
-  }, [attachStream, cleanupPeer, connected, roomCode, sendRtcSignal]);
+  // Symmetrical WebRTC Offer Creator
+  const createAndSendOffer = useCallback(async () => {
+    if (!roomCode || !connected) return;
 
-  const startOfferAsStudent = useCallback(
-    async (stream: MediaStream) => {
-      cleanupPeer();
+    if (!pcRef.current) {
       const pc = new RTCPeerConnection(RTC_CONFIG);
       pcRef.current = pc;
 
-      stream.getTracks().forEach((track) => {
-        pc.addTrack(track, stream);
-      });
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => {
+          pc.addTrack(track, localStreamRef.current!);
+        });
+      }
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
@@ -94,12 +109,25 @@ export function StudentVideoSlot({
         }
       };
 
+      pc.ontrack = (e) => {
+        const [stream] = e.streams;
+        if (stream) {
+          remoteStreamRef.current = stream;
+          setHasRemoteVideo(true);
+          attachRemoteStream(stream);
+        }
+      };
+    }
+
+    try {
+      const pc = pcRef.current;
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       sendRtcSignal('rtc:offer', offer);
-    },
-    [cleanupPeer, sendRtcSignal]
-  );
+    } catch {
+      // Ignore transient negotiation errors
+    }
+  }, [attachRemoteStream, connected, roomCode, sendRtcSignal]);
 
   const startLocalCamera = async () => {
     setCameraError(null);
@@ -107,45 +135,87 @@ export function StudentVideoSlot({
       setCameraError('Caméra non disponible dans ce navigateur.');
       return;
     }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false,
-      });
+      let stream: MediaStream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: true,
+        });
+      } catch {
+        // Fallback to video-only if audio/microphone is blocked
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+          audio: false,
+        });
+      }
+
       localStreamRef.current = stream;
       setLocalCameraOn(true);
-      attachStream(stream);
+      attachLocalStream(stream);
 
-      if (role === 'student' && roomCode && connected) {
-        await startOfferAsStudent(stream);
+      // Transmit to peer if connected
+      if (roomCode && connected) {
+        if (pcRef.current) {
+          stream.getTracks().forEach((track) => {
+            pcRef.current?.addTrack(track, stream);
+          });
+          const offer = await pcRef.current.createOffer();
+          await pcRef.current.setLocalDescription(offer);
+          sendRtcSignal('rtc:offer', offer);
+        } else {
+          await createAndSendOffer();
+        }
       }
     } catch {
       setCameraError(
-        'Accès caméra refusé. Utilisez le cadre pour poser la vignette WhatsApp/Zoom.'
+        'Accès caméra refusé. Vérifiez les autorisations de votre navigateur.'
       );
     }
   };
 
-  // WebRTC signaling listener inside live rooms
+  const stopLocalCamera = useCallback(() => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((t) => t.stop());
+      localStreamRef.current = null;
+    }
+    setLocalCameraOn(false);
+    attachLocalStream(null);
+
+    if (roomCode && connected) {
+      sendRtcSignal('rtc:camera-off');
+    }
+  }, [attachLocalStream, connected, roomCode, sendRtcSignal]);
+
+  // WebRTC signaling listener
   useEffect(() => {
     if (!roomCode || !connected) return;
 
-    // If tutor joins an active room, ask student to resend video offer if active
-    if (role === 'tutor') {
-      sendRtcSignal('rtc:request-offer');
-    }
+    // Ask peer to share their offer if already active
+    sendRtcSignal('rtc:request-offer');
 
     const unsubscribe = subscribeRtcSignal(async (msg) => {
       try {
-        if (msg.type === 'rtc:request-offer' && role === 'student') {
+        if (msg.type === 'rtc:request-offer') {
           if (localStreamRef.current) {
-            await startOfferAsStudent(localStreamRef.current);
+            await createAndSendOffer();
           }
-        } else if (msg.type === 'rtc:offer' && msg.payload && role === 'tutor') {
-          cleanupPeer();
+        } else if (msg.type === 'rtc:offer' && msg.payload) {
           remotePeerIdRef.current = msg.fromId || null;
+
+          if (pcRef.current) {
+            pcRef.current.close();
+          }
+
           const pc = new RTCPeerConnection(RTC_CONFIG);
           pcRef.current = pc;
+
+          if (localStreamRef.current) {
+            localStreamRef.current.getTracks().forEach((track) => {
+              pc.addTrack(track, localStreamRef.current!);
+            });
+          }
 
           pc.onicecandidate = (e) => {
             if (e.candidate) {
@@ -158,7 +228,7 @@ export function StudentVideoSlot({
             if (stream) {
               remoteStreamRef.current = stream;
               setHasRemoteVideo(true);
-              attachStream(stream);
+              attachRemoteStream(stream);
             }
           };
 
@@ -188,12 +258,13 @@ export function StudentVideoSlot({
             !msg.fromId ||
             remotePeerIdRef.current === msg.fromId
           ) {
-            cleanupPeer();
-            attachStream(localStreamRef.current);
+            remoteStreamRef.current = null;
+            setHasRemoteVideo(false);
+            attachRemoteStream(null);
           }
         }
       } catch {
-        // Ignore transient WebRTC negotiation mismatch
+        // Ignore negotiation mismatches
       }
     });
 
@@ -201,44 +272,39 @@ export function StudentVideoSlot({
       unsubscribe();
     };
   }, [
-    attachStream,
-    cleanupPeer,
+    attachRemoteStream,
     connected,
-    role,
+    createAndSendOffer,
     roomCode,
     sendRtcSignal,
-    startOfferAsStudent,
     subscribeRtcSignal,
   ]);
 
-  // Cleanup camera tracks on unmount
+  // Clean up streams on unmount
   useEffect(() => {
     return () => {
       if (localStreamRef.current) {
         localStreamRef.current.getTracks().forEach((t) => t.stop());
       }
-      if (pcRef.current) {
-        pcRef.current.close();
-      }
+      cleanupPeer();
     };
-  }, []);
+  }, [cleanupPeer]);
 
-  // Re-attach stream when video element mounts/re-opens
+  // Re-attach streams when video DOM elements mount/re-open
   useEffect(() => {
     if (!isOpen) return;
-    const activeStream = localCameraOn
-      ? localStreamRef.current
-      : remoteStreamRef.current;
-    if (activeStream) {
-      attachStream(activeStream);
+    if (remoteStreamRef.current) {
+      attachRemoteStream(remoteStreamRef.current);
     }
-  }, [isOpen, localCameraOn, hasRemoteVideo, attachStream]);
+    if (localStreamRef.current) {
+      attachLocalStream(localStreamRef.current);
+    }
+  }, [isOpen, attachRemoteStream, attachLocalStream]);
 
-  const showingVideo = localCameraOn || hasRemoteVideo;
-
-  const displayTitle = studentName?.trim()
-    ? `Visage de ${studentName.trim()}`
-    : 'Visage de l’élève';
+  // Titles & Labels
+  const targetName = studentName?.trim() || 'Élève';
+  const headerTitle =
+    role === 'tutor' ? `Visage de ${targetName}` : 'Visage du Professeur';
 
   if (!isOpen) {
     return (
@@ -246,10 +312,13 @@ export function StudentVideoSlot({
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="manga-btn-primary inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer"
+          className="manga-btn-primary inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer shadow-xl"
         >
           <Video className="w-4 h-4" aria-hidden="true" />
-          {displayTitle}
+          <span>{headerTitle} (Visio)</span>
+          {hasRemoteVideo && (
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          )}
         </button>
       </div>
     );
@@ -257,19 +326,27 @@ export function StudentVideoSlot({
 
   return (
     <aside
-      aria-label="Emplacement vidéo de l'élève"
-      className={`flex flex-col fixed bottom-4 right-4 z-40 manga-panel overflow-hidden transition-all max-w-[calc(100vw-2rem)] ${
+      aria-label="Emplacement vidéo interactif"
+      className={`flex flex-col fixed bottom-4 right-4 z-40 manga-panel overflow-hidden transition-all shadow-2xl max-w-[calc(100vw-2rem)] ${
         isExpanded ? 'w-96' : 'w-72'
       }`}
     >
-      {/* Compact Header */}
+      {/* Header */}
       <div className="px-3.5 py-2 sb-surface border-b sb-divider flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Video className="w-3.5 h-3.5 sb-text-accent shrink-0" aria-hidden="true" />
           <span className="text-xs font-bold tracking-wide sb-text-primary truncate">
-            {displayTitle} (Visio)
+            {headerTitle}
           </span>
-          {studentCount > 1 && (
+          {hasRemoteVideo ? (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Live
+            </span>
+          ) : connected ? (
+            <span className="text-[10px] sb-text-muted">En attente</span>
+          ) : null}
+          {studentCount > 1 && role === 'tutor' && (
             <span className="px-1.5 py-0.5 rounded-md border sb-reward-pill text-[10px] font-bold tabular-nums shrink-0">
               {studentCount} élèves
             </span>
@@ -303,26 +380,62 @@ export function StudentVideoSlot({
       </div>
 
       {/* 16:9 Video Stage */}
-      <div className="relative aspect-video sb-surface flex items-center justify-center p-3">
+      <div className="relative aspect-video sb-surface flex items-center justify-center p-2.5 overflow-hidden">
+        {/* Main Stage: ALWAYS Displays the Remote Participant */}
         <video
-          ref={videoRef}
+          ref={remoteVideoRef}
           autoPlay
           playsInline
-          muted
           className={`w-full h-full object-cover rounded-xl ${
-            showingVideo ? 'block' : 'hidden'
+            hasRemoteVideo ? 'block' : 'hidden'
           }`}
         />
 
-        {!showingVideo && (
+        {/* Remote Live Indicator Badge */}
+        {hasRemoteVideo && (
+          <div className="absolute top-4 left-4 z-20 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-black/70 backdrop-blur-sm border border-white/10 text-white text-[10px] font-bold">
+            <Radio className="w-3 h-3 text-emerald-400 animate-pulse" />
+            <span>{role === 'tutor' ? targetName : 'Professeur'}</span>
+          </div>
+        )}
+
+        {/* When Remote Video is NOT active: Waiting Placeholder */}
+        {!hasRemoteVideo && (
           <div className="w-full h-full rounded-xl border border-dashed sb-divider manga-panel-sm flex flex-col items-center justify-center text-center p-3 space-y-1.5">
-            <Video className="w-5 h-5 sb-text-accent" aria-hidden="true" />
+            <div className="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-400/20 flex items-center justify-center text-cyan-400">
+              <User className="w-4 h-4" aria-hidden="true" />
+            </div>
             <p className="text-xs font-bold tracking-wide sb-text-primary">
-              Zone dédiée au visage
+              {role === 'tutor'
+                ? `Zone réservée au visage de ${targetName}`
+                : 'Zone vidéo du Professeur'}
             </p>
-            <p className="text-[11px] sb-text-muted leading-snug">
-              Posez ici la fenêtre vidéo WhatsApp / Zoom, ou activez la caméra en direct.
+            <p className="text-[11px] sb-text-muted leading-tight">
+              {connected
+                ? role === 'tutor'
+                  ? "En attente que l'élève allume sa caméra..."
+                  : 'En attente de la caméra du professeur...'
+                : 'Connectez-vous à la salle pour activer la visio live.'}
             </p>
+          </div>
+        )}
+
+        {/* Picture-in-Picture: The User's Own Camera (Prof or Élève) */}
+        {localCameraOn && (
+          <div className="absolute bottom-3 right-3 z-30 w-24 h-16 sm:w-28 sm:h-18 rounded-lg overflow-hidden border-2 border-cyan-400 shadow-xl bg-slate-900">
+            <video
+              ref={localVideoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0.5 left-0.5 right-0.5 px-1 py-0.5 rounded bg-black/75 backdrop-blur-xs text-white text-[9px] font-bold flex items-center justify-between">
+              <span className="truncate">
+                Moi ({role === 'tutor' ? 'Prof' : targetName})
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0" />
+            </div>
           </div>
         )}
       </div>
@@ -338,24 +451,35 @@ export function StudentVideoSlot({
             <button
               type="button"
               onClick={stopLocalCamera}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border sb-status-danger text-xs font-bold hover:opacity-90 cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border sb-status-danger text-xs font-bold hover:opacity-90 cursor-pointer transition-colors"
             >
               <VideoOff className="w-3.5 h-3.5" aria-hidden="true" />
-              Couper la caméra
+              <span>
+                Couper ma caméra ({role === 'tutor' ? 'Prof' : 'Élève'})
+              </span>
             </button>
           ) : (
             <button
               type="button"
               onClick={startLocalCamera}
-              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 sb-card-option sb-text-accent text-xs font-bold cursor-pointer"
+              className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-b-2 sb-card-option sb-text-accent text-xs font-bold cursor-pointer hover:sb-card-option-active transition-colors"
             >
               <Video className="w-3.5 h-3.5" aria-hidden="true" />
-              {role === 'student'
-                ? 'Allumer ma caméra'
-                : 'Tester / Aperçu caméra'}
+              <span>
+                {role === 'tutor'
+                  ? 'Allumer ma caméra (Prof)'
+                  : 'Allumer ma caméra (Élève)'}
+              </span>
             </button>
           )}
         </div>
+
+        {/* Helpful tip */}
+        <p className="text-[10px] sb-text-muted text-center leading-tight">
+          {role === 'tutor'
+            ? 'Votre caméra s’affiche en vignette pour vous et en direct pour l’élève.'
+            : 'Votre vidéo est transmise en direct au professeur.'}
+        </p>
       </div>
     </aside>
   );

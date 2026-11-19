@@ -330,6 +330,21 @@ async function startServer() {
   const app = express();
   app.use(express.json());
 
+  app.get('/favicon.ico', (_req, res) => {
+    const icoCandidates = [
+      path.join(__dirname, 'public', 'favicon.ico'),
+      path.join(__dirname, 'dist', 'favicon.ico'),
+      path.join(__dirname, 'favicon.ico'),
+    ];
+    for (const p of icoCandidates) {
+      if (fs.existsSync(p)) {
+        res.type('image/x-icon').sendFile(p);
+        return;
+      }
+    }
+    res.status(204).end();
+  });
+
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true, activeRooms: rooms.size, savedRecaps: savedRecaps.length });
   });
@@ -540,6 +555,13 @@ async function startServer() {
 
       const currentState = getOrCreateRoom(roomCode);
       const msgType = typeof msg.type === 'string' ? msg.type : '';
+
+      if (msgType === 'ping') {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'pong' }));
+        }
+        return;
+      }
 
       if (msgType === 'state:patch' && msg.patch && typeof msg.patch === 'object') {
         const patch = msg.patch as Partial<RoomState>;
@@ -762,14 +784,15 @@ async function startServer() {
     });
   }
 
-  // Ensure dev server binds to port 3000 where Nginx reverse proxy forwards traffic
-  const port = process.env.APP_PORT
-    ? Number(process.env.APP_PORT)
-    : process.env.PORT && process.env.PORT !== '8080'
-      ? Number(process.env.PORT)
-      : 3000;
+  // In development container with Nginx (AI Studio Dev environment), Nginx listens on 8080 and proxies to port 3000.
+  // In production container (Cloud Run deployment / Shared App), Cloud Run directly routes to process.env.PORT (8080).
+  const isDevContainer = !!process.env.CONTROL_PLANE_PORT || !!process.env.DEFAULT_APP_PORT;
+  const port = isDevContainer
+    ? Number(process.env.DEFAULT_APP_PORT || 3000)
+    : Number(process.env.PORT || 3000);
+
   server.listen(port, '0.0.0.0', () => {
-    console.log(`StoryBridge Studio listening on http://localhost:${port}`);
+    console.log(`StoryBridge Studio listening on http://localhost:${port} (mode: ${process.env.NODE_ENV || 'development'}, container: ${isDevContainer ? 'dev' : 'production'})`);
   });
 }
 
