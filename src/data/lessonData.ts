@@ -4,8 +4,13 @@ import type {
   SentenceChallenge,
   VocabDeck,
 } from '../types/lesson';
+import heroBannerImg from '../assets/images/manga_hero_studio_1794703398176.jpg';
+import hobbiesThemeImg from '../assets/images/manga_theme_hobbies_1794703398074.jpg';
+import natureThemeImg from '../assets/images/manga_theme_nature_1794703398475.jpg';
+import cafeThemeImg from '../assets/images/manga_theme_cafe_1794703398047.jpg';
+import londonThemeImg from '../assets/images/lesson_hero_london_1794702022207.jpg';
 
-export const HERO_BANNER_IMAGE = '/src/assets/images/manga_hero_studio_1794703398176.jpg';
+export const HERO_BANNER_IMAGE = heroBannerImg;
 
 export const MOOD_OPTIONS = [
   { id: 'happy', en: 'happy', fr: 'contente' },
@@ -81,7 +86,7 @@ export const VOCAB_DECKS: VocabDeck[] = [
     titleFr: 'Collège, Loisirs & Créativité',
     titleEn: 'School, Hobbies & Creativity',
     descriptionFr: 'Les mots du quotidien pour parler de ses passions, de son sac et de ses activités.',
-    imageUrl: '/src/assets/images/manga_theme_hobbies_1794703398074.jpg',
+    imageUrl: hobbiesThemeImg,
     cards: [
       {
         id: 'hob-1',
@@ -150,7 +155,7 @@ export const VOCAB_DECKS: VocabDeck[] = [
     titleFr: 'Animaux & Nature Sauvage',
     titleEn: 'Animals & Wildlife',
     descriptionFr: 'Observer les animaux, décrire leurs habitats et raconter ce qu’ils savent faire.',
-    imageUrl: '/src/assets/images/manga_theme_nature_1794703398475.jpg',
+    imageUrl: natureThemeImg,
     cards: [
       {
         id: 'nat-1',
@@ -219,7 +224,7 @@ export const VOCAB_DECKS: VocabDeck[] = [
     titleFr: 'Goûter & Café Britannique',
     titleEn: 'Food & British Café',
     descriptionFr: 'Commander poliment, exprimer ses goûts et découvrir les spécialités anglaises.',
-    imageUrl: '/src/assets/images/manga_theme_cafe_1794703398047.jpg',
+    imageUrl: cafeThemeImg,
     cards: [
       {
         id: 'food-1',
@@ -288,7 +293,7 @@ export const VOCAB_DECKS: VocabDeck[] = [
     titleFr: 'Voyage & Découverte de Londres',
     titleEn: 'London & City Travel',
     descriptionFr: 'Se repérer dans la ville, prendre le bus rouge et poser des questions en voyage.',
-    imageUrl: '/src/assets/images/lesson_hero_london_1794702022207.jpg',
+    imageUrl: londonThemeImg,
     cards: [
       {
         id: 'lon-1',
