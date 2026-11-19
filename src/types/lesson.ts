@@ -96,9 +96,16 @@ export interface TimeModuleState {
 export type GrammarSection = 'irregular' | 'modals' | 'tenses' | 'prepositions';
 
 export interface GuideState {
-  subTab: 'guide' | 'builder';
+  subTab: 'tenses' | 'guide' | 'builder';
   section: GrammarSection;
   hideIrregularForms: boolean;
+  tensesCategory?:
+    | 'present-simple'
+    | 'present-continuous'
+    | 'past-simple'
+    | 'expressions'
+    | 'simulator'
+    | 'quiz';
 }
 
 export interface WritingSpaceState {

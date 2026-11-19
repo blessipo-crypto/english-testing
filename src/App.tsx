@@ -22,6 +22,7 @@ import { SessionModal } from './components/SessionModal';
 import { SpeechSpeedControl } from './components/SpeechSpeedControl';
 import { BrunoMarsQuiz } from './components/BrunoMarsQuiz';
 import { GrammarGuideModule } from './components/GrammarGuideModule';
+import { TensesModule } from './components/TensesModule';
 import { StudentVideoSlot } from './components/StudentVideoSlot';
 import { SessionRecapModule } from './components/SessionRecapModule';
 import { MiniGamesHub } from './components/MiniGamesHub';
@@ -121,7 +122,7 @@ export default function App() {
     } else if (id === 'vocab') {
       patchState({ activeTab: 'vocab' });
     } else if (id === 'grammar') {
-      patchState({ activeTab: 'builder', guide: { ...state.guide, subTab: 'builder' } });
+      patchState({ activeTab: 'builder', guide: { ...state.guide, subTab: state.guide.subTab || 'tenses' } });
     } else if (id === 'games') {
       patchState({ activeTab: 'roleplay', quiz: { ...state.quiz, subTab: 'games' } });
     } else if (id === 'time') {
@@ -523,7 +524,18 @@ export default function App() {
         {state.activeTab === 'builder' && (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="inline-flex items-center gap-1 p-1 sb-surface border rounded-2xl">
+              <div className="inline-flex flex-wrap items-center gap-1 p-1 sb-surface border rounded-2xl">
+                <button
+                  type="button"
+                  onClick={() =>
+                    patchState({ guide: { ...state.guide, subTab: 'tenses' } })
+                  }
+                  className={`px-3.5 py-1.5 text-xs font-bold tracking-wide rounded-xl transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer ${
+                    state.guide.subTab === 'tenses' ? 'sb-seg-active' : 'sb-seg-idle'
+                  }`}
+                >
+                  Formation des Temps
+                </button>
                 <button
                   type="button"
                   onClick={() =>
@@ -549,7 +561,22 @@ export default function App() {
               </div>
             </div>
 
-            {state.guide.subTab === 'guide' ? (
+            {state.guide.subTab === 'tenses' ? (
+              <TensesModule
+                accent={accent}
+                speechRate={speechRate}
+                wordbank={state.wordbank}
+                activeCategory={state.guide.tensesCategory}
+                onAddWord={addWord}
+                onAwardStar={() => {
+                  awardStar();
+                  completeModule('grammar');
+                }}
+                onChangeCategory={(tensesCategory) =>
+                  patchState({ guide: { ...state.guide, tensesCategory } })
+                }
+              />
+            ) : state.guide.subTab === 'guide' ? (
               <GrammarGuideModule
                 section={state.guide.section}
                 hideIrregularForms={state.guide.hideIrregularForms}
@@ -568,6 +595,15 @@ export default function App() {
                   })
                 }
                 onAddWord={addWord}
+                onOpenTensesModule={(tensesCategory) =>
+                  patchState({
+                    guide: {
+                      ...state.guide,
+                      subTab: 'tenses',
+                      ...(tensesCategory ? { tensesCategory } : {}),
+                    },
+                  })
+                }
               />
             ) : (
               <BuilderModule

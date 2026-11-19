@@ -7,6 +7,7 @@ import {
   Check,
   Search,
   BookMarked,
+  Zap,
 } from 'lucide-react';
 import {
   IRREGULAR_VERBS,
@@ -28,6 +29,9 @@ interface GrammarGuideModuleProps {
   onChangeSection: (section: GrammarSection) => void;
   onToggleHideIrregular: () => void;
   onAddWord: (item: Omit<WordbankItem, 'id' | 'addedAt'>) => void;
+  onOpenTensesModule?: (
+    tab?: 'present-simple' | 'present-continuous' | 'past-simple' | 'expressions'
+  ) => void;
 }
 
 const GUIDE_SECTIONS: Array<{ id: GrammarSection; label: string }> = [
@@ -117,6 +121,7 @@ export function GrammarGuideModule({
   onChangeSection,
   onToggleHideIrregular,
   onAddWord,
+  onOpenTensesModule,
 }: GrammarGuideModuleProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [groupFilter, setGroupFilter] = useState<string>('Tous');
@@ -411,8 +416,33 @@ export function GrammarGuideModule({
 
       {/* SECTION 3: SIMPLE TENSES */}
       {section === 'tenses' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {TENSE_GUIDES.map((t) => (
+        <div className="space-y-5">
+          {onOpenTensesModule && (
+            <div className="manga-panel p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[var(--sb-accent)]">
+              <div className="space-y-1">
+                <div className="text-xs font-bold tracking-wide sb-text-reward flex items-center gap-2">
+                  <Zap className="w-4 h-4 fill-current shrink-0" />
+                  <span>Module interactif dédié disponible</span>
+                </div>
+                <h3 className="text-base font-bold sb-text-primary">
+                  Formation complète : Present Simple, Present Continuous, Prétérit & Expressions de durée (FOR, SINCE, AGO)
+                </h3>
+                <p className="text-xs sb-text-secondary">
+                  Retrouve les règles détaillées pas à pas, les fiches d’orthographe (-s, -ing, -ed), le simulateur en direct et le quiz d’entraînement.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => onOpenTensesModule()}
+                className="manga-btn-primary px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+              >
+                Ouvrir la Formation des Temps →
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {TENSE_GUIDES.map((t) => (
             <article
               key={t.id}
               className="manga-panel p-6 space-y-4"
@@ -514,6 +544,7 @@ export function GrammarGuideModule({
               </div>
             </article>
           ))}
+          </div>
         </div>
       )}
 

@@ -60,7 +60,7 @@ const DEFAULT_LOCAL_STATE: RoomState = {
     showZones: true,
   },
   guide: {
-    subTab: 'guide',
+    subTab: 'tenses',
     section: 'irregular',
     hideIrregularForms: false,
   },
