@@ -8,6 +8,7 @@ import {
   Maximize2,
   Minimize2,
   X,
+  Download,
 } from 'lucide-react';
 import { useRoomSync } from './hooks/useRoomSync';
 import { useFullscreen } from './hooks/useFullscreen';
@@ -27,6 +28,7 @@ import { StudentVideoSlot } from './components/StudentVideoSlot';
 import { SessionRecapModule } from './components/SessionRecapModule';
 import { MiniGamesHub } from './components/MiniGamesHub';
 import { TimeModule } from './components/TimeModule';
+import { AppDownloadModal } from './components/AppDownloadModal';
 import {
   LessonProgressWidget,
   TopProgressStrip,
@@ -89,6 +91,7 @@ export default function App() {
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const [isWritingDrawerOpen, setIsWritingDrawerOpen] = useState(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const {
     isFullscreen,
     isImmersiveFallback,
@@ -374,6 +377,17 @@ export default function App() {
             </button>
 
             <ThemeSelector theme={theme} onSelectTheme={setTheme} />
+
+            <button
+              type="button"
+              onClick={() => setIsDownloadModalOpen(true)}
+              aria-label="Télécharger l'application portable Windows ou Android"
+              title="Télécharger StoryBridge Studio Portable (.exe Windows / .apk Android)"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] md:min-h-[30px] md:py-1 rounded-xl border text-xs font-bold tracking-wide transition-colors duration-300 whitespace-nowrap shrink-0 cursor-pointer sb-chip-idle hover:sb-chip-solid"
+            >
+              <Download className="w-3.5 h-3.5 sb-text-accent" aria-hidden="true" />
+              <span>App Portable (.exe)</span>
+            </button>
 
             {/* Real WebSocket connection state (only when room active) */}
             {roomCode && (
@@ -830,24 +844,38 @@ export default function App() {
       {!isFullscreen && (
         <footer className="sb-footer">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4 text-xs sb-text-muted">
-            <span className="font-semibold tracking-wide">StoryBridge Studio · Édition Manga Interactive pour cours en visio</span>
-            {role === 'tutor' && (
+            <div className="flex items-center gap-4">
               <button
                 type="button"
-                onClick={() =>
-                  patchState({
-                    activeTab: 'board',
-                    recap: { ...state.recap, subTab: 'recap' },
-                  })
-                }
-                className="sb-text-accent hover:underline font-bold tracking-wide cursor-pointer"
+                onClick={() => setIsDownloadModalOpen(true)}
+                className="inline-flex items-center gap-1.5 sb-text-accent hover:underline font-bold tracking-wide cursor-pointer"
               >
-                Ouvrir le récapitulatif Prof de fin de séance
+                <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Télécharger la version portable (.exe & .apk)</span>
               </button>
-            )}
+              {role === 'tutor' && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    patchState({
+                      activeTab: 'board',
+                      recap: { ...state.recap, subTab: 'recap' },
+                    })
+                  }
+                  className="sb-text-accent hover:underline font-bold tracking-wide cursor-pointer"
+                >
+                  Ouvrir le récapitulatif Prof
+                </button>
+              )}
+            </div>
           </div>
         </footer>
       )}
+
+      <AppDownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+      />
 
       {role === 'tutor' && (
         <SessionModal

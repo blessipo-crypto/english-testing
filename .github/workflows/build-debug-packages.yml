@@ -58,13 +58,18 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Ensure Android SDK licenses accepted (preinstalled SDK)
+      - name: Ensure Android SDK licenses accepted
         run: |
           SDK_ROOT="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
           echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
           echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
           mkdir -p "$SDK_ROOT/licenses"
-          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null 2>&1 || true
+          echo -e "\n24333f8a6383ba7ea0330724a82736a823775424\nd56f5187479451eabf01fb78af6dfcb131a6481e" > "$SDK_ROOT/licenses/android-sdk-license"
+          echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$SDK_ROOT/licenses/android-sdk-preview-license"
+          echo -e "\nd975f751698a77b662f1254ddbeed3901e176f5a" > "$SDK_ROOT/licenses/intel-android-extra-license"
+          if [ -d "$SDK_ROOT/cmdline-tools" ]; then
+            find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f -exec bash -c 'yes | "$1" --licenses >/dev/null 2>&1 || true' _ {} \;
+          fi
 
       - name: Install root dependencies and build web bundle
         run: |

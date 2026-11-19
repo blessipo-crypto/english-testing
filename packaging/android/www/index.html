@@ -2,13 +2,42 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StoryBridge Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="icon" type="image/png" href="./assets/favicon-DpxQzJ1I.ico" />
+    <title>StoryBridge Studio — Atelier d'anglais interactif en visio</title>
+    <meta
+      name="description"
+      content="Application interactive d'anglais pour élève de 11 ans conçue pour les cours en visioconférence : rituel d'accueil, cartes illustrées audio, atelier de phrases, jeux de rôle et tableau blanc synchronisé."
+    />
+    <meta property="og:title" content="StoryBridge Studio — Atelier d'anglais interactif en visio" />
+    <meta
+      property="og:description"
+      content="Application interactive d'anglais pour élève de 11 ans conçue pour les cours en visioconférence."
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('storybridge_theme_v1');
+          var theme = saved === 'day' || saved === 'neon' || saved === 'tech' ? saved : 'tech';
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'tech');
+        }
+      })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="./assets/index-DkoKDFp9.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-ObNrjSKu.css">
   </head>
-  <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #faf9f6; color: #0f172a; text-align: center; padding: 24px;">
-    <div>
-      <h1 style="font-size: 20px; margin-bottom: 8px;">StoryBridge Studio</h1>
-      <p style="font-size: 14px; color: #475569;">Connexion Internet requise pour charger la salle de cours en direct.</p>
-    </div>
+  <body class="antialiased transition-colors duration-300">
+    <div id="root"></div>
   </body>
 </html>

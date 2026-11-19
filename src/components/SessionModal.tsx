@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { X, Copy, Check, Users, LogOut, MessageCircle, UserPlus } from 'lucide-react';
+import { X, Copy, Check, Users, LogOut, MessageCircle, UserPlus, Download, Monitor } from 'lucide-react';
 import type { RoomParticipant, StudentProfile } from '../types/lesson';
 
 interface SessionModalProps {
@@ -327,6 +327,22 @@ export function SessionModal({
               Astuce : même sans salle live, vous pouvez simplement partager votre écran
               dans Zoom, Google Meet ou Teams et utiliser tous les exercices immédiatement.
             </p>
+
+            {/* Offline Portable App Banner */}
+            <div className="pt-3 border-t sb-divider flex items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2 sb-text-secondary">
+                <Monitor className="w-4 h-4 sb-text-accent" aria-hidden="true" />
+                <span className="font-semibold">Version Windows Portable (.exe)</span>
+              </div>
+              <a
+                href="/api/download/windows-exe"
+                download="StoryBridge-Studio-Debug.exe"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border sb-card-option font-bold sb-text-accent hover:sb-text-primary transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>Télécharger (.exe)</span>
+              </a>
+            </div>
           </form>
         )}
       </div>

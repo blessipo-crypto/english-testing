@@ -18,20 +18,20 @@ Ce dossier permet de générer :
 
 ## Option 2 : Compilation locale
 
-À la racine du projet, compilez d’abord le bundle web avec chemins relatifs :
+À la racine du projet, une seule commande compile le bundle web avec chemins relatifs et synchronise automatiquement les dossiers de packaging :
 ```bash
 npm install
-VITE_BASE=./ npm run build
+npm run build:packages
 ```
+*(Cette commande alimente directement `packaging/windows/dist-web` et `packaging/android/www` avec tous les assets autonomes nécessaires).*
 
 ### Windows `.exe` (depuis Windows avec Node.js 20+)
 ```powershell
-Copy-Item -Recurse -Force dist packaging/windows/dist-web
 cd packaging/windows
 npm install
 npm run pack:debug
 ```
-Résultat : `packaging/windows/dist/StoryBridge-Studio-Debug.exe`.
+Résultat : `packaging/windows/dist/StoryBridge-Studio-Debug.exe` (exécutable autonome ne nécessitant aucun serveur externe).
 
 ### Android `.apk` (avec Node.js 20+, Java 21 et Android SDK)
 ```bash

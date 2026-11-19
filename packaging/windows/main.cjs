@@ -15,6 +15,7 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      webSecurity: false,
     },
   });
 
@@ -40,16 +41,37 @@ function createWindow() {
     return { action: 'allow' };
   });
 
-  const bundledIndex = path.join(__dirname, 'dist-web', 'index.html');
-  if (fs.existsSync(bundledIndex)) {
-    win.loadFile(bundledIndex);
+  const candidates = [
+    path.join(__dirname, 'dist-web', 'index.html'),
+    path.join(app.getAppPath(), 'dist-web', 'index.html'),
+    path.join(__dirname, '..', '..', 'dist', 'index.html'),
+    path.join(app.getAppPath(), '..', 'dist', 'index.html'),
+    path.join(process.cwd(), 'packaging', 'windows', 'dist-web', 'index.html'),
+    path.join(process.cwd(), 'dist-web', 'index.html'),
+    path.join(process.cwd(), 'dist', 'index.html'),
+  ];
+
+  let resolvedIndex = null;
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      resolvedIndex = candidate;
+      break;
+    }
+  }
+
+  if (resolvedIndex) {
+    win.loadFile(resolvedIndex);
   } else if (process.env.STORYBRIDGE_URL) {
     win.loadURL(process.env.STORYBRIDGE_URL);
   } else {
     win.loadURL(
       'data:text/html;charset=utf-8,' +
         encodeURIComponent(
-          '<html><body style="font-family:sans-serif;padding:40px;text-align:center;"><h2>StoryBridge Studio</h2><p>Build web manquant (dist-web/index.html).</p></body></html>'
+          '<!doctype html><html><body style="font-family:sans-serif;padding:40px;text-align:center;background:#0f172a;color:#f8fafc;">' +
+            '<h2 style="color:#38bdf8;">StoryBridge Studio</h2>' +
+            '<p style="color:#94a3b8;">Fichiers de l\'application locale introuvables (dist-web/index.html).</p>' +
+            '<p style="color:#64748b;font-size:13px;">Veuillez compiler le projet avec npm run build:packages.</p>' +
+            '</body></html>'
         )
     );
   }

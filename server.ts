@@ -372,6 +372,120 @@ async function startServer() {
     res.json({ ok: true, recaps: savedRecaps });
   });
 
+  // Windows Portable EXE download endpoint
+  app.get('/api/download/windows-exe', (_req, res) => {
+    const candidates = [
+      path.join(__dirname, 'packaging', 'windows', 'dist', 'StoryBridge-Studio-Debug.exe'),
+      path.join(__dirname, 'packaging', 'windows', 'dist', 'StoryBridge-Studio-Portable.exe'),
+      path.join(__dirname, 'packaging', 'windows', 'dist', 'StoryBridge-Studio-Setup.exe'),
+      path.join(__dirname, 'StoryBridge-Studio-Debug.exe'),
+    ];
+    for (const exePath of candidates) {
+      if (fs.existsSync(exePath)) {
+        res.setHeader('Content-Disposition', 'attachment; filename="StoryBridge-Studio-Debug.exe"');
+        res.setHeader('Content-Type', 'application/vnd.microsoft.portable-executable');
+        res.sendFile(exePath);
+        return;
+      }
+    }
+    res.status(404).json({
+      error: 'StoryBridge-Studio-Debug.exe en cours de compilation ou introuvable.',
+      hint: 'Exécutez "npm run pack:debug" dans packaging/windows ou le workflow GitHub Actions.',
+    });
+  });
+
+  // Android APK download endpoint
+  app.get('/api/download/android-apk', (_req, res) => {
+    const apkCandidates = [
+      path.join(
+        __dirname,
+        'packaging',
+        'android',
+        'android',
+        'app',
+        'build',
+        'outputs',
+        'apk',
+        'debug',
+        'app-debug.apk'
+      ),
+      path.join(__dirname, 'packaging', 'android', 'app-debug.apk'),
+      path.join(__dirname, 'app-debug.apk'),
+    ];
+    for (const apkPath of apkCandidates) {
+      if (fs.existsSync(apkPath)) {
+        res.setHeader('Content-Disposition', 'attachment; filename="StoryBridge-Studio-Debug.apk"');
+        res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+        res.sendFile(apkPath);
+        return;
+      }
+    }
+    res.status(404).json({
+      error: 'app-debug.apk en cours de compilation ou introuvable.',
+      hint: 'Exécutez le workflow GitHub Actions ou compilez dans packaging/android.',
+    });
+  });
+
+  // Packaging status endpoint
+  app.get('/api/download/status', (_req, res) => {
+    const exeCandidates = [
+      path.join(__dirname, 'packaging', 'windows', 'dist', 'StoryBridge-Studio-Debug.exe'),
+      path.join(__dirname, 'packaging', 'windows', 'dist', 'StoryBridge-Studio-Portable.exe'),
+      path.join(__dirname, 'packaging', 'windows', 'dist', 'StoryBridge-Studio-Setup.exe'),
+      path.join(__dirname, 'StoryBridge-Studio-Debug.exe'),
+    ];
+    let exeFile: string | null = null;
+    let exeSize = 0;
+    for (const p of exeCandidates) {
+      if (fs.existsSync(p)) {
+        exeFile = path.basename(p);
+        exeSize = fs.statSync(p).size;
+        break;
+      }
+    }
+
+    const apkCandidates = [
+      path.join(
+        __dirname,
+        'packaging',
+        'android',
+        'android',
+        'app',
+        'build',
+        'outputs',
+        'apk',
+        'debug',
+        'app-debug.apk'
+      ),
+      path.join(__dirname, 'packaging', 'android', 'app-debug.apk'),
+      path.join(__dirname, 'app-debug.apk'),
+    ];
+    let apkFile: string | null = null;
+    let apkSize = 0;
+    for (const p of apkCandidates) {
+      if (fs.existsSync(p)) {
+        apkFile = path.basename(p);
+        apkSize = fs.statSync(p).size;
+        break;
+      }
+    }
+
+    res.json({
+      windowsExe: {
+        available: !!exeFile,
+        filename: exeFile || 'StoryBridge-Studio-Debug.exe',
+        sizeBytes: exeSize,
+        downloadUrl: '/api/download/windows-exe',
+      },
+      androidApk: {
+        available: !!apkFile,
+        filename: apkFile || 'app-debug.apk',
+        sizeBytes: apkSize,
+        downloadUrl: '/api/download/android-apk',
+      },
+    });
+  });
+
   const server = http.createServer(app);
   const wss = new WebSocketServer({ server, path: '/ws' });
 
@@ -608,15 +722,52 @@ async function startServer() {
       appType: 'spa',
     });
     app.use(vite.middlewares);
+
+    // Explicit fallback for client-side routing on any unhandled GET request
+    app.use('*', async (req, res, next) => {
+      if (req.method !== 'GET') {
+        return next();
+      }
+      try {
+        const indexHtmlPath = path.resolve(__dirname, 'index.html');
+        if (fs.existsSync(indexHtmlPath)) {
+          let template = fs.readFileSync(indexHtmlPath, 'utf-8');
+          template = await vite.transformIndexHtml(req.originalUrl, template);
+          res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+          return;
+        }
+      } catch (e) {
+        vite.ssrFixStacktrace(e as Error);
+        return next(e);
+      }
+      next();
+    });
   } else {
     const distDir = path.join(__dirname, 'dist');
-    app.use(express.static(distDir));
+    const distIndex = path.join(distDir, 'index.html');
+    if (fs.existsSync(distDir)) {
+      app.use(express.static(distDir));
+    }
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(distDir, 'index.html'));
+      if (fs.existsSync(distIndex)) {
+        res.sendFile(distIndex);
+      } else {
+        res.status(200).send(
+          '<!doctype html><html><body style="font-family:sans-serif;padding:32px;text-align:center;">' +
+            '<h2>StoryBridge Studio</h2>' +
+            '<p>Build de production introuvable. Exécutez <code>npm run build</code>.</p>' +
+            '</body></html>'
+        );
+      }
     });
   }
 
-  const port = Number(process.env.PORT) || 3000;
+  // Ensure dev server binds to port 3000 where Nginx reverse proxy forwards traffic
+  const port = process.env.APP_PORT
+    ? Number(process.env.APP_PORT)
+    : process.env.PORT && process.env.PORT !== '8080'
+      ? Number(process.env.PORT)
+      : 3000;
   server.listen(port, '0.0.0.0', () => {
     console.log(`StoryBridge Studio listening on http://localhost:${port}`);
   });
