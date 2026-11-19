@@ -1,6 +1,49 @@
 import { useEffect, useState } from 'react';
-import { X, Copy, Check, Users, LogOut, MessageCircle, UserPlus, Download, Monitor } from 'lucide-react';
+import {
+  X,
+  Copy,
+  Check,
+  Users,
+  LogOut,
+  MessageCircle,
+  UserPlus,
+  Download,
+  Monitor,
+  Globe,
+  Settings,
+  RotateCcw,
+} from 'lucide-react';
 import type { RoomParticipant, StudentProfile } from '../types/lesson';
+
+export const DEFAULT_CLOUD_STUDIO_URL =
+  'https://ais-dev-afm5mejj742ehjjk5blxlb-880439402821.europe-west2.run.app';
+
+export function getEffectiveInviteBaseUrl(): string {
+  if (typeof window === 'undefined') return DEFAULT_CLOUD_STUDIO_URL;
+
+  const customOrigin = window.localStorage.getItem('storybridge_sync_server_url')?.trim();
+  if (customOrigin) {
+    try {
+      const parsed = new URL(customOrigin);
+      const pathname = parsed.pathname === '/' || !parsed.pathname ? '' : parsed.pathname.replace(/\/$/, '');
+      return `${parsed.origin}${pathname}`;
+    } catch {
+      // ignore invalid URL
+    }
+  }
+
+  const isLocalPackaged =
+    window.location.protocol === 'file:' ||
+    window.location.protocol === 'capacitor:' ||
+    (window.location.hostname === 'localhost' && !window.location.port);
+
+  if (isLocalPackaged) {
+    return DEFAULT_CLOUD_STUDIO_URL;
+  }
+
+  const cleanPath = window.location.pathname.replace(/\/index\.html$/, '').replace(/\/$/, '');
+  return `${window.location.origin}${cleanPath}`;
+}
 
 interface SessionModalProps {
   isOpen: boolean;
@@ -32,6 +75,20 @@ export function SessionModal({
   const [whatsappPhone, setWhatsappPhone] = useState('');
   const [copiedLink, setCopiedLink] = useState(false);
 
+  const isPackagedLocal =
+    typeof window !== 'undefined' &&
+    (window.location.protocol === 'file:' ||
+      window.location.protocol === 'capacitor:' ||
+      (window.location.hostname === 'localhost' && !window.location.port));
+
+  const [customServerUrl, setCustomServerUrl] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    return window.localStorage.getItem('storybridge_sync_server_url') || '';
+  });
+  const [showServerConfig, setShowServerConfig] = useState(false);
+  const [serverInputVal, setServerInputVal] = useState(customServerUrl);
+  const [serverSavedSuccess, setServerSavedSuccess] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       setInviteStudentName(activeStudent.name);
@@ -42,8 +99,9 @@ export function SessionModal({
 
   const cleanInviteName = inviteStudentName.trim().slice(0, 32);
 
+  const effectiveBase = (customServerUrl || getEffectiveInviteBaseUrl()).replace(/\/$/, '');
   const studentInviteUrl = roomCode
-    ? `${window.location.origin}${window.location.pathname}?room=${encodeURIComponent(
+    ? `${effectiveBase}/?room=${encodeURIComponent(
         roomCode
       )}&role=student${
         cleanInviteName ? `&name=${encodeURIComponent(cleanInviteName)}` : ''
@@ -82,6 +140,33 @@ export function SessionModal({
       const other = studentProfiles.find((p) => p.id !== activeStudent.id);
       setInviteStudentName(other ? other.name : defaultSecondName);
     }
+  };
+
+  const handleSaveCustomServer = () => {
+    const trimmed = serverInputVal.trim();
+    if (!trimmed) {
+      window.localStorage.removeItem('storybridge_sync_server_url');
+      setCustomServerUrl('');
+      setServerInputVal('');
+    } else {
+      let valid = trimmed;
+      if (!/^https?:\/\//i.test(valid)) {
+        valid = `https://${valid}`;
+      }
+      window.localStorage.setItem('storybridge_sync_server_url', valid);
+      setCustomServerUrl(valid);
+      setServerInputVal(valid);
+    }
+    setServerSavedSuccess(true);
+    window.setTimeout(() => setServerSavedSuccess(false), 2000);
+  };
+
+  const handleResetServer = () => {
+    window.localStorage.removeItem('storybridge_sync_server_url');
+    setCustomServerUrl('');
+    setServerInputVal('');
+    setServerSavedSuccess(true);
+    window.setTimeout(() => setServerSavedSuccess(false), 2000);
   };
 
   const connectedStudents = participants.filter((p) => p.role === 'student');
@@ -155,6 +240,45 @@ export function SessionModal({
                     </>
                   )}
                 </button>
+              </div>
+
+              {/* Public Student Web Link display */}
+              <div className="pt-2 border-t sb-divider space-y-1.5">
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-bold sb-text-secondary flex items-center gap-1">
+                    <Globe className="w-3 h-3 sb-text-accent" aria-hidden="true" />
+                    Lien Web pour l’élève (téléphone, tablette ou PC) :
+                  </span>
+                  {isPackagedLocal && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-semibold">
+                      Mode Bureau → Passerelle Web
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={studentInviteUrl}
+                    onClick={(e) => (e.target as HTMLInputElement).select()}
+                    className="flex-1 rounded-xl border sb-input px-3 py-1.5 text-[11px] font-mono select-all bg-black/20 sb-text-primary"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCopyInvite}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl border sb-chip-idle text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer"
+                  >
+                    {copiedLink ? (
+                      <Check className="w-3.5 h-3.5 sb-text-success" aria-hidden="true" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" aria-hidden="true" />
+                    )}
+                    <span>{copiedLink ? 'Copié' : 'Copier'}</span>
+                  </button>
+                </div>
+                <p className="text-[10px] sb-text-muted">
+                  L’élève clique simplement sur ce lien pour rejoindre votre cours interactif directement dans son navigateur web, sans rien installer.
+                </p>
               </div>
 
               {/* Invite Student Selector (supports 1st or 2nd student link) */}
@@ -233,6 +357,64 @@ export function SessionModal({
                     Inviter sur WhatsApp
                   </a>
                 </div>
+              </div>
+
+              {/* Advanced Server Configuration Drawer Toggle */}
+              <div className="pt-2 border-t sb-divider">
+                <button
+                  type="button"
+                  onClick={() => setShowServerConfig(!showServerConfig)}
+                  className="inline-flex items-center gap-1 text-[11px] sb-text-muted hover:sb-text-primary cursor-pointer transition-colors"
+                >
+                  <Settings className="w-3 h-3" aria-hidden="true" />
+                  <span>
+                    {showServerConfig
+                      ? 'Masquer les paramètres du serveur'
+                      : 'Paramètres du serveur Web & synchronisation (avancé)'}
+                  </span>
+                </button>
+
+                {showServerConfig && (
+                  <div className="mt-2.5 p-3 rounded-xl sb-surface-soft border space-y-2 text-xs">
+                    <div className="text-[11px] sb-text-secondary font-medium">
+                      Adresse Web racine pour les invitations des élèves :
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={serverInputVal}
+                        onChange={(e) => setServerInputVal(e.target.value)}
+                        placeholder={DEFAULT_CLOUD_STUDIO_URL}
+                        className="flex-1 rounded-lg border sb-input px-2.5 py-1 text-xs font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSaveCustomServer}
+                        className="px-3 py-1 rounded-lg manga-btn-primary text-xs font-bold cursor-pointer shrink-0"
+                      >
+                        Enregistrer
+                      </button>
+                      {customServerUrl && (
+                        <button
+                          type="button"
+                          onClick={handleResetServer}
+                          title="Réinitialiser l'adresse officielle"
+                          className="p-1 rounded-lg border sb-chip-idle text-xs cursor-pointer shrink-0"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
+                        </button>
+                      )}
+                    </div>
+                    {serverSavedSuccess && (
+                      <div className="text-[11px] sb-text-success font-bold">
+                        Adresse du serveur enregistrée avec succès.
+                      </div>
+                    )}
+                    <div className="text-[10px] sb-text-muted">
+                      Par défaut : <code className="font-mono">{DEFAULT_CLOUD_STUDIO_URL}</code>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -329,19 +511,30 @@ export function SessionModal({
             </p>
 
             {/* Offline Portable App Banner */}
-            <div className="pt-3 border-t sb-divider flex items-center justify-between gap-3 text-xs">
+            <div className="pt-3 border-t sb-divider flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2 sb-text-secondary">
                 <Monitor className="w-4 h-4 sb-text-accent" aria-hidden="true" />
-                <span className="font-semibold">Version Windows Portable (.exe)</span>
+                <span className="font-semibold">
+                  {isPackagedLocal
+                    ? 'Application Bureau Windows Portable active'
+                    : 'Version Windows Portable (.exe)'}
+                </span>
               </div>
-              <a
-                href="/api/download/windows-exe"
-                download="StoryBridge-Studio-Debug.exe"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border sb-card-option font-bold sb-text-accent hover:sb-text-primary transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Télécharger (.exe)</span>
-              </a>
+              {isPackagedLocal ? (
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 font-bold text-[11px]">
+                  <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                  Mode bureau actif
+                </span>
+              ) : (
+                <a
+                  href="/api/download/windows-exe"
+                  download="StoryBridge-Studio-Debug.exe"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border sb-card-option font-bold sb-text-accent hover:sb-text-primary transition-colors cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Télécharger (.exe)</span>
+                </a>
+              )}
             </div>
           </form>
         )}
