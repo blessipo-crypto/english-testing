@@ -6,10 +6,12 @@ import {
   Volume2,
   Lightbulb,
   PlusCircle,
+  Sparkles,
 } from 'lucide-react';
 import { SENTENCE_CHALLENGES } from '../data/lessonData';
 import type { BuilderState, UserRole, VoiceAccent } from '../types/lesson';
 import { speakEnglish } from '../utils/speech';
+import { DictationModal } from './DictationModal';
 
 interface BuilderModuleProps {
   builder: BuilderState;
@@ -45,6 +47,7 @@ export function BuilderModule({
   const [showHint, setShowHint] = useState(false);
   const [draftFr, setDraftFr] = useState('');
   const [draftEn, setDraftEn] = useState('');
+  const [showDictationModal, setShowDictationModal] = useState(false);
 
   const activeChallenge =
     SENTENCE_CHALLENGES[builder.challengeIndex % SENTENCE_CHALLENGES.length];
@@ -302,6 +305,27 @@ export function BuilderModule({
 
       {/* Right Column: Challenge Picker + Live Tutor Custom Sentence (4 cols) */}
       <aside className="lg:col-span-4 space-y-4">
+        {/* Dictation AI Card */}
+        <div className="manga-panel p-5 space-y-3 border-2 border-[var(--sb-accent)] bg-[var(--sb-accent-soft)]">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-500 animate-pulse" />
+            <h2 className="text-sm font-bold tracking-wide sb-text-primary">
+              Atelier Dictée IA (En &amp; Fr)
+            </h2>
+          </div>
+          <p className="text-xs sb-text-secondary leading-relaxed">
+            Génère une phrase aléatoire par IA, écoute la dictée (Anglais ou Français) et corrige tes fautes en direct !
+          </p>
+          <button
+            type="button"
+            onClick={() => setShowDictationModal(true)}
+            className="w-full manga-btn-primary py-2.5 rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Lancer l'Atelier Dictée 🎙️</span>
+          </button>
+        </div>
+
         {/* Live Custom Sentence Generator for Visio */}
         <div className="manga-panel p-5 space-y-3">
           <div className="flex items-center justify-between">
@@ -372,6 +396,14 @@ export function BuilderModule({
           </div>
         </div>
       </aside>
+
+      <DictationModal
+        isOpen={showDictationModal}
+        onClose={() => setShowDictationModal(false)}
+        accent={accent}
+        speechRate={speechRate}
+        onAwardStar={onAwardStar}
+      />
     </div>
   );
 }

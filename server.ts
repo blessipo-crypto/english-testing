@@ -4,6 +4,16 @@ import http from 'http';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { WebSocketServer, WebSocket } from 'ws';
+import { GoogleGenAI, Type } from "@google/genai";
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+  httpOptions: {
+    headers: {
+      'User-Agent': 'aistudio-build',
+    }
+  }
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -363,6 +373,124 @@ async function startServer() {
 
   app.get('/api/health', (_req, res) => {
     res.json({ ok: true, activeRooms: rooms.size, savedRecaps: savedRecaps.length });
+  });
+
+  // AI Dictation endpoints
+  app.post('/api/dictation/generate', async (req, res) => {
+    try {
+      const { language } = req.body || {};
+      const modePrompt = language === 'fr' 
+        ? 'en français' 
+        : language === 'en' 
+        ? 'en anglais' 
+        : 'soit en anglais (A1/A2), soit en français (collège 6e/5e) de manière aléatoire';
+      
+      const prompt = `Génère une phrase aléatoire de dictée ${modePrompt} adaptée à un élève de 11 ans (collège). 
+      Retourne obligatoirement un objet JSON valide avec ces 4 propriétés :
+      - "sentence": la phrase à dicter
+      - "language": "en" si la phrase est en anglais, ou "fr" si elle est en français
+      - "translation": la traduction de la phrase dans l'autre langue
+      - "hint": un indice grammatical ou orthographique utile`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-4-hydrogen",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              sentence: { type: Type.STRING },
+              language: { type: Type.STRING },
+              translation: { type: Type.STRING },
+              hint: { type: Type.STRING }
+            },
+            required: ["sentence", "language", "translation", "hint"]
+          }
+        }
+      });
+
+      const jsonText = (response.text || '{}').trim();
+      const data = JSON.parse(jsonText);
+      res.json(data);
+    } catch (err: any) {
+      console.error("Dictation generate error:", err);
+      res.status(500).json({ error: err.message || 'Failed to generate dictation sentence' });
+    }
+  });
+
+  app.post('/api/dictation/detect-lang', async (req, res) => {
+    try {
+      const { text } = req.body || {};
+      if (!text || typeof text !== 'string') return res.json({ language: 'en' });
+      const prompt = `Détecte si la phrase suivante est en anglais ("en") ou en français ("fr").
+      Phrase : "${text}"
+      Retourne uniquement un JSON valide avec la propriété "language" ("en" ou "fr").`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-4-hydrogen",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              language: { type: Type.STRING }
+            },
+            required: ["language"]
+          }
+        }
+      });
+      const data = JSON.parse((response.text || '{"language":"en"}').trim());
+      res.json({ language: data.language === 'fr' ? 'fr' : 'en' });
+    } catch {
+      res.json({ language: 'en' });
+    }
+  });
+
+  app.post('/api/dictation/verify', async (req, res) => {
+    try {
+      const { targetSentence, studentInput, language = 'en' } = req.body || {};
+      if (!targetSentence) {
+        return res.status(400).json({ error: 'Missing targetSentence' });
+      }
+
+      const prompt = `Tu es un professeur bienveillant de ${language === 'fr' ? 'français' : 'anglais'} pour des collégiens.
+      Phrase cible (correcte) : "${targetSentence}"
+      Réponse de l'élève : "${studentInput || ''}"
+      
+      Évalue la réponse de l'élève. Soit indulgent sur la ponctuation ou les majuscules, mais strict sur l'orthographe et la grammaire.
+      Retourne un objet JSON valide avec :
+      - "isCorrect": boolean (true si correct ou erreur mineure tolérable, false sinon)
+      - "score": number (0 à 100)
+      - "feedback": string (encouragement et explication pédagogique des erreurs s'il y en a, en français)
+      - "correctedSentence": string (la phrase correcte)`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-4-hydrogen",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              isCorrect: { type: Type.BOOLEAN },
+              score: { type: Type.NUMBER },
+              feedback: { type: Type.STRING },
+              correctedSentence: { type: Type.STRING }
+            },
+            required: ["isCorrect", "score", "feedback", "correctedSentence"]
+          }
+        }
+      });
+
+      const jsonText = (response.text || '{}').trim();
+      const data = JSON.parse(jsonText);
+      res.json(data);
+    } catch (err: any) {
+      console.error("Dictation verify error:", err);
+      res.status(500).json({ error: err.message || 'Failed to verify dictation' });
+    }
   });
 
   // High-quality UK / US English TTS proxy with in-memory LRU cache

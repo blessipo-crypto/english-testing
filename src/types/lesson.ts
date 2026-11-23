@@ -110,7 +110,8 @@ export type GrammarSection =
   | 'modals'
   | 'tenses'
   | 'prepositions'
-  | 'mnemonics';
+  | 'mnemonics'
+  | 'french';
 
 export interface GuideState {
   subTab: 'tenses' | 'guide' | 'builder';

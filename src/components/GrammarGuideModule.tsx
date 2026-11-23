@@ -45,6 +45,7 @@ const GUIDE_SECTIONS: Array<{ id: GrammarSection; label: string }> = [
   { id: 'tenses', label: '📖 Temps simples' },
   { id: 'prepositions', label: '📍 Toutes les Prépositions' },
   { id: 'mnemonics', label: '🧠 Astuces Mnémotechniques' },
+  { id: 'french', label: '🇫🇷 Phrases en Français' },
 ];
 
 function PrepositionDiagram({ type }: { type: PlacePrepositionItem['visualType'] }) {
@@ -1405,6 +1406,127 @@ export function GrammarGuideModule({
               >
                 Fermer la vue pense-bête
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 6: FRENCH PHRASES & TRAPS */}
+      {section === 'french' && (
+        <div className="space-y-6">
+          <div className="manga-panel p-6 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-blue-500 uppercase tracking-widest px-2.5 py-0.5 rounded-lg border border-blue-500/30 bg-blue-500/10">
+                Module Français ⇄ Anglais
+              </span>
+            </div>
+            <h2 className="text-xl font-bold tracking-wide sb-text-primary">
+              🇫🇷 Phrases françaises courantes &amp; Pièges de traduction (Faux amis)
+            </h2>
+            <p className="text-xs sb-text-secondary leading-relaxed">
+              Comprendre comment traduire correctement nos tournures françaises en anglais sans tomber dans les pièges de traduction littérale !
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Trap 1 */}
+            <div className="manga-panel p-6 space-y-3">
+              <div className="flex items-start justify-between gap-3 pb-3 border-b sb-divider">
+                <div>
+                  <span className="text-xs font-bold text-red-500">❌ Piège n°1</span>
+                  <h3 className="text-base font-bold sb-text-primary mt-1">« Je suis d'accord »</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => speakEnglish('I agree.', { accent, rate: speechRate })}
+                  className="p-2 rounded-xl border sb-audio-btn shrink-0 cursor-pointer"
+                  aria-label="Écouter"
+                >
+                  <Volume2 className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs sb-text-secondary">
+                En français on utilise l'auxiliaire <em>être</em>, mais en anglais on utilise le verbe <strong>agree</strong>.
+              </p>
+              <div className="p-3 rounded-xl border sb-surface-soft text-xs font-mono space-y-1">
+                <div className="text-red-500">❌ Mauvais : I am agree</div>
+                <div className="text-emerald-500 font-bold">✅ Correct : I agree</div>
+              </div>
+            </div>
+
+            {/* Trap 2 */}
+            <div className="manga-panel p-6 space-y-3">
+              <div className="flex items-start justify-between gap-3 pb-3 border-b sb-divider">
+                <div>
+                  <span className="text-xs font-bold text-red-500">❌ Piège n°2</span>
+                  <h3 className="text-base font-bold sb-text-primary mt-1">« Depuis 3 ans »</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => speakEnglish('I have lived here for 3 years.', { accent, rate: speechRate })}
+                  className="p-2 rounded-xl border sb-audio-btn shrink-0 cursor-pointer"
+                  aria-label="Écouter"
+                >
+                  <Volume2 className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs sb-text-secondary">
+                Avec une durée (3 ans), on utilise <strong>FOR</strong>. Avec un point de départ précis (2020), on utilise <strong>SINCE</strong>.
+              </p>
+              <div className="p-3 rounded-xl border sb-surface-soft text-xs font-mono space-y-1">
+                <div className="text-red-500">❌ Mauvais : since 3 years</div>
+                <div className="text-emerald-500 font-bold">✅ Correct : for 3 years / since 2020</div>
+              </div>
+            </div>
+
+            {/* Trap 3 */}
+            <div className="manga-panel p-6 space-y-3">
+              <div className="flex items-start justify-between gap-3 pb-3 border-b sb-divider">
+                <div>
+                  <span className="text-xs font-bold text-amber-500">⚠️ Piège n°3</span>
+                  <h3 className="text-base font-bold sb-text-primary mt-1">« Ça dépend »</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => speakEnglish('It depends.', { accent, rate: speechRate })}
+                  className="p-2 rounded-xl border sb-audio-btn shrink-0 cursor-pointer"
+                  aria-label="Écouter"
+                >
+                  <Volume2 className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs sb-text-secondary">
+                En anglais, le verbe <em>pend</em> n'est pas seul : on dit toujours <strong>It depends</strong> (avec un -s à la fin).
+              </p>
+              <div className="p-3 rounded-xl border sb-surface-soft text-xs font-mono space-y-1">
+                <div className="text-red-500">❌ Mauvais : It depend</div>
+                <div className="text-emerald-500 font-bold">✅ Correct : It depends</div>
+              </div>
+            </div>
+
+            {/* Trap 4 */}
+            <div className="manga-panel p-6 space-y-3">
+              <div className="flex items-start justify-between gap-3 pb-3 border-b sb-divider">
+                <div>
+                  <span className="text-xs font-bold text-amber-500">⚠️ Piège n°4</span>
+                  <h3 className="text-base font-bold sb-text-primary mt-1">« Qu'est-ce que tu fais ? »</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => speakEnglish('What are you doing?', { accent, rate: speechRate })}
+                  className="p-2 rounded-xl border sb-audio-btn shrink-0 cursor-pointer"
+                  aria-label="Écouter"
+                >
+                  <Volume2 className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs sb-text-secondary">
+                Si c'est en train de se passer en ce moment, on utilise le présent en cours (<em>Be + V-ing</em>) et non le présent simple.
+              </p>
+              <div className="p-3 rounded-xl border sb-surface-soft text-xs font-mono space-y-1">
+                <div className="text-red-500">❌ Mauvais : What do you do? (général)</div>
+                <div className="text-emerald-500 font-bold">✅ Correct : What are you doing? (maintenant)</div>
+              </div>
             </div>
           </div>
         </div>

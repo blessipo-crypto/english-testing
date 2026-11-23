@@ -127,11 +127,37 @@ export function TutorPasteAssistantModal({
             <textarea
               id="tutor-paste-textarea"
               rows={4}
+              autoFocus
               value={pastedText}
               onChange={(e) => setPastedText(e.target.value)}
+              onPaste={(e) => {
+                const text = e.clipboardData.getData('text');
+                if (text) {
+                  setPastedText(text);
+                }
+              }}
               placeholder="Écrivez ou collez ici un texte, une phrase ou un mot (ex : Would you like a cup of tea?)..."
               className="w-full rounded-2xl border sb-input p-3.5 text-sm"
             />
+            {/* Quick Presets */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              <span className="text-[11px] sb-text-muted">Exemples rapides :</span>
+              {[
+                'Would you like a cup of tea?',
+                'I am doing my homework.',
+                'Where is the train station?',
+                'Je suis d\'accord avec toi.',
+              ].map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() => setPastedText(ex)}
+                  className="px-2 py-0.5 rounded-lg border sb-chip-idle text-[10px] font-medium cursor-pointer hover:sb-chip-solid"
+                >
+                  {ex}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-1.5">
