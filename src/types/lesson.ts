@@ -104,7 +104,13 @@ export interface TimeModuleState {
   showZones: boolean;
 }
 
-export type GrammarSection = 'irregular' | 'modals' | 'tenses' | 'prepositions';
+export type GrammarSection =
+  | 'irregular'
+  | 'conjugation'
+  | 'modals'
+  | 'tenses'
+  | 'prepositions'
+  | 'mnemonics';
 
 export interface GuideState {
   subTab: 'tenses' | 'guide' | 'builder';
